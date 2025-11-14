@@ -1,0 +1,406 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rock Paper Scissors</title>
+    <style>
+    
+          body{height:auto;
+                    background:linear-gradient(135deg,#1a2a6c,#fbdd2b,#00ff3d);}
+       .options{font-size: 20px;
+           font-weight:bold;
+            position: relative;
+            width: 98%;
+            height: 96vh;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+           .start-btn{
+                         padding:8px;
+                         background: #4CAF50;
+                         border-radius:4px;
+                         margin-left:100px;
+           }
+          .instructions{
+                        display:block;
+                       font-size:15px;
+                       background: rgba(225,225,225,0.5);
+                       padding: 10px;
+                        width:90%;
+                         height:auto;
+                         border-radius:10px;
+                    border:3px solid rgba(225,225,225,0.8);
+          }
+          .conclude{
+                        display:block;
+                       font-size:15px;
+                       background: rgba(225,225,225,0.5);
+                       padding: 20px;
+                        width:250px;
+                         height:auto;
+                         border-radius:10px;
+                    border:3px solid rgba(225,225,225,1.5);
+          }
+          h1{text-align: center;}
+    .scissors{
+              font-size: 70px;
+              position: absolute;
+              left: 40%;}
+    .rock{
+              font-size:70px;
+             position:absolute;
+             left: 40%;
+    }
+    .paper{
+              font-size: 70px;
+              position: absolute;
+              left:40%;
+    }
+       .comp-wins{position: absolute;
+                     left:40px;
+                      top: 40px;
+                     width:40px;
+                     height:40px;
+                     font-size:25px;
+                      border-radius:5px;
+                      background: #1b9f6c;
+                      padding: 5px;  
+                        align-items: center;
+                         justify-content:center;
+                        text-align: center;
+       }
+          
+       .ties{position: absolute;
+                      left: 160px;
+                      top : 40px;
+                     width:40px;
+                     height:40px;
+                      font-size: 25px;
+                      border-radius:5px;
+                      background: #5c2a6c;
+                      padding: 5px;  
+                        align-items: center;
+                         justify-content:center;
+                          text-align:center;
+       }
+         .user-wins{position: absolute;
+                     left: 100px;
+                     top: 40px;
+                     width:40px;
+                     height:40px;
+                      font-size:25px;
+                      border-radius:5px;
+                      background: #1a2a6c;
+                      padding: 5px;
+                       align-items: center;
+                         justify-content:center;
+                         text-align: center;
+       }
+               .total-rounds{position: absolute;
+                     left: 220px;
+                     top: 40px;
+                     width:40px;
+                     height:40px;
+                      font-size:25px;
+                      border-radius:5px;
+                      background: #0f961e;
+                      padding: 5px;
+                       align-items: center;
+                         justify-content:center;
+                         text-align: center;
+       }
+          button{background:#4CAF50;
+                      padding:8px;
+                      border-radius:5px;
+          }
+          .number-gms{
+            position: relative;
+            width: 60%;
+            height: 60%;
+            background: rgba(23, 43, 94, 0.7);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            border: 2px solid rgba(255, 255, 255, 1.2);
+                    display:flex;
+                     flex-direction: column;
+                    gap:20px;
+                    padding: 20px;
+        }		
+          .user-rock{
+                    position:absolute;
+                    bottom: 35%;
+                    left: 40%;}
+          .user-rock{
+                     font-size:70px;
+                    position: absolute;
+                    bottom: 34%;
+                     left: 40%;}
+                  .user-paper{
+                     font-size:70px;
+                    position: absolute;
+                    bottom: 10%;
+                     left: 70%;} 
+           .caption{
+              position:relative;
+                     top:-20px;
+               font-size:38px;
+              font-weight:bold;
+              color: #FFFF00;
+               text-align: center;}
+    .animation{
+                animation: bring-choice 3.5s ease;}
+          .visible{  display: block;}
+                  .user-animation{
+                animation:move-user-choice 3.5s ease;}
+           @keyframes move-user-choice{ 10%{ transform: translateX(10%);}
+40%{left: 40%;bottom:34%;}
+   100%{left:40%;bottom:34%;}
+           }                     
+          .user-scissors{
+                    font-size:70px;
+                    position: absolute;
+                    bottom: 10%;
+                     left: 10%;}
+            .tag{font-size:10px;
+                     color:#0000ff;
+            }
+    @keyframes bring-choice{ 1%{ transform:translateX(100vw);}
+        10%{transform:translateX(-40vw);}
+        15%{transform:translateY(-200px);}
+        20%{transform:scale(1.1);}
+        90%{transform:scale(1.0);}
+        100%{transform:translateX(100vw);}
+    }
+        
+        /* Add your CSS styles here */
+        .hidden {
+            display: none;
+        }
+       
+    </style>
+</head>
+<body>
+    <div class="instructions" id="Manual">
+                      <h1>Welcome To Rock,Paper,Scissors Game</h1>
+                    <h1>📃✂️🔨</h1>
+              <h3>Designed by: Tonny at MATCO</h3>
+                    <h2>Instructions:</h2>
+                    <ul>                             
+   <li>The rock paper scissors game is a famous game played where;</li>
+   <li>The rock destroys the scissors but the paper destroys it.</li>
+   <li>Scissors destroy paper and rock destroys scissors</li>   
+   <li>Paper destroys rock and scissors destroy paper.</li>
+ <li>When same items are selected, its a tie and that one no one wins.</li>
+                    </ul>
+                    <p>If you wish to start press the start button to proceed.</p>
+                    <button class="start-btn"id="startButton">START</button>
+          </div>
+    
+    <div class="number-gms" id="Rounds" class="hidden">
+        <h2>Select Number of Rounds</h2>
+        <button id="5gms">5 Games</button>
+        <button id="10gms">10 Games</button>
+        <button id="15gms">15 Games</button>
+        <button id="20gms">20 Games</button>
+    </div>
+
+    <div id="OptionsEl" class="options">
+        <h3 class="caption"id="Caption">Your Turn</h3>
+        <div id="userChoices">
+            <div class="user-rock" id="userRock">✊<span class="tag">rock</span></div>
+            <div class="user-paper"id="userPaper">✋<span class="tag">paper</span></div>
+            <div class="user-scissors" id="userScissors">✌️<span class="tag">scissors</span></div>
+        </div>
+
+    <div id="compChoices">
+              <div id="compDisplay">
+            <div id="Rock" class="rock">✊<span class="tag">rock</span></div>
+            <div id="Paper" class="paper">✋<span class="tag">paper</span></div>
+            <div id="Scissors" class="scissors">✌️<span class="tag">scissors</span></div>
+        </div>
+    </div>
+    <div>
+          <span class="tag"style="position:absolute;top:113px;right:90px;">Ties</span><p class="ties" id="Ties">0</p>
+        <span class="tag"style="position:absolute;top:113px;left:100px;">Your wins</span><p class="user-wins" id="userWins">0</p>
+        <span class="tag"style="position:absolute;top:113px;left:-5px;">computer wins</span><p class="comp-wins"id="compWin">0</p>
+      <span class="tag"style="position:absolute;top:113px;right:0px;">totalRounds</span>   <p class="total-rounds" id="totalRounds">0</p>
+    </div>
+    </div>
+          <div class="conclude"id="conclusion">
+                    <h1 style="color:red;font-size:30px;font-weight:bold;text-align:center;">Game Over</h1>
+                    <h2 id="lastWord"style="color:#f0961e;">dhhfdff</h2>
+                    <button id="replay">play Again</button>
+          </div>
+    <script>
+        const manualElement = document.getElementById("Manual");
+        const roundsElement = document.getElementById("Rounds");
+        const optionElem = document.getElementById("OptionsEl");
+        const userRockBtn = document.getElementById("userRock");
+        const userPaperBtn = document.getElementById("userPaper");
+        const userScissorsBtn = document.getElementById("userScissors");
+        const compRock = document.getElementById("Rock");
+        const compPaper = document.getElementById("Paper");
+        const compScissors = document.getElementById("Scissors");
+        const captionElem = document.getElementById("Caption");
+        const compChoices = document.getElementById("compChoices");
+          const Conclusion = document.getElementById('conclusion');
+
+        const tieDisplay = document.getElementById('Ties');
+        const userWinDisplay = document.getElementById('userWins');
+        const compWinDisplay = document.getElementById('compWin');
+        const totalRoundsDisplay = document.getElementById("totalRounds");
+const Replaybtn = document.getElementById('replay');
+ const lastContent = document.getElementById('lastWord');
+
+        let totalRounds = 0;
+        let currentRound = 0;
+        let tiesValue = 0;
+        let userWins = 0;
+        let compWins = 0;
+     
+roundsElement.classList.add('hidden');
+ optionElem.classList.add('hidden');
+  Conclusion.classList.add('hidden');
+          const updateDisplays = () => {
+            tieDisplay.textContent = tiesValue;
+            userWinDisplay.textContent = userWins;
+            compWinDisplay.textContent =compWins;
+            totalRoundsDisplay.textContent = currentRound;
+        };
+
+        const startGame = () => {
+            manualElement.classList.add("hidden");
+ compRock.classList.add("hidden");
+compPaper.classList.add('hidden');   
+compScissors.classList.add('hidden');                  roundsElement.classList.remove("hidden");
+        };
+
+        const playRound = (userChoice) => {
+            const choices = ['rock', 'paper', 'scissors'];
+            const compChoice = choices[Math.floor(Math.random() * choices.length)];
+            let choiceText = '';
+            if (compChoice === 'rock') {
+                choiceText = "rock";
+compRock.classList.remove('hidden');                compRock.classList.add('animation');                  
+                   setTimeout(()=>{
+ compRock.classList.add('hidden');
+                             compRock.classList.remove('animation');
+                 
+                   },3500);
+            } else if (compChoice === 'paper') {
+                choiceText = "paper";
+ compPaper.classList.remove('hidden');               compPaper.classList.add('animation');
+      isProcessing = true;
+                            setTimeout(()=>{
+ compPaper.classList.add('hidden');
+compPaper.classList.remove('animation');                
+                   },3500);     
+            } else {
+                choiceText = "scissors";
+ compScissors.classList.remove('hidden');               compScissors.classList.add('animation');
+                       setTimeout(()=>{
+ compScissors.classList.add('hidden');
+  compScissors.classList.remove('animation');
+                   },3500);            
+            }
+
+            setTimeout(() => {
+                if (userChoice === choiceText) {
+                    captionElem.textContent = "It's a tie!";
+                    tiesValue++;
+                } else if (
+                    (userChoice === 'rock' && compChoice === 'scissors') ||
+                    (userChoice === 'paper' && compChoice === 'rock') ||
+                    (userChoice === 'scissors' && compChoice === 'paper')) {
+                    captionElem.textContent = "You win!";
+                    userWins++;
+                } else {
+                    captionElem.textContent = "You lose!";
+                    compWins++;
+                }
+                currentRound++;
+                updateDisplays();
+                checkGameOver();
+            }, 1000); // Allow time for computer choice to display before revealing the result
+        };
+
+        const checkGameOver = () => {
+            if (currentRound >= totalRounds) {
+       setTimeout(()=>{
+                 optionElem.classList.add('hidden'); Conclusion.classList.remove('hidden');
+                lastContent.textContent = `Final Results: You won: ${userWins}rounds, Computer won: ${compWins}rounds, Ties were: ${tiesValue}`;
+   Replaybtn.onclick = function(){
+             location.reload();
+   }
+       },3400)
+            }
+        };
+
+        const resetChoices = () => {
+            setTimeout(() => {
+                 isProcessing = false;
+   userChoices.classList.remove('user-animation');
+                captionElem.textContent = "Your Turn";
+            }, 3500); // Adjust display timing
+        };
+
+        document.getElementById('startButton').onclick = startGame;
+
+        const setRounds = (numRounds) => {
+            totalRounds = numRounds;
+            currentRound = 0;
+            tiesValue = 0;
+            userWins = 0;
+            compWins = 0;
+            updateDisplays();
+            roundsElement.classList.add("hidden");
+            optionElem.classList.remove("hidden");
+        };
+
+        document.getElementById("5gms").onclick = () => setRounds(5);
+        document.getElementById("10gms").onclick = () => setRounds(10);
+        document.getElementById("15gms").onclick = () => setRounds(15);
+        document.getElementById("20gms").onclick = () => setRounds(20);
+          let isProcessing = false;
+        userRockBtn.onclick = () => {
+             if(isProcessing)return;
+    userRockBtn.classList.add('user-animation'); userScissorsBtn.classList.add('hidden');     
+ userPaperBtn.classList.add('hidden');
+                  isProcessing = true;
+                  setTimeout(()=>{                             userScissorsBtn.classList.remove('hidden');  
+userRockBtn.classList.remove('user-animation');                            userPaperBtn.classList.remove('hidden');        },3500)       
+              
+            playRound('rock');
+            resetChoices();
+        };
+            
+        userPaperBtn.onclick = () => {
+            if(isProcessing)return;  userPaperBtn.classList.add('user-animation');
+     userRockBtn.classList.add('hidden'); userScissorsBtn.classList.add('hidden');     
+                  isProcessing = true;
+                  setTimeout(()=>{                             userScissorsBtn.classList.remove('hidden');  
+userPaperBtn.classList.remove('user-animation');                            userRockBtn.classList.remove('hidden');             },3500)            
+            playRound('paper');
+            resetChoices();
+        };
+        
+        userScissorsBtn.onclick = () => {
+           if(isProcessing)return;    userScissorsBtn.classList.add('user-animation');
+userRockBtn.classList.add('hidden'); userPaperBtn.classList.add('hidden');
+isProcessing = true;                  
+                  setTimeout(()=>{                             userPaperBtn.classList.remove('hidden');  
+userScissorsBtn.classList.remove('user-animation');                            userRockBtn.classList.remove('hidden');             },3500)     
+            
+            playRound('scissors');
+            resetChoices();
+        };
+             
+          
+    </script>
+</body>
+</html>

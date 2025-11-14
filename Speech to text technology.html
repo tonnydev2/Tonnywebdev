@@ -1,0 +1,475 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice Recognition for Letters, Numbers & Symbols</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: white;
+        }
+        
+        .container {
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            max-width: 800px;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            background: linear-gradient(to right, #4facfe, #00f2fe);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            color: #ccc;
+        }
+        
+        .mic-container {
+            margin: 30px 0;
+            position: relative;
+            display: flex;
+            justify-content: center;
+        }
+        
+        .mic-btn {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00c6ff, #0072ff);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 8px 20px rgba(0, 114, 255, 0.4);
+            transition: all 0.3s ease;
+        }
+        
+        .mic-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 25px rgba(0, 114, 255, 0.6);
+        }
+        
+        .mic-btn.listening {
+            animation: pulse 1.5s infinite;
+            background: linear-gradient(135deg, #ff416c, #ff4b2b);
+        }
+        
+        .mic-btn i {
+            font-size: 50px;
+            color: white;
+        }
+        
+        .status {
+            margin-top: 20px;
+            font-size: 1.2rem;
+            min-height: 30px;
+            color: #00ffcc;
+        }
+        
+        .output-container {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            min-height: 150px;
+            border: 2px solid #00c6ff;
+            text-align: left;
+        }
+        
+        .output-title {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            color: #00ffcc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .output-title i {
+            margin-right: 10px;
+        }
+        
+        #output {
+            font-size: 1.4rem;
+            line-height: 1.6;
+            min-height: 100px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            color: #e0e0ff;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        button {
+            padding: 12px 25px;
+            border-radius: 50px;
+            border: none;
+            background: linear-gradient(135deg, #00c6ff, #0072ff);
+            color: white;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+        }
+        
+        button i {
+            margin-right: 8px;
+        }
+        
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 114, 255, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(1px);
+        }
+        
+        #clearBtn {
+            background: linear-gradient(135deg, #ff416c, #ff4b2b);
+        }
+        
+        .instructions {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 30px;
+            text-align: left;
+        }
+        
+        .instructions h2 {
+            color: #00ffcc;
+            margin-bottom: 15px;
+            font-size: 1.4rem;
+        }
+        
+        .instructions ul {
+            padding-left: 25px;
+        }
+        
+        .instructions li {
+            margin-bottom: 10px;
+            line-height: 1.5;
+            color: #ccc;
+        }
+        
+        .symbol-list {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .symbol {
+            background: rgba(0, 198, 255, 0.2);
+            padding: 8px 15px;
+            border-radius: 30px;
+            font-weight: bold;
+            color: #00c6ff;
+        }
+        
+        .browser-warning {
+            background: rgba(255, 100, 100, 0.2);
+            border: 1px solid #ff4b2b;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            color: #ff9999;
+            display: none;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 75, 43, 0.7); }
+            70% { box-shadow: 0 0 0 20px rgba(255, 75, 43, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 75, 43, 0); }
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .mic-btn {
+                width: 100px;
+                height: 100px;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            button {
+                width: 100%;
+                max-width: 300px;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Voice Recognition</h1>
+        <p class="subtitle">Speak letters, numbers, and symbols to see them appear</p>
+        
+        <div class="browser-warning" id="browserWarning">
+            <i class="fas fa-exclamation-triangle"></i> Voice recognition requires a modern browser like Chrome, Edge, or Firefox. 
+            Please ensure you're using a supported browser and that your microphone is enabled.
+        </div>
+        
+        <div class="mic-container">
+            <button class="mic-btn" id="micButton">
+                <i class="fas fa-microphone"></i>
+            </button>
+        </div>
+        
+        <div class="status" id="status">Click the microphone to start</div>
+        
+        <div class="output-container">
+            <div class="output-title">
+                <i class="fas fa-keyboard"></i> Recognized Input
+            </div>
+            <div id="output">Your speech will appear here...</div>
+        </div>
+        
+        <div class="controls">
+            <button id="clearBtn"><i class="fas fa-trash-alt"></i> Clear Text</button>
+            <button id="copyBtn"><i class="fas fa-copy"></i> Copy Text</button>
+        </div>
+        
+        <div class="instructions">
+            <h2><i class="fas fa-info-circle"></i> How to Use</h2>
+            <ul>
+                <li>Click the microphone button to start voice recognition</li>
+                <li>Speak clearly at a normal volume</li>
+                <li>Say letters (A to Z), numbers (0 to 9), or any of these symbols:</li>
+            </ul>
+            
+            <div class="symbol-list">
+                <div class="symbol">Period (.)</div>
+                <div class="symbol">Comma (,)</div>
+                <div class="symbol">Question Mark (?)</div>
+                <div class="symbol">Exclamation Mark (!)</div>
+                <div class="symbol">Colon (:)</div>
+                <div class="symbol">Semicolon (;)</div>
+                <div class="symbol">Hyphen (-)</div>
+                <div class="symbol">Space</div>
+                <div class="symbol">New Line</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const micButton = document.getElementById('micButton');
+            const outputElement = document.getElementById('output');
+            const statusElement = document.getElementById('status');
+            const clearBtn = document.getElementById('clearBtn');
+            const copyBtn = document.getElementById('copyBtn');
+            const browserWarning = document.getElementById('browserWarning');
+            
+            // Check for browser support
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                browserWarning.style.display = 'block';
+                statusElement.textContent = "Speech Recognition not supported in this browser.";
+                micButton.disabled = true;
+                return;
+            }
+            
+            const recognition = new SpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.lang = 'en-US';
+            
+            let isListening = false;
+            
+            // Symbol mapping
+            const symbolMap = {
+                'period': '.',
+                'comma': ',',
+                'question mark': '?',
+                'exclamation mark': '!',
+                'exclamation point': '!',
+                'colon': ':',
+                'semicolon': ';',
+                'hyphen': '-',
+                'dash': '-',
+                'space': ' ',
+                'new line': '\n',
+                'next line': '\n',
+                'enter': '\n'
+            };
+            
+            // Number mapping
+            const numberMap = {
+                'zero': '0',
+                'one': '1',
+                'two': '2',
+                'three': '3',
+                'four': '4',
+                'five': '5',
+                'six': '6',
+                'seven': '7',
+                'eight': '8',
+                'nine': '9'
+            };
+            
+            micButton.addEventListener('click', toggleListening);
+            clearBtn.addEventListener('click', clearOutput);
+            copyBtn.addEventListener('click', copyOutput);
+            
+            recognition.onresult = function(event) {
+                let transcript = '';
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    if (event.results[i].isFinal) {
+                        transcript += event.results[i][0].transcript;
+                    }
+                }
+                
+                if (transcript) {
+                    processTranscript(transcript);
+                }
+            };
+            
+            recognition.onerror = function(event) {
+                console.error('Speech recognition error', event.error);
+                statusElement.textContent = `Error: ${event.error}`;
+                stopListening();
+            };
+            
+            recognition.onend = function() {
+                if (isListening) {
+                    recognition.start();
+                }
+            };
+            
+            function toggleListening() {
+                if (isListening) {
+                    stopListening();
+                } else {
+                    startListening();
+                }
+            }
+            
+            function startListening() {
+                try {
+                    recognition.start();
+                    micButton.classList.add('listening');
+                    statusElement.textContent = "Listening... Speak now!";
+                    statusElement.style.color = "#00ffcc";
+                    isListening = true;
+                } catch (error) {
+                    console.error("Speech recognition start failed:", error);
+                    statusElement.textContent = "Error starting microphone. Please try again.";
+                    statusElement.style.color = "#ff6666";
+                }
+            }
+            
+            function stopListening() {
+                recognition.stop();
+                micButton.classList.remove('listening');
+                statusElement.textContent = "Microphone off. Click to start again.";
+                statusElement.style.color = "#00ffcc";
+                isListening = false;
+            }
+            
+            function processTranscript(transcript) {
+                // Convert to lowercase for easier matching
+                let cleanTranscript = transcript.toLowerCase().trim();
+                
+                // Replace number words with digits
+                for (const [word, digit] of Object.entries(numberMap)) {
+                    const regex = new RegExp(`\\b${word}\\b`, 'g');
+                    cleanTranscript = cleanTranscript.replace(regex, digit);
+                }
+                
+                // Replace symbol words with actual symbols
+                for (const [word, symbol] of Object.entries(symbolMap)) {
+                    const regex = new RegExp(`\\b${word}\\b`, 'g');
+                    cleanTranscript = cleanTranscript.replace(regex, symbol);
+                }
+                
+                // Remove any unwanted characters
+                cleanTranscript = cleanTranscript.replace(/[^a-z0-9\s.,?!:;\-\n]/gi, '');
+                
+                // Capitalize the first letter of each sentence
+                cleanTranscript = cleanTranscript.replace(/(^\s*|[.!?]\s+)([a-z])/g, (match, p1, p2) => {
+                    return p1 + p2.toUpperCase();
+                });
+                
+                // Update the output
+                outputElement.textContent += cleanTranscript;
+                
+                // Auto-scroll to bottom
+                outputElement.scrollTop = outputElement.scrollHeight;
+            }
+            
+            function clearOutput() {
+                outputElement.textContent = '';
+                statusElement.textContent = "Text cleared. Click the microphone to start.";
+            }
+            
+            function copyOutput() {
+                const text = outputElement.textContent;
+                if (!text) return;
+                
+                navigator.clipboard.writeText(text)
+                    .then(() => {
+                        const originalText = copyBtn.innerHTML;
+                        copyBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                        setTimeout(() => {
+                            copyBtn.innerHTML = originalText;
+                        }, 2000);
+                    })
+                    .catch(err => {
+                        console.error('Failed to copy: ', err);
+                        statusElement.textContent = "Failed to copy text to clipboard";
+                        statusElement.style.color = "#ff6666";
+                    });
+            }
+        });
+    </script>
+</body>
+</html>
