@@ -1030,17 +1030,6 @@
     </footer>
 
     <script>
-   <script src="https://cdn.jsdelivr.net/npm/emailjs-com@2/dist/email.min.js"></script>
-<script>
-  (function() {
-    emailjs.init("YOUR_USER_ID"); // Replace with your EmailJS user ID
-  })();
-
-  function sendEmail(e) {
-    e.preventDefault();
-    emailjs.sendForm('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', e.target)
-      .then(() => alert('Email sent!'), (error) => alert('Failed: ' + JSON.stringify(error)));
-  }
 
   // Mobile Menu Toggle
         document.querySelector('.menu-toggle').addEventListener('click', function() {
