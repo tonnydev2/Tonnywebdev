@@ -78,7 +78,7 @@ window.addEventListener('load',function(){
             this.width = width;
             this.height = height;
             this.speed = 0;
-            this.maxSpeed = 6;
+            this.maxSpeed = 10;
             this.groundMargin = 50;
             this.background = new Background(this);
             this.player = new Player(this);
