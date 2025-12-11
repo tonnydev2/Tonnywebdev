@@ -1,0 +1,363 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projectile Motion Simulation</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f7fa;
+            color: #333;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .canvas-container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 15px;
+            text-align: center;
+        }
+        canvas {
+            background-color: #e9f2ff;
+            border-radius: 4px;
+            display: block;
+        		   width: 300px;
+        		   height: 400px;
+            margin: 0 auto;
+        }
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+        .control-group {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+        }
+        input[type="range"] {
+            width: 100%;
+        }
+        .value-display {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 5px;
+            font-size: 0.9em;
+            color: #666;
+        }
+        button {
+            background-color: #4a6ee0;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.2s;
+            grid-column: 1 / -1;
+        }
+        button:hover {
+            background-color: #3a5ec0;
+        }
+        .info {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        h2 {
+            color: #34495e;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 8px;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .stat {
+            background-color: #f8fafd;
+            padding: 10px;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #4a6ee0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Projectile Motion Simulation</h1>
+    		<h2>From: Tonny</h2>
+    		<h2>To: Physics OBs and OGs at MATCO</h2>
+        
+        <div class="canvas-container">
+            <canvas id="projectileCanvas" width="800" height="400"></canvas>
+        </div>
+        
+        <div class="controls">
+            <div class="control-group">
+                <label for="velocity">Initial Velocity (m/s)</label>
+                <input type="range" id="velocity" min="10" max="100" value="50">
+                <div class="value-display">
+                    <span>10</span>
+                    <span id="velocity-value">50</span>
+                    <span>100</span>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <label for="angle">Launch Angle (degrees)</label>
+                <input type="range" id="angle" min="10" max="80" value="45">
+                <div class="value-display">
+                    <span>10</span>
+                    <span id="angle-value">45</span>
+                    <span>80</span>
+                </div>
+            </div>
+            
+            <div class="control-group">
+                <label for="gravity">Gravity (m/s²)</label>
+                <input type="range" id="gravity" min="1" max="20" value="9.8">
+                <div class="value-display">
+                    <span>1</span>
+                    <span id="gravity-value">9.8</span>
+                    <span>20</span>
+                </div>
+            </div>
+            
+            <button id="launchBtn">Launch Projectile</button>
+        </div>
+        
+        <div class="info">
+            <h2>Projectile Motion Information</h2>
+            <p>Projectile motion is the motion of an object thrown or projected into the air, subject to only the acceleration of gravity. The path followed by a projectile is called its trajectory.</p>
+            
+            <div class="stats">
+                <div class="stat">
+                    <div>Max Height</div>
+                    <div class="stat-value" id="max-height">0 m</div>
+                </div>
+                <div class="stat">
+                    <div>Range</div>
+                    <div class="stat-value" id="range">0 m</div>
+                </div>
+                <div class="stat">
+                    <div>Flight Time</div>
+                    <div class="stat-value" id="flight-time">0 s</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get DOM elements
+        const canvas = document.getElementById('projectileCanvas');
+        const ctx = canvas.getContext('2d');
+        const velocitySlider = document.getElementById('velocity');
+        const angleSlider = document.getElementById('angle');
+        const gravitySlider = document.getElementById('gravity');
+        const launchBtn = document.getElementById('launchBtn');
+        const velocityValue = document.getElementById('velocity-value');
+        const angleValue = document.getElementById('angle-value');
+        const gravityValue = document.getElementById('gravity-value');
+        const maxHeightDisplay = document.getElementById('max-height');
+        const rangeDisplay = document.getElementById('range');
+        const flightTimeDisplay = document.getElementById('flight-time');
+
+        // Simulation variables
+        let isAnimating = false;
+        let projectile = {
+            x: 50,
+            y: canvas.height - 50,
+            radius: 8,
+            color: '#e74c3c'
+        };
+        
+        let trajectory = [];
+        let time = 0;
+        let animationId = null;
+
+        // Update value displays
+        velocitySlider.addEventListener('input', () => {
+            velocityValue.textContent = velocitySlider.value;
+        });
+        
+        angleSlider.addEventListener('input', () => {
+            angleValue.textContent = angleSlider.value;
+        });
+        
+        gravitySlider.addEventListener('input', () => {
+            gravityValue.textContent = gravitySlider.value;
+        });
+
+        // Launch projectile
+        launchBtn.addEventListener('click', () => {
+            if (isAnimating) {
+                resetAnimation();
+            } else {
+                launchProjectile();
+            }
+        });
+
+        function launchProjectile() {
+            if (isAnimating) return;
+            
+            isAnimating = true;
+            launchBtn.textContent = 'Reset';
+            
+            // Get simulation parameters
+            const velocity = parseFloat(velocitySlider.value);
+            const angle = parseFloat(angleSlider.value) * Math.PI / 180; // Convert to radians
+            const gravity = parseFloat(gravitySlider.value);
+            
+            // Calculate initial velocity components
+            const vx = velocity * Math.cos(angle);
+            const vy = -velocity * Math.sin(angle); // Negative because y increases downward
+            
+            // Calculate theoretical values
+            const flightTime = (2 * velocity * Math.sin(angle)) / gravity;
+            const maxHeight = (velocity * velocity * Math.sin(angle) * Math.sin(angle)) / (2 * gravity);
+            const range = (velocity * velocity * Math.sin(2 * angle)) / gravity;
+            
+            // Update displays
+            maxHeightDisplay.textContent = maxHeight.toFixed(2) + ' m';
+            rangeDisplay.textContent = range.toFixed(2) + ' m';
+            flightTimeDisplay.textContent = flightTime.toFixed(2) + ' s';
+            
+            // Reset trajectory and time
+            trajectory = [];
+            time = 0;
+            
+            // Start animation
+            animateProjectile(vx, vy, gravity);
+        }
+
+        function animateProjectile(vx, vy, gravity) {
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw ground
+            ctx.fillStyle = '#8B4513';
+            ctx.fillRect(0, canvas.height - 30, canvas.width, 30);
+            
+            // Draw trajectory
+            if (trajectory.length > 1) {
+                ctx.beginPath();
+                ctx.moveTo(trajectory[0].x, trajectory[0].y);
+                for (let i = 1; i < trajectory.length; i++) {
+                    ctx.lineTo(trajectory[i].x, trajectory[i].y);
+                }
+                ctx.strokeStyle = 'rgba(52, 152, 219, 0.5)';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            }
+            
+            // Calculate current position
+            const dt = 0.05; // Time step
+            time += dt;
+            
+            projectile.x = 50 + vx * time;
+            projectile.y = (canvas.height - 50) + vy * time + 0.5 * gravity * time * time;
+            
+            // Add current position to trajectory
+            trajectory.push({x: projectile.x, y: projectile.y});
+            
+            // Draw projectile
+            ctx.beginPath();
+            ctx.arc(projectile.x, projectile.y, projectile.radius, 0, Math.PI * 2);
+            ctx.fillStyle = projectile.color;
+            ctx.fill();
+            ctx.strokeStyle = '#c0392b';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            // Draw velocity vector
+            const vectorScale = 0.5;
+            ctx.beginPath();
+            ctx.moveTo(projectile.x, projectile.y);
+            ctx.lineTo(projectile.x + vx * vectorScale, projectile.y + (vy + gravity * time) * vectorScale);
+            ctx.strokeStyle = '#e67e22';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            // Draw angle indicator at launch
+            if (time < 0.5) {
+                const angle = parseFloat(angleSlider.value);
+                ctx.beginPath();
+                ctx.arc(50, canvas.height - 50, 30, 0, -angle * Math.PI / 180, true);
+                ctx.strokeStyle = '#2ecc71';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                
+                ctx.fillStyle = '#2ecc71';
+                ctx.font = '14px Arial';
+                ctx.fillText(`${angle}°`, 85, canvas.height - 70);
+            }
+            
+            // Continue animation if projectile is still in view
+            if (projectile.y < canvas.height - 30 && projectile.x < canvas.width) {
+                animationId = requestAnimationFrame(() => animateProjectile(vx, vy, gravity));
+            } else {
+                isAnimating = false;
+                launchBtn.textContent = 'Launch Projectile';
+            }
+        }
+
+        function resetAnimation() {
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+            }
+            
+            isAnimating = false;
+            launchBtn.textContent = 'Launch Projectile';
+            
+            // Reset projectile position
+            projectile.x = 50;
+            projectile.y = canvas.height - 50;
+            trajectory = [];
+            time = 0;
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw ground
+            ctx.fillStyle = '#8B4513';
+            ctx.fillRect(0, canvas.height - 30, canvas.width, 30);
+            
+            // Reset displays
+            maxHeightDisplay.textContent = '0 m';
+            rangeDisplay.textContent = '0 m';
+            flightTimeDisplay.textContent = '0 s';
+        }
+
+        // Initial draw
+        resetAnimation();
+    </script>
+</body>
+</html>
