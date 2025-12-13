@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+		<meta http-equiv="CONTENT-TYPE" content="text/html; charset=UTF-8">
+		<title>Hello, World!</title>
+</head>
+<body>
+		<h1>
+				Hello, World!
+		</h1>
+		<canvas id="gameCanvas" width="600" height="400"></canvas>
+<script>
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+class Ball {
+  constructor(x, y, radius) {
+    this.x = x;
+    this.y = y;
+    this.radius = radius;
+    this.vx = (Math.random() - 0.5) * 10;
+    this.vy = (Math.random() - 0.5) * 10;
+    this.friction = 0.998888888888888888888888888888;
+    this.color = `hsl(${Math.random() * 360}, 70%, 60%)`;
+  }
+  
+  update() {
+    // Apply friction
+    this.vx *= this.friction;
+    this.vy *= this.friction;
+    
+    // Update position
+    this.x += this.vx;
+    this.y += this.vy;
+    
+    // Boundary check with friction on bounce
+    if (this.x - this.radius < 0) {
+      this.x = this.radius;
+      this.vx = -this.vx * 0.8; // Additional friction on collision
+    }
+    if (this.x + this.radius > canvas.width) {
+      this.x = canvas.width - this.radius;
+      this.vx = -this.vx * 0.8;
+    }
+    if (this.y - this.radius < 0) {
+      this.y = this.radius;
+      this.vy = -this.vy * 0.8;
+    }
+    if (this.y + this.radius > canvas.height) {
+      this.y = canvas.height - this.radius;
+      this.vy = -this.vy * 0.8;
+    }
+    
+    // Stop completely when very slow (prevents endless micro-movement)
+    if (Math.abs(this.vx) < 0.05) this.vx = 0;
+    if (Math.abs(this.vy) < 0.05) this.vy = 0;
+  }
+  
+  draw() {
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+    ctx.fillStyle = this.color;
+    ctx.fill();
+    ctx.strokeStyle = '#333';
+    ctx.stroke();
+  }
+}
+
+// Create multiple balls
+const balls = [];
+for (let i = 0; i < 5; i++) {
+  balls.push(new Ball(
+    Math.random() * (canvas.width - 40) + 20,
+    Math.random() * (canvas.height - 40) + 20,
+    15 + Math.random() * 10
+  ));
+}
+
+// Animation loop
+function animate() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
+  balls.forEach(ball => {
+    ball.update();
+    ball.draw();
+  });
+  
+  requestAnimationFrame(animate);
+}
+
+// Start animation
+animate();
+
+// Add click to give balls a push
+canvas.addEventListener('click', (e) => {
+  const rect = canvas.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+  
+  balls.forEach(ball => {
+    const dx = ball.x - x;
+    const dy = ball.y - y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    
+    if (distance < 100) {
+      ball.vx += (dx / distance) * 5;
+      ball.vy += (dy / distance) * 5;
+    }
+  });
+});
+</script>
+</body>
+</html>

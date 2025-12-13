@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0">
+		<title>Hello, World!</title>
+		<style>
+		   body{
+		   		background: linear-gradient(135deg, #ff9600,#1eff96,#961efd);
+		   		height: 100vh;
+		   }
+		.container{
+				  margin: 20px;
+				  padding: 20px;
+				 border-radius: 20px;
+				border: 5px solid #f0f0f0;
+				background: rgba(0,0,0,0.1);
+		}
+		#btn{
+				 padding-left: 40px;
+				 padding-right: 40px;
+				 padding-top: 10px;
+				 padding-bottom: 10px;
+				 border-radius: 40%;
+				 background: orange;
+				 border: none;
+				 font-size: 25px;
+				 margin-left: 50px;
+				 margin-top: 30px;
+				 color: white;
+		}
+		 #btn:active{
+		 		 transform: sclale(0.8)
+		 		 color: orange; 
+		 		 background: white;
+		 }
+		.controls{
+				  display: grid;
+				  grid-template-columns: repeat(3,1fr);
+				  gap: 10px;
+				  margin-top: 20px;
+				  padding: 20px;
+				  
+		}
+		.btn{
+				 width: 60px;
+				 height: 60px;
+				border-radius: 10px;
+				font-size: 20px;
+				color: #333;
+		}
+		#input{
+				 padding: 5px;
+				 margin-left: 50px;
+				 font-size: 23px;
+				width: 150px;
+				font-weight: bold;
+		}
+				.zero{
+						 grid-column: 2;
+				}
+		</style>
+</head>
+<body>
+		<div class="container">
+		<h3 id="text">
+		</h3>
+		<input type='text' readonly="" id="input">
+		<button id="btn">check</button>
+				<div class="controls">
+						<button onclick="appendNumber(1)" class="btn">1</button>
+									<button onclick="appendNumber(2)" class="btn">2</button>
+									<button onclick="appendNumber(3)" class="btn">3</button>
+									<button onclick="appendNumber(4)" class="btn">4</button>
+									<button onclick="appendNumber(5)" class="btn">5</button>
+									<button onclick="appendNumber(6)" class="btn">6</button>
+									<button onclick="appendNumber(7)" class="btn">7</button>
+									<button onclick="appendNumber(8)" class="btn" >8</button>
+									<button onclick="appendNumber(9)" class="btn">9</button>
+									<button onclick="appendNumber(0)" class="btn zero"><span = 2></span>0</button>
+				</div>
+				</div>
+		<script src="guessNumber.js"></script>
+</body>
+</html>

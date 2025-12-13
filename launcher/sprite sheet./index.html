@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width,initial-scale = 1.0">
+		<link rel="stylesheet" href="styles/style.css"/>
+		<title>Robot Boy</title>
+		<link rel="stylesheets" href="styles/styles.css">
+</head>
+<body style="background: linear-gradient(45deg,#ffBC00,#1e00ff,#ffff96); height: 100vh;">
+		<h1 style="color: orange; font-family: itallic;">
+				Robobot Boy
+		</h1>
+		<canvas id="canvas1"></canvas>
+		<button id="arrowUp">⬆️</button>
+			<button id="arrowDown">⬇️</button>
+			<button id="arrowLeft">➡️</button>
+			<button id="arrowRight">⬅️</button>
+			<button id="enter">🅰️</button>
+		<img src="images (1).jpeg" id="background" width="1000" height="350">
+		<img class='char' id="001" src="00_idle/skeleton-00_idle_00.png" width="100"height="100">
+		<img class='char' id="002" src="00_idle/skeleton-00_idle_01.png" width="100"height="100">
+		<img class='char' id="003" src="00_idle/skeleton-00_idle_02.png" width="100"height="100">
+		<img class='char' id="004" src="00_idle/skeleton-00_idle_03.png" width="100"height="100">
+		<img class='char' id="005" src="00_idle/skeleton-00_idle_04.png" width="100"height="100">
+		<img class='char' id="006" src="00_idle/skeleton-00_idle_05.png" width="100"height="100">
+		<img class='char' id="007" src="00_idle/skeleton-00_idle_06.png" width="100"height="100">
+		<img class='char' id="008" src="00_idle/skeleton-00_idle_07.png" width="100"height="100">
+		<img class='char' id="009" src="00_idle/skeleton-00_idle_08.png" width="100"height="100">
+		<img class='char' id="010" src="00_idle/skeleton-00_idle_09.png" width="100"height="100">
+		<img class='char' id="011" src="00_idle/skeleton-00_idle_10.png" width="100"height="100">
+		<img class='char' id="012" src="00_idle/skeleton-00_idle_11.png" width="100"height="100">
+		<img class='char' id="013" src="00_idle/skeleton-00_idle_12.png" width="100"height="100">
+		<img class='char' id="014" src="00_idle/skeleton-00_idle_13.png" width="100"height="100">
+		<img class='char' id="015" src="00_idle/skeleton-00_idle_14.png" width="100"height="100">
+		<img class='char' id="016" src="00_idle/skeleton-00_idle_15.png" width="100"height="100">
+		<img class='char' id="017" src="00_idle/skeleton-00_idle_16.png" width="100"height="100">
+		<img class='char' id="018" src="00_idle/skeleton-00_idle_17.png" width="100"height="100">
+		<img class='char' id="019" src="00_idle/skeleton-00_idle_18.png" width="100"height="100">
+		<img class='char' id="020" src="00_idle/skeleton-00_idle_19.png" width="100"height="100">
+		
+				<img class="char" id="021"src="01_run_00ready/skeleton-01_run_00ready_01.png" width="100"height="100">
+				<img class="char" id="022"src="01_run_00ready/skeleton-01_run_00ready_02.png" width="100"height="100">
+				<img class="char" id="023"src="01_run_00ready/skeleton-01_run_00ready_03.png" width="100"height="100">
+				<img class="char" id="024"src="01_run_00ready/skeleton-01_run_00ready_04.png" width="100"height="100">
+				<img class="char" id="025"src="01_run_00ready/skeleton-01_run_00ready_05.png" width="100"height="100">
+				<img class="char" id="026"src="01_run_00ready/skeleton-01_run_00ready_06.png" width="100"height="100">
+				<img class="char" id="027"src="01_run_00ready/skeleton-01_run_00ready_07.png" width="100"height="100">
+				<img class="char" id="028"src="01_run_00ready/skeleton-01_run_00ready_08.png" width="100"height="100">
+				<img class="char" id="029"src="01_run_00ready/skeleton-01_run_00ready_09.png" width="100"height="100">
+				<img class="char" id="030"src="01_run_00ready/skeleton-01_run_00ready_10.png" width="100"height="100">
+		
+		 <img class="char" id="031" src="01_run_01start/skeleton-01_run_01start_01.png" width="100" height="100">
+		 <img class="char" id="032" src="01_run_01start/skeleton-01_run_01start_02.png" width="100" height="100">
+		 <img class="char" id="033" src="01_run_01start/skeleton-01_run_01start_03.png" width="100" height="100">
+		 <img class="char" id="034" src="01_run_01start/skeleton-01_run_01start_04.png" width="100" height="100">
+		 <img class="char" id="035" src="01_run_01start/skeleton-01_run_01start_05.png" width="100" height="100">
+		 <img class="char" id="036" src="01_run_01start/skeleton-01_run_01start_06.png" width="100" height="100">
+		 <img class="char" id="037" src="01_run_01start/skeleton-01_run_01start_07.png" width="100" height="100">
+		 <img class="char" id="038" src="01_run_01start/skeleton-01_run_01start_08.png" width="100" height="100">
+		 <img class="char" id="039" src="01_run_01start/skeleton-01_run_01start_09.png" width="100" height="100">
+		 <img class="char" id="040" src="01_run_01start/skeleton-01_run_01start_10.png" width="100" height="100">
+		 <img class="char" id="041" src="01_run_01start/skeleton-01_run_01start_11.png" width="100" height="100">
+		 <img class="char" id="042" src="01_run_01start/skeleton-01_run_01start_12.png" width="100" height="100">
+		 <img class="char" id="043" src="01_run_01start/skeleton-01_run_01start_13.png" width="100" height="100">
+		 <img class="char" id="044" src="01_run_01start/skeleton-01_run_01start_14.png" width="100" height="100">
+		 <img class="char" id="045" src="01_run_01start/skeleton-01_run_01start_15.png" width="100" height="100">
+		 <img class="char" id="046" src="01_run_01start/skeleton-01_run_01start_16.png" width="100" height="100">
+		 <img class="char" id="047" src="01_run_01start/skeleton-01_run_01start_17.png" width="100" height="100">
+		 <img class="char" id="048" src="01_run_01start/skeleton-01_run_01start_18.png" width="100" height="100">
+				
+		 <img class="char" id="049"src="01_run_02finish/skeleton-01_run_02finish_00.png" width="100" height="100">
+				<img class="char" id="050"src="01_run_02finish/skeleton-01_run_02finish_01.png" width="100" height="100">
+				<img class="char" id="051"src="01_run_02finish/skeleton-01_run_02finish_02.png" width="100" height="100">
+				<img class="char" id="052"src="01_run_02finish/skeleton-01_run_02finish_03.png" width="100" height="100">
+				<img class="char" id="053"src="01_run_02finish/skeleton-01_run_02finish_04.png" width="100" height="100">
+				<img class="char" id="054"src="01_run_02finish/skeleton-01_run_02finish_05.png" width="100" height="100">
+				<img class="char" id="055"src="01_run_02finish/skeleton-01_run_02finish_06.png" width="100" height="100">
+				<img class="char" id="056"src="01_run_02finish/skeleton-01_run_02finish_07.png" width="100" height="100">
+				<img class="char" id="057"src="01_run_02finish/skeleton-01_run_02finish_08.png" width="100" height="100">
+				<img class="char" id="058"src="01_run_02finish/skeleton-01_run_02finish_09.png" width="100" height="100">
+		
+				<img class="char" id="059"src="02_jump_00ready/skeleton-02_jump_00ready_00.png" width="100" height="100">
+				<img class="char" id="060"src="02_jump_00ready/skeleton-02_jump_00ready_01.png" width="100" height="100">
+		 <img class="char" id="061"src="02_jump_00ready/skeleton-02_jump_00ready_02.png" width="100" height="100">
+				<img class="char" id="062"src="02_jump_00ready/skeleton-02_jump_00ready_03.png" width="100" height="100">
+				<img class="char" id="063"src="02_jump_00ready/skeleton-02_jump_00ready_04.png" width="100" height="100">
+				<img class="char" id="064"src="02_jump_00ready/skeleton-02_jump_00ready_05.png" width="100" height="100">
+				<img class="char" id="065"src="02_jump_00ready/skeleton-02_jump_00ready_06.png" width="100" height="100">
+				<img class="char" id="066"src="02_jump_00ready/skeleton-02_jump_00ready_07.png" width="100" height="100">
+				<img class="char" id="067"src="02_jump_00ready/skeleton-02_jump_00ready_08.png" width="100" height="100">
+				<img class="char" id="068"src="02_jump_00ready/skeleton-02_jump_00ready_09.png" width="100" height="100">
+					
+		<img class="char" id="069"src="02_jump_01start/skeleton-02_jump_01start_00.png" width="100" height="100">
+		<img class="char" id="070"src="02_jump_01start/skeleton-02_jump_01start_01.png" width="100" height="100">
+		<img class="char" id="071"src="02_jump_01start/skeleton-02_jump_01start_02.png" width="100" height="100">
+		<img class="char" id="072"src="02_jump_01start/skeleton-02_jump_01start_03.png" width="100" height="100">
+		<img class="char" id="073"src="02_jump_01start/skeleton-02_jump_01start_04.png" width="100" height="100">
+		<img class="char" id="074"src="02_jump_01start/skeleton-02_jump_01start_05.png" width="100" height="100">
+		<img class="char" id="075"src="02_jump_01start/skeleton-02_jump_01start_06.png" width="100" height="100">
+		<img class="char" id="076"src="02_jump_01start/skeleton-02_jump_01start_07.png" width="100" height="100">
+		<img class="char" id="077"src="02_jump_01start/skeleton-02_jump_01start_08.png" width="100" height="100">
+		<img class="char" id="078"src="02_jump_01start/skeleton-02_jump_01start_09.png" width="100" height="100">
+		
+		<img class="char" id="079"src="02_jump_02finish/skeleton-02_jump_02finish_00.png" width="100" height="100">
+		<img class="char" id="080"src="02_jump_02finish/skeleton-02_jump_02finish_01.png" width="100" height="100">
+		<img class="char" id="081"src="02_jump_02finish/skeleton-02_jump_02finish_02.png" width="100" height="100">
+		<img class="char" id="082"src="02_jump_02finish/skeleton-02_jump_02finish_03.png" width="100" height="100">
+		<img class="char" id="083"src="02_jump_02finish/skeleton-02_jump_02finish_04.png" width="100" height="100">
+		<img class="char" id="084"src="02_jump_02finish/skeleton-02_jump_02finish_05.png" width="100" height="100">
+		<img class="char" id="085"src="02_jump_02finish/skeleton-02_jump_02finish_06.png" width="100" height="100">
+		<img class="char" id="086"src="02_jump_02finish/skeleton-02_jump_02finish_07.png" width="100" height="100">
+		<img class="char" id="087"src="02_jump_02finish/skeleton-02_jump_02finish_08.png" width="100" height="100">
+		<img class="char" id="088"src="02_jump_02finish/skeleton-02_jump_02finish_09.png" width="100" height="100">
+		
+		<img class="char" id="089"src="03_ko/skeleton-03_ko_00.png" width="100" height="100">
+		<img class="char" id="090"src="03_ko/skeleton-03_ko_01.png" width="100" height="100">
+		<img class="char" id="091"src="03_ko/skeleton-03_ko_02.png" width="100" height="100">
+		<img class="char" id="092"src="03_ko/skeleton-03_ko_03.png" width="100" height="100">
+		<img class="char" id="093"src="03_ko/skeleton-03_ko_04.png" width="100" height="100">
+		<img class="char" id="094"src="03_ko/skeleton-03_ko_05.png" width="100" height="100">
+		<img class="char" id="095"src="03_ko/skeleton-03_ko_06.png" width="100" height="100">
+		<img class="char" id="096"src="03_ko/skeleton-03_ko_07.png" width="100" height="100">
+		<img class="char" id="097"src="03_ko/skeleton-03_ko_08.png" width="100" height="100">
+		<img class="char" id="098"src="03_ko/skeleton-03_ko_09.png" width="100" height="100">
+		<img class="char" id="099"src="03_ko/skeleton-03_ko_10.png" width="100" height="100">
+		<img class="char" id="100"src="03_ko/skeleton-03_ko_11.png" width="100" height="100">
+		<img class="char" id="101"src="03_ko/skeleton-03_ko_12.png" width="100" height="100">
+		<img class="char" id="102"src="03_ko/skeleton-03_ko_13.png" width="100" height="100">
+		<img class="char" id="103"src="03_ko/skeleton-03_ko_14.png" width="100" height="100">
+		<img class="char" id="104"src="03_ko/skeleton-03_ko_15.png" width="100" height="100">
+		<img class="char" id="105"src="03_ko/skeleton-03_ko_16.png" width="100" height="100">
+		<img class="char" id="106"src="03_ko/skeleton-03_ko_17.png" width="100" height="100">
+		<img class="char" id="107"src="03_ko/skeleton-03_ko_18.png" width="100" height="100">
+		<img class="char" id="108"src="03_ko/skeleton-03_ko_19.png" width="100" height="100">
+		<img class="char" id="109"src="03_ko/skeleton-03_ko_20.png" width="100" height="100">
+		<img class="char" id="110"src="03_ko/skeleton-03_ko_21.png" width="100" height="100">
+		<img class="char" id="111"src="03_ko/skeleton-03_ko_22.png" width="100" height="100">
+		<img class="char" id="112"src="03_ko/skeleton-03_ko_23.png" width="100" height="100">
+		<img class="char" id="113"src="03_ko/skeleton-03_ko_24.png" width="100" height="100">
+		<img class="char" id="114"src="03_ko/skeleton-03_ko_25.png" width="100" height="100">
+		<img class="char" id="115"src="03_ko/skeleton-03_ko_26.png" width="100" height="100">
+		<img class="char" id="116"src="03_ko/skeleton-03_ko_27.png" width="100" height="100">
+		<img class="char" id="117"src="03_ko/skeleton-03_ko_28.png" width="100" height="100">
+		<img class="char" id="118"src="03_ko/skeleton-03_ko_29.png" width="100" height="100">
+		<img class="char" id="119"src="03_ko/skeleton-03_ko_30.png" width="100" height="100">
+		<img class="char" id="120"src="03_ko/skeleton-03_ko_31.png" width="100" height="100">
+		<img class="char" id="121"src="03_ko/skeleton-03_ko_32.png" width="100" height="100">
+		<img class="char" id="122"src="03_ko/skeleton-03_ko_33.png" width="100" height="100">
+		<img class="char" id="123"src="03_ko/skeleton-03_ko_34.png" width="100" height="100">
+		<img class="char" id="124"src="03_ko/skeleton-03_ko_35.png" width="100" height="100">
+		<img class="char" id="125"src="03_ko/skeleton-03_ko_36.png" width="100" height="100">
+		<img class="char" id="126"src="03_ko/skeleton-03_ko_37.png" width="100" height="100">
+		<img class="char" id="127"src="03_ko/skeleton-03_ko_38.png" width="100" height="100">
+		<img class="char" id="128"src="03_ko/skeleton-03_ko_39.png" width="100" height="100">
+		<img class="char" id="129"src="03_ko/skeleton-03_ko_40.png" width="100" height="100">
+		
+		<img class="char" id="130"src="04_punch/skeleton-04_punch_00.png" width="100" height="100">
+		<img class="char" id="131"src="04_punch/skeleton-04_punch_01.png" width="100" height="100">
+		<img class="char" id="132"src="04_punch/skeleton-04_punch_02.png" width="100" height="100">
+		<img class="char" id="133"src="04_punch/skeleton-04_punch_03.png" width="100" height="100">
+		<img class="char" id="134"src="04_punch/skeleton-04_punch_04.png" width="100" height="100">
+		<img class="char" id="135"src="04_punch/skeleton-04_punch_05.png" width="100" height="100">
+		<img class="char" id="136"src="04_punch/skeleton-04_punch_06.png" width="100" height="100">
+		<img class="char" id="137"src="04_punch/skeleton-04_punch_07.png" width="100" height="100">
+		<img class="char" id="138"src="04_punch/skeleton-04_punch_08.png" width="100" height="100">
+		<img class="char" id="139"src="04_punch/skeleton-04_punch_09.png" width="100" height="100">
+		
+		<script type="module" src="scripts/main.js"></script>
+</body>
+</html>

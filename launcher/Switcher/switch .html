@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+		<meta http-equiv="CONTENT-TYPE" content="text/html; charset=UTF-8">
+		<title>Hello, World!</title>
+		<style>
+		    img{
+		    		width: 200px;
+		    		height: auto;
+		    		border-radius: 20px;
+		    		box-shadow: 10px 8px 5px black;
+		    }
+		#btn{
+				 margin-top: 20px;
+				margin-left: 100px;
+				padding: 15px;
+				boder-radius: 30%;
+				background: orange;
+		</style>
+</head>
+<body>
+		<h1><marquee style="alternative">SWITCHING ITEMS</marquee></h1>
+		<div id="items">
+				<img src="img1.jpg">
+		</div>
+		<button id="btn">SWITCH</button>
+		<script>
+		  const array = ['img1.jpg','img2.jpg','img3.jpg','img4.jpg','img5.jpg','img6.jpg','img7.jpg','img8.jpeg','img9.webp','img10.webp','img11.webp','img12.webp'];
+		  let index = -1;
+		  btn.addEventListener('click',function(){
+		  		if(index >= (array.length - 1)) index = -1;
+		  		index ++;
+		  		items.innerHTML = `<img src="${array[index]}">`;
+		  		console.log(items);
+		  });
+		</script>
+</body>
+</html>

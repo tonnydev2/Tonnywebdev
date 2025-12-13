@@ -1,0 +1,30 @@
+{
+		margin: 0;
+		padding: 0;
+		box-sizing: border-box;
+}
+
+#canvas1{
+		 width: 350px;
+		 height: 350px;
+		 border: 3px solid black;
+		 position: absolute;
+		 top: 50%;
+		 left: 50%;
+ 		transform: translate(-50%, -50%);
+}
+#background{
+		  display: none;
+}
+ .char{
+ 		 display: none;
+ }
+button{
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+		  padding: 0;
+		  font-size: 30px;
+		  margin-left: 20px;
+}

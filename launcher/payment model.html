@@ -1,0 +1,611 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lucky Dice - Casino Game</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            padding: 20px;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
+        }
+        
+        header {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            text-align: center;
+            border-bottom: 3px solid #f1c40f;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #f1c40f;
+            text-shadow: 0 0 10px rgba(241, 196, 15, 0.5);
+        }
+        
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.8;
+        }
+        
+        .main-content {
+            display: flex;
+            padding: 20px;
+            gap: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+        }
+        
+        .game-section {
+            flex: 1;
+            background: rgba(25, 25, 35, 0.8);
+            border-radius: 15px;
+            padding: 20px;
+        }
+        
+        .payment-section {
+            flex: 1;
+            background: rgba(25, 25, 35, 0.8);
+            border-radius: 15px;
+            padding: 20px;
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #f1c40f;
+            text-align: center;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        
+        .game-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .dice-container {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 20px 0;
+        }
+        
+        .dice {
+            width: 100px;
+            height: 100px;
+            background: white;
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 3rem;
+            color: #1a2a6c;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .dice::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, rgba(255,255,255,0.1), rgba(255,255,255,0.3));
+            z-index: 1;
+        }
+        
+        .bet-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+        }
+        
+        .bet-amount {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            justify-content: center;
+        }
+        
+        input {
+            padding: 10px 15px;
+            border-radius: 50px;
+            border: 2px solid #3498db;
+            background: rgba(0, 0, 0, 0.3);
+            color: white;
+            font-size: 1.1rem;
+            text-align: center;
+            width: 150px;
+        }
+        
+        button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 50px;
+            background: #3498db;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        button:hover {
+            background: #2980b9;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        button:active {
+            transform: translateY(1px);
+        }
+        
+        .play-btn {
+            background: #f1c40f;
+            color: #1a2a6c;
+            font-size: 1.3rem;
+            padding: 15px 30px;
+            margin-top: 10px;
+        }
+        
+        .play-btn:hover {
+            background: #f39c12;
+        }
+        
+        .result-display {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 10px;
+            text-align: center;
+            min-height: 100px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .win {
+            color: #2ecc71;
+            font-weight: bold;
+            font-size: 1.3rem;
+        }
+        
+        .lose {
+            color: #e74c3c;
+            font-weight: bold;
+            font-size: 1.3rem;
+        }
+        
+        .balance {
+            font-size: 1.4rem;
+            font-weight: bold;
+            text-align: center;
+            margin: 20px 0;
+            color: #f1c40f;
+        }
+        
+        .payment-methods {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        .payment-method {
+            width: 70px;
+            height: 50px;
+            background: white;
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.8rem;
+            color: #1a2a6c;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .payment-method:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 15px rgba(52, 152, 219, 0.7);
+        }
+        
+        .payment-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        .deposit-btn {
+            background: #2ecc71;
+            margin-top: 10px;
+        }
+        
+        .deposit-btn:hover {
+            background: #27ae60;
+        }
+        
+        .payout-message {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 10px;
+            text-align: center;
+            display: none;
+        }
+        
+        .payout-message.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .dice.rolling {
+            animation: roll 0.5s ease infinite;
+        }
+        
+        @keyframes roll {
+            0% { transform: rotate(0deg); }
+            25% { transform: rotate(90deg); }
+            50% { transform: rotate(180deg); }
+            75% { transform: rotate(270deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            border-left: 5px solid #2ecc71;
+            display: none;
+            z-index: 1000;
+        }
+        
+        .notification.show {
+            display: block;
+            animation: slideIn 0.5s ease, fadeOut 0.5s ease 2.5s forwards;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 0.9rem;
+            opacity: 0.7;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .disclaimer {
+            background: rgba(231, 76, 60, 0.2);
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>LUCKY DICE CASINO</h1>
+            <p class="subtitle">Roll the dice and win big! Secure payments and automatic developer notifications</p>
+        </header>
+        
+        <div class="main-content">
+            <div class="game-section">
+                <h2 class="section-title">GAME AREA</h2>
+                <div class="balance">
+                    <i class="fas fa-coins"></i> BALANCE: $<span id="balance">500.00</span>
+                </div>
+                
+                <div class="game-area">
+                    <div class="dice-container">
+                        <div class="dice" id="dice1">?</div>
+                        <div class="dice" id="dice2">?</div>
+                    </div>
+                    
+                    <div class="bet-controls">
+                        <div class="bet-amount">
+                            <label for="bet">BET AMOUNT:</label>
+                            <input type="number" id="bet" min="10" max="1000" value="50">
+                        </div>
+                        
+                        <button class="play-btn" id="roll-btn">
+                            <i class="fas fa-dice"></i> ROLL DICE
+                        </button>
+                    </div>
+                    
+                    <div class="result-display" id="result">
+                        Place your bet and roll the dice!
+                    </div>
+                </div>
+            </div>
+            
+            <div class="payment-section">
+                <h2 class="section-title">PAYMENT SYSTEM</h2>
+                
+                <div class="payment-methods">
+                    <div class="payment-method" data-method="visa">
+                        <i class="fab fa-cc-visa"></i>
+                    </div>
+                    <div class="payment-method" data-method="mastercard">
+                        <i class="fab fa-cc-mastercard"></i>
+                    </div>
+                    <div class="payment-method" data-method="paypal">
+                        <i class="fab fa-cc-paypal"></i>
+                    </div>
+                    <div class="payment-method" data-method="bitcoin">
+                        <i class="fab fa-bitcoin"></i>
+                    </div>
+                </div>
+                
+                <div class="payment-form">
+                    <div class="form-group">
+                        <label for="card-number">CARD NUMBER</label>
+                        <input type="text" id="card-number" placeholder="1234 5678 9012 3456">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="expiry">EXPIRY DATE</label>
+                        <input type="text" id="expiry" placeholder="MM/YY">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="cvc">CVC</label>
+                        <input type="text" id="cvc" placeholder="123">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="deposit-amount">DEPOSIT AMOUNT ($)</label>
+                        <input type="number" id="deposit-amount" min="10" value="100">
+                    </div>
+                    
+                    <button class="deposit-btn" id="deposit-btn">
+                        <i class="fas fa-money-bill-wave"></i> DEPOSIT FUNDS
+                    </button>
+                </div>
+                
+                <div class="payout-message" id="payout-message">
+                    <h3><i class="fas fa-envelope"></i> DEVELOPER NOTIFICATION</h3>
+                    <p>A payout request has been sent to the developer. Winnings will be transferred within 24 hours.</p>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>This is a simulation for demonstration purposes only. No real money transactions are processed.</p>
+            <div class="disclaimer">
+                Note: A real implementation would require backend integration with payment gateways (like Stripe, PayPal) and compliance with financial regulations.
+            </div>
+        </footer>
+    </div>
+    
+    <div class="notification" id="notification">
+        <i class="fas fa-check-circle"></i> Payment processed successfully!
+    </div>
+    
+    <script>
+        // Game state
+        let balance = 500.00;
+        let selectedPaymentMethod = null;
+        
+        // DOM Elements
+        const balanceElement = document.getElementById('balance');
+        const dice1 = document.getElementById('dice1');
+        const dice2 = document.getElementById('dice2');
+        const betInput = document.getElementById('bet');
+        const rollBtn = document.getElementById('roll-btn');
+        const resultDisplay = document.getElementById('result');
+        const paymentMethods = document.querySelectorAll('.payment-method');
+        const depositBtn = document.getElementById('deposit-btn');
+        const depositAmountInput = document.getElementById('deposit-amount');
+        const payoutMessage = document.getElementById('payout-message');
+        const notification = document.getElementById('notification');
+        
+        // Payment method selection
+        paymentMethods.forEach(method => {
+            method.addEventListener('click', () => {
+                paymentMethods.forEach(m => m.style.boxShadow = 'none');
+                method.style.boxShadow = '0 0 15px rgba(52, 152, 219, 0.7)';
+                selectedPaymentMethod = method.dataset.method;
+            });
+        });
+        
+        // Roll dice function
+        rollBtn.addEventListener('click', () => {
+            const betAmount = parseFloat(betInput.value);
+            
+            // Validate bet
+            if (isNaN(betAmount) || betAmount < 10 || betAmount > 1000) {
+                resultDisplay.innerHTML = '<p class="lose">Please enter a valid bet between $10 and $1000</p>';
+                return;
+            }
+            
+            if (betAmount > balance) {
+                resultDisplay.innerHTML = '<p class="lose">Insufficient balance! Please deposit more funds.</p>';
+                return;
+            }
+            
+            // Deduct bet from balance
+            balance -= betAmount;
+            updateBalance();
+            
+            // Show rolling animation
+            dice1.textContent = '?';
+            dice2.textContent = '?';
+            dice1.classList.add('rolling');
+            dice2.classList.add('rolling');
+            rollBtn.disabled = true;
+            
+            // Simulate dice roll after delay
+            setTimeout(() => {
+                // Generate random dice values
+                const diceValue1 = Math.floor(Math.random() * 6) + 1;
+                const diceValue2 = Math.floor(Math.random() * 6) + 1;
+                const total = diceValue1 + diceValue2;
+                
+                // Display dice values
+                dice1.textContent = diceValue1;
+                dice2.textContent = diceValue2;
+                dice1.classList.remove('rolling');
+                dice2.classList.remove('rolling');
+                
+                // Determine win/loss
+                let winAmount = 0;
+                let resultText = '';
+                
+                if (total === 7 || total === 11) {
+                    // Big win
+                    winAmount = betAmount * 3;
+                    balance += winAmount;
+                    resultText = `<p class="win">JACKPOT! You won $${winAmount.toFixed(2)}</p>`;
+                    
+                    // Trigger developer notification for payout
+                    triggerPayoutNotification(winAmount);
+                } else if (total > 7) {
+                    // Win
+                    winAmount = betAmount * 2;
+                    balance += winAmount;
+                    resultText = `<p class="win">You won $${winAmount.toFixed(2)}!</p>`;
+                } else {
+                    // Loss
+                    resultText = `<p class="lose">Sorry, you lost $${betAmount.toFixed(2)}. Try again!</p>`;
+                }
+                
+                resultDisplay.innerHTML = resultText;
+                updateBalance();
+                rollBtn.disabled = false;
+            }, 1500);
+        });
+        
+        // Deposit function
+        depositBtn.addEventListener('click', () => {
+            const depositAmount = parseFloat(depositAmountInput.value);
+            
+            if (!selectedPaymentMethod) {
+                alert('Please select a payment method');
+                return;
+            }
+            
+            if (isNaN(depositAmount) || depositAmount < 10) {
+                alert('Please enter a valid deposit amount (minimum $10)');
+                return;
+            }
+            
+            // Simulate payment processing
+            showNotification('Processing payment...');
+            
+            setTimeout(() => {
+                // Add to balance
+                balance += depositAmount;
+                updateBalance();
+                
+                // Show success notification
+                showNotification('Payment processed successfully!');
+                
+                // Simulate transfer to developer account
+                setTimeout(() => {
+                    showNotification(`$${depositAmount.toFixed(2)} transferred to developer account`);
+                }, 1000);
+            }, 2000);
+        });
+        
+        // Trigger payout notification to developer
+        function triggerPayoutNotification(amount) {
+            payoutMessage.classList.add('show');
+            
+            // Simulate sending message to developer
+            setTimeout(() => {
+                showNotification(`Developer notified to pay out $${amount.toFixed(2)}`);
+            }, 1000);
+            
+            // Hide after 5 seconds
+            setTimeout(() => {
+                payoutMessage.classList.remove('show');
+            }, 5000);
+        }
+        
+        // Show notification
+        function showNotification(message) {
+            notification.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Update balance display
+        function updateBalance() {
+            balanceElement.textContent = balance.toFixed(2);
+        }
+        
+        // Initialize
+        updateBalance();
+    </script>
+</body>
+</html>

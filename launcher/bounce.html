@@ -1,0 +1,139 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bouncing Ball Physics Simulation</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        h1 {
+            color: #fff;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+        }
+        
+        .subtitle {
+            color: #a0a0c0;
+            margin-bottom: 25px;
+        }
+        
+        canvas {
+            background: #0f1525;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 25px;
+            width: 350px;
+            height: 400px;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        label {
+            color: #a0a0c0;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        input[type="range"] {
+            width: 180px;
+            accent-color: #4cc9f0;
+        }
+        
+        .value-display {
+            color: #4cc9f0;
+            font-weight: bold;
+            margin-top: 5px;
+            min-width: 40px;
+        }
+        
+        .physics-info {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            color: #ccc;
+            font-size: 14px;
+            text-align: left;
+            border-left: 3px solid #4cc9f0;
+        }
+        
+        .info-title {
+            color: #4cc9f0;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Bouncing Ball Physics Simulation</h1>
+        <p class="subtitle">A realistic simulation of bouncing balls with adjustable physics parameters</p>
+        
+        <canvas id="ballCanvas" width="800" height="500"></canvas>
+        
+        <div class="controls">
+            <div class="control-group">
+                <label for="gravitySlider">Gravity: <span id="gravityValue">0.5</span></label>
+                <input type="range" id="gravitySlider" min="0.1" max="1.5" step="0.1" value="0.5">
+            </div>
+            
+            <div class="control-group">
+                <label for="restitutionSlider">Bounce Energy: <span id="restitutionValue">0.8</span></label>
+                <input type="range" id="restitutionSlider" min="0.1" max="0.95" step="0.05" value="0.8">
+            </div>
+            
+            <div class="control-group">
+                <label for="airResistanceSlider">Air Resistance: <span id="airResistanceValue">0.01</span></label>
+                <input type="range" id="airResistanceSlider" min="0" max="0.05" step="0.005" value="0.01">
+            </div>
+        </div>
+        
+        <div class="physics-info">
+            <div class="info-title">Physics Principles Applied:</div>
+            <ul>
+                <li><strong>Blue Ball:</strong> Draggable with touch - dragging sets initial velocity</li>
+                <li><strong>Green Ball:</strong> Perfectly elastic (restitution = 1.0)</li>
+                <li><strong>Gravity:</strong> Constant downward acceleration acting on both balls</li>
+                <li><strong>Restitution:</strong> Energy retained after each bounce</li>
+                <li><strong>Air Resistance:</strong> Velocity-dependent damping that slows balls over time</li>
+                <li><strong>Collision Detection:</strong> Full border collision with all four walls</li>
+            </ul>
+        </div>
+    </div>
+
+    <script src="bounce (1).js"></script>
+</body>
+</html>

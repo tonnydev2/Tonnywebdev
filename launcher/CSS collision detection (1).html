@@ -1,0 +1,106 @@
+ <!DOCTYPE html>
+<html>
+<head>
+<style>
+.moving-element {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    background-color: red;
+}
+
+#element1 {
+    animation: move1 3s infinite alternate;
+}
+
+#element2 {
+    background-color: blue;
+    animation: move2 4s infinite alternate;
+}
+
+@keyframes move1 {
+    0% { transform: translate(0px, 0px); }
+    100% { transform: translate(300px, 200px); }
+}
+
+@keyframes move2 {
+    0% { transform: translate(300px, 0px); }
+    100% { transform: translate(0px, 200px); }
+}
+
+.collision {
+    background-color: yellow !important;
+}
+</style>
+</head>
+<body>
+<div class="moving-element" id="element1"></div>
+<div class="moving-element" id="element2"></div>
+
+<script>
+class CollisionDetector {
+    constructor() {
+        this.elements = [];
+        this.isChecking = false;
+    }
+    
+    addElement(element) {
+        this.elements.push(element);
+    }
+    
+    startDetection() {
+        if (this.isChecking) return;
+        this.isChecking = true;
+        this.checkCollisions();
+    }
+    
+    stopDetection() {
+        this.isChecking = false;
+    }
+    
+    checkCollisions() {
+        if (!this.isChecking) return;
+        
+        // Reset collision styles
+        this.elements.forEach(el => el.classList.remove('collision'));
+        
+        // Check all combinations
+        for (let i = 0; i < this.elements.length; i++) {
+            for (let j = i + 1; j < this.elements.length; j++) {
+                if (this.isColliding(this.elements[i], this.elements[j])) {
+                    this.elements[i].classList.add('collision');
+                    this.elements[j].classList.add('collision');
+                    this.onCollision(this.elements[i], this.elements[j]);
+                }
+            }
+        }
+        
+        requestAnimationFrame(() => this.checkCollisions());
+    }
+    
+    isColliding(element1, element2) {
+        const rect1 = element1.getBoundingClientRect();
+        const rect2 = element2.getBoundingClientRect();
+        
+        return !(
+            rect1.right < rect2.left ||
+            rect1.left > rect2.right ||
+            rect1.bottom < rect2.top ||
+            rect1.top > rect2.bottom
+        );
+    }
+    
+    onCollision(element1, element2) {
+        console.log('Collision between:', element1.id, 'and', element2.id);
+        // Add your collision handling logic here
+    }
+}
+
+// Usage
+const detector = new CollisionDetector();
+detector.addElement(document.getElementById('element1'));
+detector.addElement(document.getElementById('element2'));
+detector.startDetection();
+</script>
+</body>
+</html>
