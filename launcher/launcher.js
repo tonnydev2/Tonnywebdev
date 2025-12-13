@@ -5,15 +5,15 @@
             { name: "Bouncing simulator", icon: "bounce.png", link: "bounce.html" },
             { name: "Robot boy", icon: "robot.png", link: "sprite sheet./index.html" },
             { name: "Ludo", icon: "ludo.png", link: "Ludo super/index.html" },
-            { name: "Gallery", icon: "photos.png", link: "switcher/switch.html" },
+            { name: "Gallery", icon: "photos.png", link: "Switcher/switch.html" },
             { name: "Matatu", icon: "matatu.png", link: "Tonnoid Matatu.html" },
             { name: "Hero Dog", icon: "dog.png", link: "Dog game/index.html" },
             { name: "Lottery", icon: "lottery.png", link: "lottery.html" },
             { name: "Calculator", icon: "calc.png", link: "calculator.html" },
             { name: "Notes", icon: "notepad.png", link: "notepad.html" },
-            { name: "Story games", icon: "story1.png", link: "story Game.html" },
+            { name: "Story games", icon: "story1.png", link: "Story Game.html" },
             { name: "R P S", icon: "rps.png", link: "Rock Paper Scissors .html" },
-            { name: "Checkers", icon: "chess.png", link: "checkers-v2.html" },
+            { name: "Checkers", icon: "chess.png", link: "Checkers-v2.html" },
             { name: "Lucky spin", icon: "payment-modal.png", link: "payment model.html" }
         ];
 
