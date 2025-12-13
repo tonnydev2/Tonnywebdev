@@ -1,19 +1,19 @@
-        // Sample app data - replace with your own content
+         // Sample app data - replace with your own content
         const apps = [
-            { name: "Browser", icon: "guess.png", link: "Number guess.html" },
-            { name: "Messages", icon: "typer.png", link: "Typer 2.html" },
-            { name: "Contacts", icon: "bounce.png", link: "bounce.html" },
-            { name: "Calendar", icon: "robot.png", link: "sprite sheet./index.html" },
-            { name: "Camera", icon: "ludo.png", link: "ludo super/index.html" },
-            { name: "Photos", icon: "photos.png", link: "switcher/switch .html" },
-            { name: "Music", icon: "matatu.png", link: "Tonnoid Matatu.html" },
-            { name: "Maps", icon: "dog.png", link: "dog Game/index.html" },
-            { name: "Weather", icon: "lottery.png", link: "lottery.html" },
+            { name: "Guess number", icon: "guess.png", link: "Number guess.html" },
+            { name: "Typing simulator", icon: "typer.png", link: "Typer 2.html" },
+            { name: "Bouncing simulator", icon: "bounce.png", link: "bounce.html" },
+            { name: "Robot boy", icon: "robot.png", link: "sprite sheet./index.html" },
+            { name: "Ludo", icon: "ludo.png", link: "ludo super/index.html" },
+            { name: "Gallery", icon: "photos.png", link: "switcher/switch .html" },
+            { name: "Matatu", icon: "matatu.png", link: "Tonnoid Matatu.html" },
+            { name: "Hero Dog", icon: "dog.png", link: "dog Game/index.html" },
+            { name: "Lottery", icon: "lottery.png", link: "lottery.html" },
             { name: "Calculator", icon: "calc.png", link: "calculator.html" },
             { name: "Notes", icon: "notepad.png", link: "notepad.html" },
-            { name: "Settings", icon: "story1.png", link: "story Game.html" },
-            { name: "Mail", icon: "rps.png", link: "Rock Paper Scissors .html" },
-            { name: "Files", icon: "chess.png", link: "checkers-v2.html" },
+            { name: "Story games", icon: "story1.png", link: "story Game.html" },
+            { name: "R P S", icon: "rps.png", link: "Rock Paper Scissors .html" },
+            { name: "Checkers", icon: "chess.png", link: "checkers-v2.html" },
             { name: "Lucky spin", icon: "payment-modal.png", link: "payment model.html" }
         ];
 
@@ -67,4 +67,5 @@
 
         // Run initialization when page loads
         document.addEventListener('DOMContentLoaded', init);
+
 
