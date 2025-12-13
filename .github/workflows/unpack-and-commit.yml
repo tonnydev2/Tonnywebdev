@@ -1,0 +1,53 @@
+name: Unpack uploaded ZIP and commit
+
+on:
+  push:
+    paths:
+      - '**/*.zip'   # adjust to e.g. 'uploads/**/*.zip' if you upload zips to a specific folder
+
+permissions:
+  contents: write
+
+jobs:
+  unzip-and-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+
+      - name: Find zip files
+        id: find_zip
+        run: |
+          set -e
+          zipfiles=$(git ls-files '*.zip' || true)
+          if [ -z "$zipfiles" ]; then
+            echo "no_zip=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          echo "no_zip=false" >> $GITHUB_OUTPUT
+          printf "%s\n" $zipfiles > ziplist.txt
+
+      - name: Extract zip files
+        if: steps.find_zip.outputs.no_zip == 'false'
+        run: |
+          while IFS= read -r zipfile; do
+            zipfile=${zipfile#./}
+            base=$(basename "$zipfile")
+            dirname=$(dirname "$zipfile")
+            name="${base%.*}"
+            targetdir="$dirname/$name"
+            mkdir -p "$targetdir"
+            echo "Unzipping $zipfile -> $targetdir"
+            unzip -o "$zipfile" -d "$targetdir"
+          done < ziplist.txt
+
+      - name: Commit extracted files
+        if: steps.find_zip.outputs.no_zip == 'false'
+        uses: EndBug/add-and-commit@v9
+        with:
+          author_name: github-actions[bot]
+          author_email: 41898282+github-actions[bot]@users.noreply.github.com
+          message: "Extracted ZIP(s)"
+          add: '.'
