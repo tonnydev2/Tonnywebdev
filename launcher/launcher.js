@@ -4,7 +4,7 @@
             { name: "Typing simulator", icon: "typer.png", link: "Typer 2.html" },
             { name: "Bouncing simulator", icon: "bounce.png", link: "bounce.html" },
             { name: "Robot boy", icon: "robot.png", link: "sprite sheet./index.html" },
-            { name: "Ludo", icon: "ludo.png", link: "ludo super/index.html" },
+            { name: "Ludo", icon: "ludo.png", link: "Ludo super/index.html" },
             { name: "Gallery", icon: "photos.png", link: "switcher/switch.html" },
             { name: "Matatu", icon: "matatu.png", link: "Tonnoid Matatu.html" },
             { name: "Hero Dog", icon: "dog.png", link: "Dog game/index.html" },
