@@ -7,7 +7,7 @@
             { name: "Ludo", icon: "ludo.png", link: "ludo super/index.html" },
             { name: "Gallery", icon: "photos.png", link: "switcher/switch.html" },
             { name: "Matatu", icon: "matatu.png", link: "Tonnoid Matatu.html" },
-            { name: "Hero Dog", icon: "dog.png", link: "dog Game/index.html" },
+            { name: "Hero Dog", icon: "dog.png", link: "Dog game/index.html" },
             { name: "Lottery", icon: "lottery.png", link: "lottery.html" },
             { name: "Calculator", icon: "calc.png", link: "calculator.html" },
             { name: "Notes", icon: "notepad.png", link: "notepad.html" },
