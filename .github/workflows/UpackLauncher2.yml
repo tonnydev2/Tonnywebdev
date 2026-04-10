@@ -1,0 +1,5 @@
+# For Unix/Linux/macOS:
+unzip -o launcher.zip && rm launcher.zip
+
+# For Windows (PowerShell):
+Expand-Archive -Path launcher.zip -DestinationPath . -Force; Remove-Item launcher.zip
