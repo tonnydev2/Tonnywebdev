@@ -1,0 +1,768 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkers Game with AI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            padding: 20px;
+            color: white;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+            color: #f0f0f0;
+        }
+
+        .game-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .player-turn {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .player-turn.red {
+            color: #ff4d4d;
+        }
+
+        .player-turn.black {
+            color: #333;
+        }
+
+        .score {
+            font-size: 1.2rem;
+        }
+
+        .game-mode {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .board-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            grid-template-rows: repeat(8, 1fr);
+            width: min(80vw, 500px);
+            height: min(80vw, 500px);
+            border: 10px solid #5d4037;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .cell {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .dark {
+            background-color: #8d6e63;
+        }
+
+        .light {
+            background-color: #d7ccc8;
+        }
+
+        .piece {
+            width: 80%;
+            height: 80%;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.2s;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            position: relative;
+            z-index: 2;
+        }
+
+        .piece:hover {
+            transform: scale(1.1);
+        }
+
+        .red-piece {
+            background: radial-gradient(circle at 30% 30%, #ff6b6b, #c62828);
+        }
+
+        .black-piece {
+            background: radial-gradient(circle at 30% 30%, #666, #212121);
+        }
+
+        .king::after {
+            content: "♔";
+            position: absolute;
+            font-size: 1.5rem;
+            color: gold;
+            text-shadow: 0 0 3px black;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .valid-move {
+            position: relative;
+        }
+
+        .valid-move::before {
+            content: "";
+            position: absolute;
+            width: 30%;
+            height: 30%;
+            border-radius: 50%;
+            background-color: rgba(76, 175, 80, 0.7);
+            z-index: 1;
+        }
+
+        .selected {
+            box-shadow: 0 0 0 3px gold, 0 0 10px 5px rgba(255, 215, 0, 0.5);
+        }
+
+        .possible-jump {
+            position: relative;
+        }
+
+        .possible-jump::after {
+            content: "";
+            position: absolute;
+            width: 40%;
+            height: 40%;
+            border-radius: 50%;
+            background-color: rgba(255, 193, 7, 0.7);
+            z-index: 1;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 12px 25px;
+            font-size: 1rem;
+            background: #5d4037;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        button:hover {
+            background: #795548;
+            transform: translateY(-2px);
+        }
+
+        select {
+            padding: 10px 15px;
+            font-size: 1rem;
+            background: #5d4037;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .instructions {
+            margin-top: 30px;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: left;
+        }
+
+        .instructions h2 {
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .instructions ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .instructions li {
+            margin-bottom: 8px;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .instructions li::before {
+            content: "•";
+            color: #ffd700;
+            position: absolute;
+            left: 0;
+        }
+
+        .status-message {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            background: rgba(0, 0, 0, 0.3);
+            font-weight: bold;
+        }
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .game-info {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .controls {
+                flex-wrap: wrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>CHECKERS</h1>
+        <p class="subtitle">Classic board game with AI opponent</p>
+        
+        <div class="game-info">
+            <div class="player-turn red">Red's Turn</div>
+            <div class="score">Red: <span id="red-score">12</span> | Black: <span id="black-score">12</span></div>
+            <div class="game-mode">
+                <label for="game-mode">Game Mode:</label>
+                <select id="game-mode">
+                    <option value="human">Human vs Human</option>
+                    <option value="ai">Human vs Computer</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="board-container">
+            <div class="board" id="board"></div>
+        </div>
+        
+        <div class="status-message" id="status-message">Select a red piece to begin</div>
+        
+        <div class="controls">
+            <button id="new-game">New Game</button>
+            <button id="hint">Show Hints</button>
+            <button id="rules">Game Rules</button>
+            <button id="undo">Undo Move</button>
+        </div>
+        
+        <div class="instructions">
+            <h2>How to Play Checkers</h2>
+            <ul>
+                <li>Red moves first, then players alternate turns</li>
+                <li>Move your piece diagonally to an adjacent dark square</li>
+                <li>Jump over your opponent's pieces to capture them</li>
+                <li>When a piece reaches the opposite end, it becomes a King</li>
+                <li>Kings can move and jump diagonally in any direction</li>
+                <li>Kings can also move multiple squares in a diagonal line</li>
+                <li>The player who captures all opponent pieces wins</li>
+                <li>In Human vs Computer mode, you play as Red against the AI (Black)</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const board = document.getElementById('board');
+            const redScoreElement = document.getElementById('red-score');
+            const blackScoreElement = document.getElementById('black-score');
+            const playerTurnElement = document.querySelector('.player-turn');
+            const statusMessageElement = document.getElementById('status-message');
+            const newGameButton = document.getElementById('new-game');
+            const hintButton = document.getElementById('hint');
+            const rulesButton = document.getElementById('rules');
+            const undoButton = document.getElementById('undo');
+            const gameModeSelect = document.getElementById('game-mode');
+
+            let gameState = {
+                currentPlayer: 'red',
+                selectedPiece: null,
+                validMoves: [],
+                board: [],
+                redPieces: 12,
+                blackPieces: 12,
+                gameMode: 'human',
+                moveHistory: [],
+                isJumpInProgress: false,
+                jumpSequence: []
+            };
+
+            // Initialize the game
+            function initGame() {
+                gameState = {
+                    currentPlayer: 'red',
+                    selectedPiece: null,
+                    validMoves: [],
+                    board: [],
+                    redPieces: 12,
+                    blackPieces: 12,
+                    gameMode: gameModeSelect.value,
+                    moveHistory: [],
+                    isJumpInProgress: false,
+                    jumpSequence: []
+                };
+
+                // Create empty board
+                for (let row = 0; row < 8; row++) {
+                    gameState.board[row] = [];
+                    for (let col = 0; col < 8; col++) {
+                        gameState.board[row][col] = null;
+                    }
+                }
+
+                // Set up pieces
+                for (let row = 0; row < 8; row++) {
+                    for (let col = 0; col < 8; col++) {
+                        if ((row + col) % 2 === 1) {
+                            if (row < 3) {
+                                gameState.board[row][col] = { type: 'black', king: false };
+                            } else if (row > 4) {
+                                gameState.board[row][col] = { type: 'red', king: false };
+                            }
+                        }
+                    }
+                }
+
+                renderBoard();
+                updateGameInfo();
+                statusMessageElement.textContent = "Select a red piece to begin";
+                
+                // If playing against AI and it's AI's turn, make AI move
+                if (gameState.gameMode === 'ai' && gameState.currentPlayer === 'black') {
+                    setTimeout(makeAIMove, 500);
+                }
+            }
+
+            // Render the board
+            function renderBoard() {
+                board.innerHTML = '';
+                
+                for (let row = 0; row < 8; row++) {
+                    for (let col = 0; col < 8; col++) {
+                        const cell = document.createElement('div');
+                        cell.className = `cell ${(row + col) % 2 === 0 ? 'light' : 'dark'}`;
+                        cell.dataset.row = row;
+                        cell.dataset.col = col;
+                        
+                        const piece = gameState.board[row][col];
+                        if (piece) {
+                            const pieceElement = document.createElement('div');
+                            pieceElement.className = `piece ${piece.type}-piece ${piece.king ? 'king' : ''}`;
+                            pieceElement.addEventListener('click', () => handlePieceClick(row, col));
+                            cell.appendChild(pieceElement);
+                        } else {
+                            cell.addEventListener('click', () => handleCellClick(row, col));
+                        }
+                        
+                        // Highlight valid moves
+                        if (gameState.validMoves.some(move => move.row === row && move.col === col && !move.isJump)) {
+                            cell.classList.add('valid-move');
+                        }
+                        
+                        // Highlight possible jumps
+                        if (gameState.validMoves.some(move => move.row === row && move.col === col && move.isJump)) {
+                            cell.classList.add('possible-jump');
+                        }
+                        
+                        board.appendChild(cell);
+                    }
+                }
+                
+                // Highlight selected piece
+                if (gameState.selectedPiece) {
+                    const { row, col } = gameState.selectedPiece;
+                    const cell = document.querySelector(`.cell[data-row="${row}"][data-col="${col}"]`);
+                    if (cell) {
+                        const piece = cell.querySelector('.piece');
+                        if (piece) {
+                            piece.classList.add('selected');
+                        }
+                    }
+                }
+            }
+
+            // Handle piece selection
+            function handlePieceClick(row, col) {
+                const piece = gameState.board[row][col];
+                
+                // Only allow selecting current player's pieces
+                if (piece.type !== gameState.currentPlayer) {
+                    statusMessageElement.textContent = `It's ${gameState.currentPlayer}'s turn. Select one of your pieces.`;
+                    return;
+                }
+                
+                // If a jump is in progress, only allow selecting the jumping piece
+                if (gameState.isJumpInProgress && 
+                    (gameState.selectedPiece.row !== row || gameState.selectedPiece.col !== col)) {
+                    statusMessageElement.textContent = "You must complete your jump sequence with the same piece.";
+                    return;
+                }
+                
+                // Clear previous selection
+                clearSelection();
+                
+                // Select the piece
+                gameState.selectedPiece = { row, col };
+                
+                // Calculate valid moves
+                gameState.validMoves = calculateValidMoves(row, col);
+                
+                // If there are jumps available, filter out non-jump moves
+                const jumpsAvailable = gameState.validMoves.some(move => move.isJump);
+                if (jumpsAvailable && !gameState.isJumpInProgress) {
+                    gameState.validMoves = gameState.validMoves.filter(move => move.isJump);
+                    statusMessageElement.textContent = "You must make a jump if available!";
+                }
+                
+                renderBoard();
+                
+                if (gameState.validMoves.length === 0) {
+                    statusMessageElement.textContent = "No valid moves for this piece. Select another piece.";
+                } else {
+                    statusMessageElement.textContent = "Select a highlighted square to move.";
+                }
+            }
+
+            // Handle cell click for moving pieces
+            function handleCellClick(row, col) {
+                if (!gameState.selectedPiece || !gameState.validMoves.some(move => move.row === row && move.col === col)) {
+                    return;
+                }
+                
+                const move = gameState.validMoves.find(m => m.row === row && m.col === col);
+                movePiece(gameState.selectedPiece.row, gameState.selectedPiece.col, row, col, move);
+            }
+
+            // Calculate valid moves for a piece
+            function calculateValidMoves(row, col) {
+                const piece = gameState.board[row][col];
+                if (!piece) return [];
+                
+                const moves = [];
+                
+                // For kings, we need to check multiple squares in each diagonal direction
+                if (piece.king) {
+                    const directions = [[-1, -1], [-1, 1], [1, -1], [1, 1]];
+                    
+                    for (const [dr, dc] of directions) {
+                        // Check for regular moves (without jumping)
+                        for (let i = 1; i < 8; i++) {
+                            const newRow = row + dr * i;
+                            const newCol = col + dc * i;
+                            
+                            if (!isValidPosition(newRow, newCol)) break;
+                            
+                            if (!gameState.board[newRow][newCol]) {
+                                // Empty cell, valid move
+                                moves.push({ row: newRow, col: newCol, isJump: false });
+                            } else {
+                                // Cell is occupied
+                                if (gameState.board[newRow][newCol].type !== piece.type) {
+                                    // Opponent piece, check if we can jump over it
+                                    const jumpRow = newRow + dr;
+                                    const jumpCol = newCol + dc;
+                                    
+                                    if (isValidPosition(jumpRow, jumpCol) && !gameState.board[jumpRow][jumpCol]) {
+                                        // Valid jump
+                                        moves.push({ 
+                                            row: jumpRow, 
+                                            col: jumpCol, 
+                                            isJump: true, 
+                                            captured: { row: newRow, col: newCol } 
+                                        });
+                                    }
+                                }
+                                break; // Stop checking in this direction once we hit a piece
+                            }
+                        }
+                        
+                        // Check for jumps specifically
+                        for (let i = 1; i < 7; i++) {
+                            const midRow = row + dr * i;
+                            const midCol = col + dc * i;
+                            
+                            if (!isValidPosition(midRow, midCol)) break;
+                            
+                            if (gameState.board[midRow][midCol] && 
+                                gameState.board[midRow][midCol].type !== piece.type) {
+                                // Found opponent piece, check landing spot
+                                const jumpRow = midRow + dr;
+                                const jumpCol = midCol + dc;
+                                
+                                if (isValidPosition(jumpRow, jumpCol) && !gameState.board[jumpRow][jumpCol]) {
+                                    // Valid jump
+                                    moves.push({ 
+                                        row: jumpRow, 
+                                        col: jumpCol, 
+                                        isJump: true, 
+                                        captured: { row: midRow, col: midCol } 
+                                    });
+                                }
+                                break; // Only consider first opponent piece in this direction for a jump
+                            }
+                        }
+                    }
+                } else {
+                    // Regular piece logic
+                    const directions = piece.type === 'red' 
+                        ? [[-1, -1], [-1, 1]] 
+                        : [[1, -1], [1, 1]];
+                    
+                    // Check for regular moves
+                    for (const [dr, dc] of directions) {
+                        const newRow = row + dr;
+                        const newCol = col + dc;
+                        
+                        if (isValidPosition(newRow, newCol) && !gameState.board[newRow][newCol]) {
+                            moves.push({ row: newRow, col: newCol, isJump: false });
+                        }
+                    }
+                    
+                    // Check for jumps
+                    for (const [dr, dc] of directions) {
+                        const jumpRow = row + dr * 2;
+                        const jumpCol = col + dc * 2;
+                        const midRow = row + dr;
+                        const midCol = col + dc;
+                        
+                        if (isValidPosition(jumpRow, jumpCol) && 
+                            !gameState.board[jumpRow][jumpCol] &&
+                            gameState.board[midRow][midCol] &&
+                            gameState.board[midRow][midCol].type !== piece.type) {
+                            moves.push({ 
+                                row: jumpRow, 
+                                col: jumpCol, 
+                                isJump: true, 
+                                captured: { row: midRow, col: midCol } 
+                            });
+                        }
+                    }
+                }
+                
+                return moves;
+            }
+
+            // Move a piece to a new position
+            function movePiece(fromRow, fromCol, toRow, toCol, move) {
+                // Save state for undo
+                gameState.moveHistory.push({
+                    board: JSON.parse(JSON.stringify(gameState.board)),
+                    currentPlayer: gameState.currentPlayer,
+                    redPieces: gameState.redPieces,
+                    blackPieces: gameState.blackPieces
+                });
+                
+                const piece = gameState.board[fromRow][fromCol];
+                
+                // Move the piece
+                gameState.board[toRow][toCol] = piece;
+                gameState.board[fromRow][fromCol] = null;
+                
+                // Handle captures
+                if (move && move.isJump) {
+                    gameState.board[move.captured.row][move.captured.col] = null;
+                    
+                    if (piece.type === 'red') {
+                        gameState.blackPieces--;
+                    } else {
+                        gameState.redPieces--;
+                    }
+                    
+                    // Check for additional jumps
+                    const additionalJumps = calculateValidMoves(toRow, toCol).filter(m => m.isJump);
+                    
+                    if (additionalJumps.length > 0) {
+                        // Continue jump sequence
+                        gameState.isJumpInProgress = true;
+                        gameState.selectedPiece = { row: toRow, col: toCol };
+                        gameState.validMoves = additionalJumps;
+                        statusMessageElement.textContent = "Continue your jump sequence!";
+                        renderBoard();
+                        updateGameInfo();
+                        return;
+                    }
+                }
+                
+                // Check for king promotion
+                if ((piece.type === 'red' && toRow === 0) || (piece.type === 'black' && toRow === 7)) {
+                    piece.king = true;
+                    statusMessageElement.textContent = `${piece.type} piece crowned!`;
+                }
+                
+                // End jump sequence if any
+                gameState.isJumpInProgress = false;
+                
+                // Switch turns
+                gameState.currentPlayer = gameState.currentPlayer === 'red' ? 'black' : 'red';
+                
+                // Clear selection
+                clearSelection();
+                
+                // Check for game over
+                if (gameState.redPieces === 0 || gameState.blackPieces === 0) {
+                    setTimeout(() => {
+                        alert(`${gameState.redPieces === 0 ? 'Black' : 'Red'} wins!`);
+                        initGame();
+                    }, 100);
+                    return;
+                }
+                
+                renderBoard();
+                updateGameInfo();
+                
+                // Update status message
+                statusMessageElement.textContent = `${gameState.currentPlayer.charAt(0).toUpperCase() + gameState.currentPlayer.slice(1)}'s turn`;
+                
+                // If playing against AI and it's AI's turn, make AI move
+                if (gameState.gameMode === 'ai' && gameState.currentPlayer === 'black') {
+                    setTimeout(makeAIMove, 800);
+                }
+            }
+
+            // Simple AI implementation
+            function makeAIMove() {
+                // Find all possible moves for black pieces
+                const allMoves = [];
+                
+                for (let row = 0; row < 8; row++) {
+                    for (let col = 0; col < 8; col++) {
+                        const piece = gameState.board[row][col];
+                        if (piece && piece.type === 'black') {
+                            const moves = calculateValidMoves(row, col);
+                            moves.forEach(move => {
+                                allMoves.push({
+                                    from: { row, col },
+                                    to: { row: move.row, col: move.col },
+                                    move: move
+                                });
+                            });
+                        }
+                    }
+                }
+                
+                // Prioritize jumps
+                const jumps = allMoves.filter(m => m.move.isJump);
+                const movesToConsider = jumps.length > 0 ? jumps : allMoves;
+                
+                if (movesToConsider.length === 0) {
+                    // No moves available, skip turn
+                    gameState.currentPlayer = 'red';
+                    updateGameInfo();
+                    statusMessageElement.textContent = "Black has no moves. Red's turn.";
+                    return;
+                }
+                
+                // Select a random move from the available options
+                const randomMove = movesToConsider[Math.floor(Math.random() * movesToConsider.length)];
+                
+                // Execute the move
+                movePiece(
+                    randomMove.from.row, 
+                    randomMove.from.col, 
+                    randomMove.to.row, 
+                    randomMove.to.col, 
+                    randomMove.move
+                );
+            }
+
+            // Helper functions
+            function isValidPosition(row, col) {
+                return row >= 0 && row < 8 && col >= 0 && col < 8;
+            }
+
+            function clearSelection() {
+                gameState.selectedPiece = null;
+                gameState.validMoves = [];
+            }
+
+            function updateGameInfo() {
+                redScoreElement.textContent = gameState.redPieces;
+                blackScoreElement.textContent = gameState.blackPieces;
+                
+                playerTurnElement.textContent = `${gameState.currentPlayer.charAt(0).toUpperCase() + gameState.currentPlayer.slice(1)}'s Turn`;
+                playerTurnElement.className = `player-turn ${gameState.currentPlayer}`;
+            }
+
+            // Event listeners for buttons
+            newGameButton.addEventListener('click', initGame);
+            
+            hintButton.addEventListener('click', () => {
+                alert('Hint: Try to control the center of the board and create multiple jump opportunities!');
+            });
+            
+            rulesButton.addEventListener('click', () => {
+                alert('Checkers Rules:\n\n1. Red moves first\n2. Pieces move diagonally forward\n3. Jump over opponent pieces to capture them\n4. Reach the opposite end to become a King\n5. Kings can move and jump in any diagonal direction\n6. Kings can also move multiple squares in a diagonal line\n7. Capture all opponent pieces to win!');
+            });
+            
+            undoButton.addEventListener('click', () => {
+                if (gameState.moveHistory.length > 0) {
+                    const previousState = gameState.moveHistory.pop();
+                    gameState.board = previousState.board;
+                    gameState.currentPlayer = previousState.currentPlayer;
+                    gameState.redPieces = previousState.redPieces;
+                    gameState.blackPieces = previousState.blackPieces;
+                    gameState.isJumpInProgress = false;
+                    clearSelection();
+                    renderBoard();
+                    updateGameInfo();
+                    statusMessageElement.textContent = "Move undone";
+                } else {
+                    statusMessageElement.textContent = "No moves to undo";
+                }
+            });
+            
+            gameModeSelect.addEventListener('change', () => {
+                gameState.gameMode = gameModeSelect.value;
+                statusMessageElement.textContent = `Game mode changed to ${gameState.gameMode === 'ai' ? 'Human vs Computer' : 'Human vs Human'}`;
+            });
+
+            // Initialize the game
+            initGame();
+        });
+    </script>
+</body>
+</html>

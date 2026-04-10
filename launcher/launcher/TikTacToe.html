@@ -1,0 +1,326 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic Tac Toe AI</title>
+    <style>
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-gap: 5px;
+            margin: 20px auto;
+            width: 310px;
+        }
+        .cell {
+            width: 100px;
+            height: 100px;
+            background-color: #f0f0f0;
+            border: 2px solid #333;
+            font-size: 2.5em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        .cell:hover {
+            background-color: #e0e0e0;
+        }
+        .status {
+            text-align: center;
+            font-size: 1.5em;
+            margin: 20px;
+            height: 30px;
+        }
+        .controls {
+            text-align: center;
+            margin: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 1em;
+            cursor: pointer;
+        }
+        .cell.x { color: #ff4444; }
+        .cell.o { color: #4444ff; }
+    </style>
+</head>
+<body>
+    <div class="status" id="status">Your turn (X)</div>
+    <div class="board" id="board"></div>
+    <div class="controls">
+        <button onclick="resetGame()">New Game</button>
+        <label>
+            <input type="checkbox" id="aiToggle" checked> Play against AI
+        </label>
+    </div>
+
+    <script>
+        // Game state
+        let board = ['', '', '', '', '', '', '', '', ''];
+        let currentPlayer = 'X'; // Human is X, AI is O
+        let gameActive = true;
+        let vsAI = true;
+
+        // Winning combinations
+        const winPatterns = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
+            [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
+            [0, 4, 8], [2, 4, 6]             // Diagonals
+        ];
+
+        // Initialize board
+        function initBoard() {
+            const boardElement = document.getElementById('board');
+            boardElement.innerHTML = '';
+            
+            for (let i = 0; i < 9; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                cell.dataset.index = i;
+                cell.addEventListener('click', () => handleCellClick(i));
+                boardElement.appendChild(cell);
+            }
+            
+            updateBoardDisplay();
+        }
+
+        // Handle cell click
+        function handleCellClick(index) {
+            if (!gameActive || board[index] !== '' || 
+                (vsAI && currentPlayer === 'O')) {
+                return;
+            }
+            
+            // Human move
+            makeMove(index);
+            
+            // AI move if playing against AI and game not over
+            if (vsAI && gameActive && currentPlayer === 'O') {
+                setTimeout(makeAIMove, 500); // Delay for better UX
+            }
+        }
+
+        // Make a move
+        function makeMove(index) {
+            board[index] = currentPlayer;
+            updateBoardDisplay();
+            
+            if (checkWin()) {
+                gameActive = false;
+                document.getElementById('status').textContent = 
+                    `${currentPlayer === 'X' ? 'You' : 'AI'} Win!`;
+                return;
+            }
+            
+            if (checkDraw()) {
+                gameActive = false;
+                document.getElementById('status').textContent = "It's a Draw!";
+                return;
+            }
+            
+            // Switch player
+            currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+            updateStatus();
+        }
+
+        // AI Move - Three different AI levels
+
+        // Level 1: Random moves (Easy)
+        function makeRandomMove() {
+            const emptyCells = board
+                .map((cell, index) => cell === '' ? index : null)
+                .filter(index => index !== null);
+            
+            if (emptyCells.length > 0) {
+                const randomIndex = Math.floor(Math.random() * emptyCells.length);
+                return emptyCells[randomIndex];
+            }
+            return null;
+        }
+
+        // Level 2: Smarter AI (Medium)
+        function makeSmartMove() {
+            // Try to win
+            for (let i = 0; i < board.length; i++) {
+                if (board[i] === '') {
+                    board[i] = 'O';
+                    if (checkWinForPlayer('O')) {
+                        board[i] = '';
+                        return i;
+                    }
+                    board[i] = '';
+                }
+            }
+            
+            // Block human from winning
+            for (let i = 0; i < board.length; i++) {
+                if (board[i] === '') {
+                    board[i] = 'X';
+                    if (checkWinForPlayer('X')) {
+                        board[i] = '';
+                        return i;
+                    }
+                    board[i] = '';
+                }
+            }
+            
+            // Take center if available
+            if (board[4] === '') return 4;
+            
+            // Take corners
+            const corners = [0, 2, 6, 8];
+            const emptyCorners = corners.filter(index => board[index] === '');
+            if (emptyCorners.length > 0) {
+                return emptyCorners[Math.floor(Math.random() * emptyCorners.length)];
+            }
+            
+            // Take any available edge
+            const edges = [1, 3, 5, 7];
+            const emptyEdges = edges.filter(index => board[index] === '');
+            if (emptyEdges.length > 0) {
+                return emptyEdges[Math.floor(Math.random() * emptyEdges.length)];
+            }
+            
+            return null;
+        }
+
+        // Level 3: Minimax AI (Impossible to beat)
+        function makeMinimaxMove() {
+            let bestScore = -Infinity;
+            let bestMove = null;
+            
+            for (let i = 0; i < board.length; i++) {
+                if (board[i] === '') {
+                    board[i] = 'O';
+                    let score = minimax(board, 0, false);
+                    board[i] = '';
+                    
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestMove = i;
+                    }
+                }
+            }
+            
+            return bestMove;
+        }
+
+        // Minimax algorithm
+        function minimax(board, depth, isMaximizing) {
+            // Check terminal states
+            if (checkWinForPlayer('O')) return 10 - depth;
+            if (checkWinForPlayer('X')) return depth - 10;
+            if (checkDraw()) return 0;
+            
+            if (isMaximizing) {
+                let bestScore = -Infinity;
+                for (let i = 0; i < board.length; i++) {
+                    if (board[i] === '') {
+                        board[i] = 'O';
+                        let score = minimax(board, depth + 1, false);
+                        board[i] = '';
+                        bestScore = Math.max(score, bestScore);
+                    }
+                }
+                return bestScore;
+            } else {
+                let bestScore = Infinity;
+                for (let i = 0; i < board.length; i++) {
+                    if (board[i] === '') {
+                        board[i] = 'X';
+                        let score = minimax(board, depth + 1, true);
+                        board[i] = '';
+                        bestScore = Math.min(score, bestScore);
+                    }
+                }
+                return bestScore;
+            }
+        }
+
+        // Main AI move function (using smart AI by default)
+        function makeAIMove() {
+            if (!gameActive) return;
+            
+            let moveIndex;
+            
+            // Choose AI difficulty
+            const aiLevel = 'smart'; // Change to 'random', 'smart', or 'minimax'
+            
+            switch(aiLevel) {
+                case 'random':
+                    moveIndex = makeRandomMove();
+                    break;
+                case 'smart':
+                    moveIndex = makeSmartMove();
+                    break;
+                case 'minimax':
+                    moveIndex = makeMinimaxMove();
+                    break;
+                default:
+                    moveIndex = makeSmartMove();
+            }
+            
+            if (moveIndex !== null) {
+                makeMove(moveIndex);
+            }
+        }
+
+        // Check if a specific player has won
+        function checkWinForPlayer(player) {
+            return winPatterns.some(pattern => {
+                return pattern.every(index => board[index] === player);
+            });
+        }
+
+        // Check for win
+        function checkWin() {
+            return checkWinForPlayer(currentPlayer);
+        }
+
+        // Check for draw
+        function checkDraw() {
+            return board.every(cell => cell !== '');
+        }
+
+        // Update board display
+        function updateBoardDisplay() {
+            const cells = document.querySelectorAll('.cell');
+            console.log(cells[1])
+            cells.forEach((cell, index) => {
+                cell.textContent = board[index];
+                cell.className = 'cell ' + board[index].toLowerCase();
+            });
+        }
+
+        // Update status display
+        function updateStatus() {
+            const status = document.getElementById('status');
+            if (gameActive) {
+                if (vsAI) {
+                    status.textContent = currentPlayer === 'X' 
+                        ? 'Your turn (X)' 
+                        : 'AI thinking...';
+                } else {
+                    status.textContent = `Player ${currentPlayer}'s turn`;
+                }
+            }
+        }
+
+        // Reset game
+        function resetGame() {
+            board = ['', '', '', '', '', '', '', '', ''];
+            currentPlayer = 'X';
+            gameActive = true;
+            vsAI = document.getElementById('aiToggle').checked;
+            updateBoardDisplay();
+            updateStatus();
+        }
+
+        // Initialize
+        document.getElementById('aiToggle').addEventListener('change', resetGame);
+        initBoard();
+        updateStatus();
+    </script>
+</body>
+</html>

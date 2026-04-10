@@ -1,0 +1,18 @@
+*{
+		margin: 0;
+		padding: 0;
+		box-sizing: border-box;
+}
+ #canvas1{
+ 		width: 350px;
+ 		height: 300px;
+ 		border: 3px solid black;
+ 		position: absolute;
+ 		top: 50%;
+ 		left: 50%;
+ 		transform: translate(-50%, -50%);
+ 		background: linear-gradient(to bottom, deepskyblue 90%,brown 10%);
+ }
+#img{
+		display: none;
+}

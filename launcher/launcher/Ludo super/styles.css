@@ -1,0 +1,205 @@
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+            min-height: 100vh;
+            background: linear-gradient(45deg, #ff961e,#00ff3d,#96fffd);
+        }
+        canvas {
+            width: 350;
+        		   height: 550;
+        		   position: absolute;
+        		   top: 50%;
+        		   left: 50%;
+        		   transform: translate(-50%, -50%);
+        		   z-index: 100;
+        }
+		   #ludo{
+		   		display: none;
+		   }
+    #dice{
+        display: none;
+    		   max-width: 600px;
+    		   max-height: 600px;
+    }
+
+#screen2,#screen1{
+    display: none;
+}
+.progress-bar{
+		  		  width: 300px;
+		  		  height: 30px;
+		  		  border : 3px solid gold;
+		  		  border-radius: 30px;
+		  		  background: red;
+		  		  position: relative;
+		  		  overflow: hidden;
+		  		  top: 400px;
+		  		  margin-left: 20px;
+		  }
+		 .progress{
+		 		  width: 0%;
+		 		  height: 100%;
+		 		  background: linear-gradient(45deg,#ff0000,#ffff00,#ff9600,#00ff00,#0000ff,#003738,#3d001e);
+		 		  position: absolute;
+		 }
+		.percent{
+				  margin-left: 150px;
+				  margin-top: 10px;
+				  font-size: 25px;
+				  font-weight: bold;
+				  color: cyan;
+				  position: absolute;
+				  z-index: 100;
+				  top: 450px;
+		}
+		.ludo-img{
+		    width: 200px;
+				height: 200px;
+				position: fixed;
+				top: 30%;
+				left: 30%;
+		 z-index: 10;   
+		 animation: pulse 2s infinite alternate;   
+		}
+		h1{
+				 position: absolute;
+				 top: -15px;
+				 z-index: 100;
+				 color: orange;
+				 font-weight: bold;
+				 font-family: itallic;
+				 text-align: center;
+		  left: 3%;  
+		}
+
+#screen1,#screen2{
+    padding: 20px;
+    top: 30px;
+    width: 95vw;
+    background: rgba(0,0,0,0.4);
+    border: 5px solid white;
+    border-radius: 20px;
+}
+#screen1{
+    position: fixed;
+    height: 80vh
+}
+#screen2{
+    position: relative;
+    height: auto;
+}
+h2{
+   position: absolute;
+    top: 350px;
+    z-index: 100;
+    color: #333;
+}
+@keyframes pulse {
+    from{
+        transform: scale(1.0);
+    }
+    to{
+        transform: scale(1.5);
+    }
+}
+ 
+.mode-b{
+    width: 40px;
+    height: 40px;
+    border: 3px solid orange;
+    border-radius: 50%
+    margin-top: 30px;
+}
+#buttons{
+    position: absolute;
+    top: 80px;
+    left: 50px;
+}
+label{
+    color: #333;
+    font-weight: bold;
+    font-size: 25px;
+    margin-left: 30px;
+    position: absolute;
+}
+#start{
+    padding: 15px;
+    background: #ff1e00;
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    color: white;
+    position: absolute;
+    top: 40vh;
+    left: 30vw;
+}
+#start:active{
+    background: white;
+    color: #ff1e00;
+    transform: scale(0.8);
+}
+/* Add to your CSS file */
+.player-select {
+  margin: 15px 0;
+  text-align: center;
+}
+
+.mode-toggle {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin: 10px 0;
+}
+
+.mode-btn {
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  border: 3px solid transparent;
+  border-radius: 10px;
+  transition: all 0.3s;
+}
+
+.mode-btn.active {
+  border-color: gold;
+  box-shadow: 0 0 15px gold;
+  opacity: 1 !important;
+}
+
+.mode-btn:not(.active) {
+  opacity: 0.5;
+}
+
+.mode-btn:hover {
+  transform: scale(1.05);
+}
+
+.difficulty-select {
+  margin-top: 10px;
+  padding: 5px 10px;
+  border-radius: 5px;
+  border: 2px solid #666;
+  background: #333;
+  color: white;
+  font-size: 14px;
+}
+
+.start-btn {
+  margin-top: 30px;
+  padding: 15px 40px;
+  font-size: 1.2em;
+  background: linear-gradient(135deg, #4CAF50, #45a049);
+  color: white;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+}
+
+.start-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 8px rgba(0,0,0,0.3);
+}

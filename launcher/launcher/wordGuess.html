@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+		<meta name="viewport" content="width=device-width,initial-scale=1.0">
+		<meta http-equiv="CONTENT-TYPE" content="text/html; charset=UTF-8">
+		<link rel="stylesheet" href="wordguess.css">
+		<title>Word Guess Game</title>
+</head>
+<body>
+		<div class="screen3">
+				<h1>Choose level to play</h1>
+				<div class="levels">
+			 			<div class="level">
+			 					<img src="unlocked.png" style="position: absolute; z-index: 100; border-radius: 10px;width: 67px; height: 67px;">
+			 					<p style = "position: absolute; z-index: 1000" >1</p>
+			 			</div>
+								<div class="level">
+										<img src="locked.png" style="position: absolute; z-index: 100; border-radius: 10px; width: 67px; height: 67px;">
+										<p style = "position: absolute; z-index: 1000" >2</p>
+								</div>
+								<div class="level">
+										<img src="locked.png" style="position: absolute; z-index: 100; border-radius: 10px; width: 67px; height: 67px;">
+										<p style = "position: absolute; z-index: 1000" >3</p>
+								</div>
+								<div class="level">
+										<img src="locked.png" style="position: absolute; z-index: 100; border-radius: 10px; width: 67px; height: 67px;">
+										<p style = "position: absolute; z-index: 1000" >4</p>
+								</div>
+								<div class="level">
+										<img src="locked.png" style="position: absolute; z-index: 100; border-radius: 10px; width: 67px; height: 67px;">
+										<p style = "position: absolute; z-index: 1000" >5</p>
+								</div>
+								<div class="level">
+										<img src="locked.png" style="position: absolute; z-index: 100; border-radius: 10px; width: 67px; height: 67px;">
+										<p style = "position: absolute; z-index: 1000" >6</p>
+								</div>
+								<div class="level">
+										<img src="locked.png" style="position: absolute; z-index: 100; border-radius: 10px; width: 67px; height: 67px;">
+										<p style = "position: absolute; z-index: 1000" >7</p>
+								</div>
+								<div class="level">
+										<img src="locked.png" style="position: absolute; z-index: 100; border-radius: 10px; width: 67px; height: 67px;">
+										<p style = "position: absolute; z-index: 1000" >8</p>
+								</div>
+								<div class="level">
+										<img src="locked.png" style="position: absolute; z-index: 100; border-radius: 10px; width: 67px; height: 67px;">
+										<p style = "position: absolute; z-index: 1000" >9</p>
+								</div>
+								<div class="level ten">
+										<img src="locked.png" style="position: absolute; z-index: 100; border-radius: 10px; width: 67px; height: 67px;">
+										<p style = "position: absolute; z-index: 1000" >10</p>
+								</div>
+				</div>
+		</div>
+		<div class="screen1">
+				<h1>Welcome To The Word Guess Game.</h1>
+				<h2>By Tonnoid Studios.</h2>
+				<p class="w wordguess">W</p>
+				<p class="o wordguess">O</p>
+				<p class="r wordguess">R</p>
+				<p class="d wordguess">D</p>
+				<p class="g wordguess">G</p>
+				<p class="u wordguess">U</p>
+				<p class="e wordguess">E</p>
+				<p class="s wordguess">S</p>
+				<p class="s2 wordguess">S</p>
+				<button id="start-btn">START</button>
+		</div>
+		<div class="screen2">
+				<div class="controlBar">
+						<p class="score">Score: <span id="score">0</span></p>
+						<p class="best-score">Coins: <span id="total_score">0</span></p>
+						<div id="stars">⭐⭐⭐</div>
+						<div id="starFill"></div>
+				</div>
+				<div class="game-area">
+				<div id="caption"></div>
+				<div id="answerBoxes">
+					  	
+				</div>
+						
+				<div class="hint">
+						<p id="particle">m</p>
+						<img src="hint.png" width="50" height="50">
+						<p id="hints"></p>
+				</div>
+				<p class="hintText">Take a hint</p>
+				<p id="feedback">feedback will go here...</p>
+				<div class="buttons">
+						<div class="keyboard-row">
+						<button class="button">q</button>
+				<button class="button">w</button>
+				<button class="button">e</button>
+				<button class="button">r</button>
+				<button class="button">t</button>
+				<button class="button">y</button>
+				<button class="button">u</button>
+				<button class="button">i</button>
+				<button class="button">o</button>
+				<button class="button">p</button>
+								</div>
+						<div class="keyboard-row">
+				<button class="button">a</button>
+				<button class="button">s</button>
+				<button class="button">d</button>
+				<button class="button">f</button>
+				<button class="button">g</button>
+				<button class="button">h</button>
+				<button class="button">j</button>
+				<button class="button">k</button>
+				<button class="button">l</button>
+						</div>
+						<div class="keyboard-row">
+				<button class="button">z</button>
+				<button class="button">x</button>
+				<button class="button">c</button>
+				<button class="button">v</button>
+				<button class="button">b</button>
+				<button class="button">n</button>
+				<button class="button">m</button>
+						</div>
+				</div>
+				</div>
+		</div>
+		<script type="module" src="wordguess.js"></script>
+</body>
+</html>

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+		<meta http-equiv="CONTENT-TYPE" content="text/html; charset=UTF-8">
+		<link rel="stylesheet" href="styles/style.css"/>
+		<meta name="viewport" content="width=device-width,initial-scale=1.0">
+		<title>Hex colors converter</title>
+</head>
+<body>
+		<h1>Hex Colors calculator</h1>
+			
+		<div class="container">
+				<div id="display">
+					<p id="text">#000000</p>
+			</div>
+				<div class="controls">
+						<div class="redControls">
+							<div id="redBox" class="colorBox"></div>
+				<input id="redRange" type="range" min="0" max="255" value="0">
+						<label for="redRange">0</label>
+						</div>
+						<div class="greenControls">
+							<div id="greenBox" class="colorBox"></div>
+				<input id="greenRange" type="range" min="0" max="255" value="0">
+						<label for="greenRange">0</label>
+								</div>
+						<div class="blueControls">
+							<div id="blueBox" class="colorBox"></div>
+				<input  id="blueRange"type="range" min="0" max="255" value="0">
+									<label for="blueRange">0</label>
+								</div>
+				</div>
+				<button id="copy">Copy</button>
+		</div>
+		
+		
+		<script src="scripts/hex.js"></script>
+</body>
+</html>

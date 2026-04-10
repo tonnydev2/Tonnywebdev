@@ -1,0 +1,761 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sticker Lottery Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            padding: 20px;
+            color: #333;
+        }
+        
+        .screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            max-width: 800px;
+            width: 100%;
+            height: auto;
+        }
+        
+        #welcome-screen {
+            text-align: center;
+            color: white;
+            padding: 20px;
+        }
+        
+        #game-screen {
+            display: none;
+        }
+        
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .subtitle {
+            color: #e0e0ff;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 1.2rem;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-bottom: 20px;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        
+        .coins-display {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px 20px;
+            border-radius: 50px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .coins-display img {
+            width: 30px;
+            height: 30px;
+        }
+        
+        .timer-display {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px 20px;
+            border-radius: 50px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .plot {
+            position: relative;
+            width: 500px;
+            height: 600px;
+            border: 4px solid #8B4513;
+            border-radius: 25px;
+            background: linear-gradient(to bottom, #e6d2aa, #d2b48c);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+        
+        .house {
+            width: 300px;
+            height: 300px;
+            border-radius: 15px;
+            border: 3px solid #8B4513;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 28px;
+            color: #8B4513;
+            font-weight: bold;
+            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.1);
+            text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.7);
+        }
+        
+        /* Fence positions around the house */
+        .fence {
+            position: absolute;
+            display: flex;
+            z-index: 10;
+        }
+        
+        .top-fence, .bottom-fence {
+            width: 420px;
+            height: 60px;
+            left: 40px;
+            justify-content: space-around;
+        }
+        
+        .top-fence {
+            top: 5px;
+        }
+        
+        .bottom-fence {
+            bottom: -15px;
+            transform: rotateY(180deg);
+        }
+        
+        .left-fence, .right-fence {
+            width: 60px;
+            height: 240px;
+            top: 50px;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .left-fence {
+            left: 0px;
+            top: -70px;
+            transform: translateY(-50px);
+            transform: rotateX(180deg);
+        }
+        
+        .right-fence {
+            right: -15px;
+        }
+        
+        .box {
+            width: 60px;
+            height: 60px;
+            font-size: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border: 2px solid #2a9d4c;
+            cursor: pointer;
+        }
+        
+        .box.selected {
+            border: 3px solid #ff0000;
+            box-shadow: 0 0 15px #ff0000;
+        }
+        
+        .box.highlight {
+            transform: scale(1.3);
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+            box-shadow: 0 0 20px rgba(255, 154, 158, 0.8);
+            z-index: 20;
+        }
+        
+        .box.winner {
+            transform: scale(1.5);
+            background: linear-gradient(135deg, #ffe259 0%, #ffa751 100%);
+            box-shadow: 0 0 30px rgba(255, 226, 89, 0.9);
+            z-index: 30;
+            animation: pulse 0.5s infinite alternate;
+        }
+        
+        .emoji-center {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 30px 0;
+        }
+        
+        .center-emoji {
+            font-size: 70px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 50%;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .instructions {
+            margin-top: 20px;
+            text-align: center;
+            color: white;
+            max-width: 600px;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+        }
+        
+        .welcome-instructions {
+            margin: 30px 0;
+            text-align: center;
+            color: white;
+            max-width: 600px;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            border-radius: 10px;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        button {
+            padding: 12px 25px;
+            font-size: 1rem;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        button:hover {
+            background: #ff5252;
+            transform: translateY(-2px);
+        }
+        
+        button:active {
+            transform: translateY(1px);
+        }
+        
+        button:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .result-message {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            text-align: center;
+            font-weight: bold;
+            color: #333;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            display: none;
+        }
+        
+        .coin-particle {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="%23FFD700" stroke="%23D4AF37" stroke-width="2"/><text x="12" y="16" font-size="12" text-anchor="middle" fill="%238B4513">$</text></svg>');
+            background-size: contain;
+            pointer-events: none;
+            z-index: 100;
+        }
+        
+        @media (max-width: 600px) {
+            .plot {
+                width: 90vw;
+                height: 70vw;
+            }
+            
+            .house {
+                width: 60vw;
+                height: 40vw;
+            }
+            
+            .top-fence, .bottom-fence {
+                width: 80vw;
+                left: 5vw;
+            }
+            
+            .box {
+                width: 12vw;
+                height: 12vw;
+                font-size: 7vw;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Welcome Screen -->
+    <div id="welcome-screen" class="screen">
+        <h1>Sticker Lottery Game</h1>
+        <p class="subtitle">Test your luck and win coins!</p>
+        
+        <div class="welcome-instructions">
+            <h2>How to Play</h2>
+            <p>1. Click on a sticker to select it</p>
+            <p>2. Press START to begin the animation (costs 5 coins)</p>
+            <p>3. If the game stops on the exact sticker you selected, you win 50 coins!</p>
+            <p>4. If the game stops on the inverted version of your selected sticker, you win 10 coins!</p>
+            <p>5. No coins for any other outcome</p>
+            <p>6. If you run out of coins, wait 60 seconds to get 10 free coins!</p>
+        </div>
+        
+        <button id="welcome-start-btn">Start Playing</button>
+    </div>
+    
+    <!-- Game Screen -->
+    <div id="game-screen" class="screen">
+        <h1>Sticker Lottery Game</h1>
+        <p class="subtitle">Select a sticker, press start, and win coins!</p>
+        
+        <div class="stats">
+            <div class="coins-display">
+                <span id="coinsCount">100</span>
+                <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><circle cx='12' cy='12' r='10' fill='%23FFD700' stroke='%23D4AF37' stroke-width='2'/><text x='12' y='16' font-size='12' text-anchor='middle' fill='%238B4513'>$</text></svg>" alt="Coins">
+            </div>
+            <div class="timer-display" id="timerDisplay" style="display: none;">
+                Next free coins in: <span id="timerValue">60</span>s
+            </div>
+        </div>
+        
+        <div class="plot">
+            <div class="house">🏠 HOUSE</div>
+            
+            <!-- Top fence - 5 stickers -->
+            <div class="fence top-fence">
+                <div class="box" data-index="0">🍉</div>
+                <div class="box" data-index="1">🍓</div>
+                <div class="box" data-index="2">🍊</div>
+                <div class="box" data-index="3">🍍</div>
+                <div class="box" data-index="4">🎰</div>
+            </div>
+            
+            <!-- Right fence - 3 stickers -->
+            <div class="fence right-fence">
+                <div class="box" data-index="5">🏆</div>
+                <div class="box" data-index="6">🃏</div>
+                <div class="box" data-index="7">🌻</div>
+            </div>
+            
+            <!-- Bottom fence - 5 stickers -->
+            <div class="fence bottom-fence">
+                <div class="box" data-index="8">🍉</div>
+                <div class="box" data-index="9">🍓</div>
+                <div class="box" data-index="10">🍊</div>
+                <div class="box" data-index="11">🍍</div>
+                <div class="box" data-index="12">🎰</div>
+            </div>
+            
+            <!-- Left fence - 3 stickers -->
+            <div class="fence left-fence">
+                <div class="box" data-index="13">🏆</div>
+                <div class="box" data-index="14">🃏</div>
+                <div class="box" data-index="15">🌻</div>
+            </div>
+        </div>
+              <div class="controls">
+            <button id="startBtn">Start Game (5 coins)</button>
+            <button id="stopBtn" disabled>Stop Animation</button>
+        </div>  
+        <div class="emoji-center">
+            <div class="center-emoji">🎯</div>
+        </div>
+        
+        <div class="result-message" id="resultMessage"></div>
+        
+
+    </div>
+
+    <!-- Audio elements for sounds -->
+    <audio id="spinSound" preload="auto">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-slot-machine-wheel-1939.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="winSound" preload="auto">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="coinSound" preload="auto">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-coins-handling-1936.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Game state variables
+            const boxes = document.querySelectorAll('.box');
+            const startBtn = document.getElementById('startBtn');
+            const stopBtn = document.getElementById('stopBtn');
+            const coinsCount = document.getElementById('coinsCount');
+            const timerDisplay = document.getElementById('timerDisplay');
+            const timerValue = document.getElementById('timerValue');
+            const resultMessage = document.getElementById('resultMessage');
+            const welcomeScreen = document.getElementById('welcome-screen');
+            const gameScreen = document.getElementById('game-screen');
+            const welcomeStartBtn = document.getElementById('welcome-start-btn');
+            
+            const spinSound = document.getElementById('spinSound');
+            const winSound = document.getElementById('winSound');
+            const coinSound = document.getElementById('coinSound');
+            
+            let coins = 50;
+            let selectedSticker = null;
+            let current = 0;
+            let animationInterval;
+            let animationSpeed = 50; // Start fast
+            let isAnimating = false;
+            let stopIndex = null;
+            let timerInterval = null;
+            let freeCoinsTimer = 0;
+            let audioUnlocked = false;
+            
+            // Define which stickers are inverted (left and bottom fences)
+            const invertedStickers = [8, 9, 10, 11, 12, 13, 14, 15];
+            
+            // Define sticker counterparts (upright to inverted mapping)
+            const stickerCounterparts = {
+                // Top fence upright stickers to bottom fence inverted counterparts
+                0: 8,   // 🍉 upright to inverted
+                1: 9,   // 🍓 upright to inverted
+                2: 10,  // 🍊 upright to inverted
+                3: 11,  // 🍍 upright to inverted
+                4: 12,  // 🎰 upright to inverted
+                
+                // Right fence upright stickers to left fence inverted counterparts
+                5: 13,  // 🏆 upright to inverted
+                6: 14,  // 🃏 upright to inverted
+                7: 15,  // 🌻 upright to inverted
+                
+                // Bottom fence inverted stickers to top fence upright counterparts
+                8: 0,   // 🍉 inverted to upright
+                9: 1,   // 🍓 inverted to upright
+                10: 2,  // 🍊 inverted to upright
+                11: 3,  // 🍍 inverted to upright
+                12: 4,  // 🎰 inverted to upright
+                
+                // Left fence inverted stickers to right fence upright counterparts
+                13: 5,  // 🏆 inverted to upright
+                14: 6,  // 🃏 inverted to upright
+                15: 7   // 🌻 inverted to upright
+            };
+            
+            // Initialize game
+            updateCoinsDisplay();
+            
+            // Event listener for welcome screen start button
+            welcomeStartBtn.addEventListener('click', function() {
+                welcomeScreen.style.display = 'none';
+                gameScreen.style.display = 'flex';
+                // Unlock audio on first user interaction
+                unlockAudio();
+            });
+            
+            // Event listeners for sticker selection
+            boxes.forEach(box => {
+                box.addEventListener('click', function() {
+                    if (isAnimating) return;
+                    
+                    // Remove previous selection
+                    boxes.forEach(b => b.classList.remove('selected'));
+                    
+                    // Select this sticker
+                    this.classList.add('selected');
+                    selectedSticker = parseInt(this.getAttribute('data-index'));
+                    
+                    // Enable start button if player has enough coins
+                    startBtn.disabled = coins < 5;
+                });
+            });
+            
+            // Start button event listener
+            startBtn.addEventListener('click', function() {
+                if (selectedSticker === null) {
+                    showResult("Please select a sticker first!", false);
+                    return;
+                }
+                
+                if (coins < 5) {
+                    showResult("Not enough coins! Wait for the timer to get free coins.", false);
+                    return;
+                }
+                
+                // Deduct 5 coins for playing
+                coins -= 5;
+                updateCoinsDisplay();
+                
+                // Reset animation state
+                isAnimating = true;
+                startBtn.disabled = true;
+                stopBtn.disabled = false;
+                
+                // Remove any previous selections and highlights
+                boxes.forEach(box => {
+                    box.classList.remove('highlight', 'winner');
+                });
+                
+                // Generate a random stop position
+                stopIndex = Math.floor(Math.random() * boxes.length);
+                
+                // Start the animation with fast speed
+                animationSpeed = 50;
+                startAnimation();
+                
+                // Play spin sound
+                if (audioUnlocked) {
+                    spinSound.currentTime = 0;
+                    spinSound.play().catch(e => console.log("Audio play failed:", e));
+                }
+                
+                // Gradually slow down the animation
+                const slowDownInterval = setInterval(() => {
+                    if (animationSpeed < 400) {
+                        animationSpeed += 10;
+                        
+                        // Restart animation with new speed
+                        if (animationInterval) {
+                            clearInterval(animationInterval);
+                            animationInterval = setInterval(animateBoxes, animationSpeed);
+                        }
+                    } else {
+                        // Stop the animation when it's slow enough
+                        clearInterval(slowDownInterval);
+                        stopAnimationAtTarget();
+                    }
+                }, 500);
+            });
+            
+            // Stop button event listener (for emergency stop)
+            stopBtn.addEventListener('click', function() {
+                if (isAnimating) {
+                    stopAnimationAtTarget();
+                }
+            });
+            
+            function unlockAudio() {
+                // Create a silent audio context and play it to unlock audio
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                const audioContext = new AudioContext();
+                
+                // Create a silent buffer and play it
+                const buffer = audioContext.createBuffer(1, 1, 22050);
+                const source = audioContext.createBufferSource();
+                source.buffer = buffer;
+                source.connect(audioContext.destination);
+                source.start();
+                
+                // Resume the audio context
+                if (audioContext.state !== 'running') {
+                    audioContext.resume();
+                }
+                
+                audioUnlocked = true;
+            }
+            
+            function startAnimation() {
+                if (animationInterval) {
+                    clearInterval(animationInterval);
+                }
+                animationInterval = setInterval(animateBoxes, animationSpeed);
+            }
+            
+            function animateBoxes() {
+                // Remove highlight from all boxes
+                boxes.forEach(box => {
+                    box.classList.remove('highlight');
+                });
+                
+                // Add highlight to current box
+                boxes[current].classList.add('highlight');
+                
+                // Move to next box
+                current = (current + 1) % boxes.length;
+            }
+            
+            function stopAnimationAtTarget() {
+                if (animationInterval) {
+                    clearInterval(animationInterval);
+                    animationInterval = null;
+                }
+                
+                // Stop spin sound
+                spinSound.pause();
+                
+                // Remove highlight from all boxes
+                boxes.forEach(box => {
+                    box.classList.remove('highlight');
+                });
+                
+                // Highlight the winning box
+                boxes[stopIndex].classList.add('winner');
+                
+                // Calculate winnings
+                let winnings = 0;
+                let message = "";
+                
+                if (selectedSticker === stopIndex) {
+                    // Exact match
+                    winnings = 50;
+                    message = "Jackpot! Exact match! You win 50 coins!";
+                    if (audioUnlocked) {
+                        winSound.currentTime = 0;
+                        winSound.play().catch(e => console.log("Audio play failed:", e));
+                    }
+                } else if (stickerCounterparts[selectedSticker] === stopIndex) {
+                    // Inverted match
+                    winnings = 10;
+                    message = "Good match! Inverted sticker! You win 10 coins!";
+                    if (audioUnlocked) {
+                        winSound.currentTime = 0;
+                        winSound.play().catch(e => console.log("Audio play failed:", e));
+                    }
+                } else {
+                    // No win
+                    message = "No match this time. Try again!";
+                }
+                
+                // Update coins and show result
+                if (winnings > 0) {
+                    coins += winnings;
+                    updateCoinsDisplay();
+                    createCoinParticles(boxes[stopIndex], winnings);
+                }
+                
+                showResult(message, winnings > 0);
+                
+                // Reset game state
+                isAnimating = false;
+                startBtn.disabled = coins < 5;
+                stopBtn.disabled = true;
+                
+                // Reset selected sticker after a delay
+                setTimeout(() => {
+                    boxes.forEach(b => b.classList.remove('selected'));
+                    selectedSticker = null;
+                    boxes[stopIndex].classList.remove('winner');
+                }, 3000);
+            }
+            
+            function updateCoinsDisplay() {
+                coinsCount.textContent = coins;
+                startBtn.disabled = coins < 5 || isAnimating || selectedSticker === null;
+                
+                // Check if player is out of coins
+                if (coins < 5 && freeCoinsTimer === 0) {
+                    startFreeCoinsTimer();
+                }
+            }
+            
+            function showResult(message, isWin) {
+                resultMessage.textContent = message;
+                resultMessage.style.display = 'block';
+                resultMessage.style.background = isWin ? 
+                    'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)' : 
+                    'rgba(255, 255, 255, 0.9)';
+                
+                setTimeout(() => {
+                    resultMessage.style.display = 'none';
+                }, 3000);
+            }
+            
+            function startFreeCoinsTimer() {
+                freeCoinsTimer = 60;
+                timerDisplay.style.display = 'block';
+                timerValue.textContent = freeCoinsTimer;
+                
+                timerInterval = setInterval(() => {
+                    freeCoinsTimer--;
+                    timerValue.textContent = freeCoinsTimer;
+                    
+                    if (freeCoinsTimer <= 0) {
+                        clearInterval(timerInterval);
+                        timerDisplay.style.display = 'none';
+                        coins += 10;
+                        updateCoinsDisplay();
+                        showResult("Free 10 coins added! You can play again.", true);
+                        if (audioUnlocked) {
+                            coinSound.currentTime = 0;
+                            coinSound.play().catch(e => console.log("Audio play failed:", e));
+                        }
+                    }
+                }, 1000);
+            }
+            
+            function createCoinParticles(sourceElement, count) {
+                const coinsDisplay = document.querySelector('.coins-display');
+                const sourceRect = sourceElement.getBoundingClientRect();
+                const targetRect = coinsDisplay.getBoundingClientRect();
+                
+                for (let i = 0; i < count; i++) {
+                    const particle = document.createElement('div');
+                    particle.className = 'coin-particle';
+                    
+                    // Position at source
+                    particle.style.left = (sourceRect.left + sourceRect.width / 2) + 'px';
+                    particle.style.top = (sourceRect.top + sourceRect.height / 2) + 'px';
+                    
+                    document.body.appendChild(particle);
+                    
+                    // Animate to target with random delay and path
+                    const delay = Math.random() * 500;
+                    const duration = 800 + Math.random() * 400;
+                    
+                    setTimeout(() => {
+                        particle.style.transition = `all ${duration}ms cubic-bezier(0.2, 0.8, 0.3, 1)`;
+                        particle.style.left = (targetRect.left + targetRect.width / 2) + 'px';
+                        particle.style.top = (targetRect.top + targetRect.height / 2) + 'px';
+                        particle.style.transform = 'scale(0)';
+                        
+                        // Remove particle after animation
+                        setTimeout(() => {
+                            if (particle.parentNode) {
+                                particle.parentNode.removeChild(particle);
+                            }
+                        }, duration);
+                    }, delay);
+                }
+                
+                // Play coin sound
+                if (audioUnlocked) {
+                    coinSound.currentTime = 0;
+                    coinSound.play().catch(e => console.log("Audio play failed:", e));
+                }
+            }
+        });
+    </script>
+</body>
+</html>

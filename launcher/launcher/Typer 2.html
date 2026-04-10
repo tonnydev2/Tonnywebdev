@@ -1,0 +1,348 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto-Scrolling Typing Effect</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Courier New', monospace;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            width: 90%;
+            max-width: 800px;
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            margin-top: 20px;
+        }
+        
+        .header {
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 15px 20px;
+            border-bottom: 1px solid #333;
+        }
+        
+        .header h1 {
+            font-size: 1.5rem;
+            color: #4CAF50;
+            text-align: center;
+        }
+        
+        .terminal {
+            height: 400px;
+            overflow-y: auto;
+            padding: 20px;
+            line-height: 1.5;
+            font-size: 1.1rem;
+        }
+        
+        .terminal-content {
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        
+        .cursor {
+            display: inline-block;
+            width: 8px;
+            height: 1.2em;
+            background-color: #4CAF50;
+            margin-left: 2px;
+            animation: blink 1s infinite;
+            vertical-align: middle;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+        
+        .controls {
+            padding: 15px 20px;
+            background-color: rgba(0, 0, 0, 0.8);
+            border-top: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #45a049;
+        }
+        
+        button:disabled {
+            background-color: #666;
+            cursor: not-allowed;
+        }
+        
+        .speed-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        input[type="range"] {
+            width: 120px;
+        }
+        
+        .status {
+            color: #4CAF50;
+            font-size: 0.9rem;
+        }
+        
+        .instructions {
+            margin-top: 20px;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 8px;
+            max-width: 800px;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        
+        .instructions h2 {
+            color: #4CAF50;
+            margin-bottom: 10px;
+        }
+        
+        .instructions ul {
+            padding-left: 20px;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+        }
+        
+        @media (max-width: 600px) {
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .speed-control {
+                justify-content: space-between;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Auto-Scrolling Typing Effect</h1>
+        </div>
+        
+        <div class="terminal" id="terminal">
+            <div class="terminal-content" id="terminal-content"></div>
+        </div>
+        
+        <div class="controls">
+            <div>
+                <button id="start-btn">Start Typing</button>
+                <button id="pause-btn" disabled>Pause</button>
+                <button id="reset-btn">Reset</button>
+            </div>
+            
+            <div class="speed-control">
+                <label for="speed">Speed:</label>
+                <input type="range" id="speed" min="10" max="200" value="50">
+                <span id="speed-value">Medium</span>
+            </div>
+            
+            <div class="status" id="status">Ready</div>
+        </div>
+    </div>
+    
+    <div class="instructions">
+        <h2>How It Works</h2>
+        <ul>
+            <li>Click <strong>Start Typing</strong> to begin the automatic typing animation</li>
+            <li>The text will automatically scroll down as new content is added</li>
+            <li>Use the <strong>Speed</strong> slider to control how fast the text appears</li>
+            <li>Click <strong>Pause</strong> to temporarily stop the typing</li>
+            <li>Click <strong>Reset</strong> to clear the text and start over</li>
+        </ul>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elements
+            const terminalContent = document.getElementById('terminal-content');
+            const terminal = document.getElementById('terminal');
+            const startBtn = document.getElementById('start-btn');
+            const pauseBtn = document.getElementById('pause-btn');
+            const resetBtn = document.getElementById('reset-btn');
+            const speedSlider = document.getElementById('speed');
+            const speedValue = document.getElementById('speed-value');
+            const status = document.getElementById('status');
+            
+            // Sample text to type
+            const sampleText = `Welcome to the Auto-Scrolling Typing Effect Demo!
+
+This simulation demonstrates how text can be automatically typed on a webpage while maintaining automatic scrolling to follow the new content.
+
+Features:
+• Automatic typing with customizable speed
+• Smooth auto-scrolling as text is added
+• Play, pause, and reset controls
+• Responsive design that works on all devices
+
+How it works:
+1. The JavaScript code adds characters one by one to simulate typing
+2. After each character is added, the container scrolls to the bottom
+3. The scrolling is smooth and follows the text as it grows
+
+Use cases for this effect:
+- Terminal simulations
+- Chatbot interfaces
+- Storytelling animations
+- Code demonstrations
+- Any application where text needs to appear gradually
+
+You can adjust the typing speed using the slider above. Try different speeds to see how it affects the reading experience.
+
+This is the end of the sample text. Feel free to modify the code to use your own content!`;
+            
+            // Variables
+            let currentIndex = 0;
+            let typingInterval;
+            let isTyping = false;
+            let speed = 101 - speedSlider.value; // Inverse relationship: higher slider = faster
+            
+            // Update speed display
+            function updateSpeedDisplay() {
+                speed = 101 - speedSlider.value;
+                if (speedSlider.value > 66) {
+                    speedValue.textContent = 'Fast';
+                } else if (speedSlider.value > 33) {
+                    speedValue.textContent = 'Medium';
+                } else {
+                    speedValue.textContent = 'Slow';
+                }
+            }
+            
+            // Initialize speed display
+            updateSpeedDisplay();
+            
+            // Scroll to bottom of terminal
+            function scrollToBottom() {
+                terminal.scrollTop = terminal.scrollHeight;
+            }
+            
+            // Type one character
+            function typeCharacter() {
+                if (currentIndex < sampleText.length) {
+                    // Add the next character
+                    terminalContent.textContent += sampleText.charAt(currentIndex);
+                    currentIndex++;
+                    
+                    // Scroll to bottom
+                    scrollToBottom();
+                    
+                    // Update status
+                    status.textContent = `Typing... ${Math.round((currentIndex / sampleText.length) * 100)}%`;
+                } else {
+                    // Finished typing
+                    clearInterval(typingInterval);
+                    isTyping = false;
+                    startBtn.disabled = false;
+                    pauseBtn.disabled = true;
+                    status.textContent = 'Complete';
+                    
+                    // Remove cursor
+                    const cursor = document.querySelector('.cursor');
+                    if (cursor) cursor.remove();
+                }
+            }
+            
+            // Start typing
+            function startTyping() {
+                if (isTyping) return;
+                
+                isTyping = true;
+                startBtn.disabled = true;
+                pauseBtn.disabled = false;
+                status.textContent = 'Typing... 0%';
+                
+                // Add cursor if not present
+                if (!document.querySelector('.cursor')) {
+                    const cursor = document.createElement('span');
+                    cursor.className = 'cursor';
+                    terminalContent.appendChild(cursor);
+                }
+                
+                // Start the typing interval
+                typingInterval = setInterval(typeCharacter, speed);
+            }
+            
+            // Pause typing
+            function pauseTyping() {
+                if (!isTyping) return;
+                
+                clearInterval(typingInterval);
+                isTyping = false;
+                startBtn.disabled = false;
+                pauseBtn.disabled = true;
+                status.textContent = 'Paused';
+            }
+            
+            // Reset typing
+            function resetTyping() {
+                clearInterval(typingInterval);
+                isTyping = false;
+                currentIndex = 0;
+                terminalContent.textContent = '';
+                startBtn.disabled = false;
+                pauseBtn.disabled = true;
+                status.textContent = 'Ready';
+                
+                // Remove cursor
+                const cursor = document.querySelector('.cursor');
+                if (cursor) cursor.remove();
+            }
+            
+            // Event listeners
+            startBtn.addEventListener('click', startTyping);
+            pauseBtn.addEventListener('click', pauseTyping);
+            resetBtn.addEventListener('click', resetTyping);
+            
+            speedSlider.addEventListener('input', function() {
+                updateSpeedDisplay();
+                
+                // If currently typing, update the interval speed
+                if (isTyping) {
+                    clearInterval(typingInterval);
+                    typingInterval = setInterval(typeCharacter, speed);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

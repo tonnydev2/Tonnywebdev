@@ -1,0 +1,144 @@
+
+*{
+		margin: 0;
+		padding: 0;
+		box-sizing: border-box;
+}
+body{
+		background: #333;
+		
+}
+
+.container {
+            max-width: 1200px;
+            width: 100vw;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            text-align: center;
+		           height: 100vh;
+        }
+        .score-board {
+            display: flex;
+            justify-content: space-around;
+            margin: 2rem 0;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1.5rem;
+            border-radius: 15px;
+        }
+        
+        .score-item {
+            font-size: 1.5rem;
+        }
+        
+        .score-value {
+            font-weight: bold;
+            color: #fdbb2d;
+        }
+     
+		
+button {
+																										padding: 15%;
+																										margin-right: 5rem;
+																										border-radius: 50%;
+																										position: absolute;
+																										top: 70%;
+																										border: 4px solid orange;
+		         			font-size: 190%;
+            width: 10%;
+            height: 10%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+         
+}
+h1{
+		text-align: center;
+		color: antiquewhite;
+}
+#message1{
+		border: 3px dotted blue;
+		padding: 30px;
+		width: 40px;
+		height: 40px;
+		margin-top: 0px;
+		margin-left: 100px;
+		font-size: 30px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		position: absolute;
+		margin-left: 400px;
+		top: 35%;
+		border-radius: 50%;
+			background-color: floralwhite;
+}
+#message2{
+		border: 3px dotted blue;
+		padding: 30px;
+		width: 40px;
+		height: 40px;
+		margin-top: 0px;
+		margin-left: 100px;
+		font-size: 30px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		margin-left: 400px;
+		position: absolute;
+		top: 50%;
+		border-radius: 50%;
+		background-color: floralwhite;
+}
+.p1{
+		 font-size: 30px;
+		 color: red;
+		 margin-top: 10px;
+}
+.p2{
+		font-size: 30px;
+		color: red;
+		margin-top: 68px;
+}
+#paper{
+		 left: 35%;
+}
+#result{
+		text-align: center;
+		color: greenyellow;
+}
+#scissors{
+		left: 70%;
+}
+button:active{
+		 transform: scale(0.8);
+}
+.animation{
+		 animation: move 0.5s forwards;
+}
+@keyframes move{
+		from{
+				tranform: translateX(400px);
+		}
+		to{
+				transform: translateX(-150px);
+		}
+}
+#reset{
+		position: absolute;
+		 padding-left: 20px;
+		  padding-right: 20px;
+		  padding-top: 5px;
+		   padding-bottom: 5px;
+		  font-size: 15px;
+		 margin-top: 37%;
+		 border: 2px solid green;
+		 background-color: burlywood;
+		margin-left: 30%;
+		width: 150px;
+		border-radius: 30%;
+		height: 50px;
+}

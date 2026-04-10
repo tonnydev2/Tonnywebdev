@@ -1,0 +1,422 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upgraded Notepad</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(90deg, #4b6cb7 0%, #182848 100%);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .menu-container {
+            position: relative;
+        }
+        .menu-icon {
+            font-size: 24px;
+            cursor: pointer;
+            user-select: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        .menu-icon:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background-color: white;
+            min-width: 200px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            border-radius: 6px;
+            z-index: 100;
+            overflow: hidden;
+        }
+        .dropdown-menu.show {
+            display: block;
+        }
+        .menu-item {
+            padding: 12px 16px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+            color: #333;
+            transition: background-color 0.2s;
+        }
+        .menu-item:hover {
+            background-color: #f5f5f5;
+        }
+        .menu-item:last-child {
+            border-bottom: none;
+        }
+        .header h1 {
+            font-size: 24px;
+        }
+        .notepad-container {
+            padding: 20px;
+        }
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .save-btn {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .save-btn:hover {
+            background-color: #388E3C;
+            transform: translateY(-2px);
+        }
+        .clear-btn {
+            background-color: #f44336;
+            color: white;
+        }
+        .clear-btn:hover {
+            background-color: #d32f2f;
+            transform: translateY(-2px);
+        }
+        .download-btn {
+            background-color: #2196F3;
+            color: white;
+        }
+        .download-btn:hover {
+            background-color: #0b7dda;
+            transform: translateY(-2px);
+        }
+        .status {
+            display: flex;
+            align-items: center;
+            color: #555;
+            font-size: 14px;
+            gap: 10px;
+        }
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #4CAF50;
+            display: inline-block;
+        }
+        textarea {
+            width: 100%;
+            height: 400px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            resize: none;
+            font-size: 16px;
+            line-height: 1.6;
+            outline: none;
+            transition: border 0.3s;
+        }
+        textarea:focus {
+            border-color: #4b6cb7;
+        }
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 15px;
+            color: #666;
+            font-size: 14px;
+        }
+        .footer {
+            padding: 15px 20px;
+            background-color: #f5f5f5;
+            text-align: center;
+            color: #777;
+            font-size: 14px;
+            border-top: 1px solid #eee;
+        }
+        @media (max-width: 600px) {
+            .controls {
+                flex-direction: column;
+            }
+            .status {
+                margin-top: 10px;
+            }
+            textarea {
+                height: 300px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="menu-container">
+                <div class="menu-icon" id="menuIcon">☰</div>
+                <div class="dropdown-menu" id="dropdownMenu">
+                    <div class="menu-item" id="autoSaveOption">✓ Auto-save: On</div>
+                    <div class="menu-item" id="themeOption">Theme: Light</div>
+                    <div class="menu-item" id="exportOption">Export as TXT</div>
+                    <div class="menu-item" id="importOption">Import from file</div>
+                    <div class="menu-item" id="aboutOption">About</div>
+                </div>
+            </div>
+            <h1>Upgraded Notepad</h1>
+            <div style="width: 40px;"></div> <!-- Spacer for balance -->
+        </div>
+        
+        <div class="notepad-container">
+            <div class="controls">
+                <div>
+                    <button class="save-btn" id="saveBtn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M17 3H5C3.89 3 3 3.9 3 5V19C3 20.1 3.89 21 5 21H19C20.1 21 21 20.1 21 19V7L17 3ZM12 19C10.34 19 9 17.66 9 16C9 14.34 10.34 13 12 13C13.66 13 15 14.34 15 16C15 17.66 13.66 19 12 19ZM15 9H5V5H15V9Z" fill="white"/>
+                        </svg>
+                        Save to Browser
+                    </button>
+                    <button class="download-btn" id="downloadBtn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M19 9H15V3H9V9H5L12 16L19 9ZM5 18V20H19V18H5Z" fill="white"/>
+                        </svg>
+                        Download File
+                    </button>
+                    <button class="clear-btn" id="clearBtn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M6 19C6 20.1 6.9 21 8 21H16C17.1 21 18 20.1 18 19V7H6V19ZM19 4H15.5L14.5 3H9.5L8.5 4H5V6H19V4Z" fill="white"/>
+                        </svg>
+                        Clear All
+                    </button>
+                </div>
+                <div class="status">
+                    <span class="status-indicator" id="statusIndicator"></span>
+                    <span id="statusText">All changes saved</span>
+                </div>
+            </div>
+            
+            <textarea id="notepad" placeholder="Start typing your notes here..."></textarea>
+            
+            <div class="stats">
+                <span>Word Count: <span id="wordCount">0</span></span>
+                <span>Character Count: <span id="charCount">0</span></span>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Your notes are saved automatically and can be downloaded as a file</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const notepad = document.getElementById('notepad');
+            const saveBtn = document.getElementById('saveBtn');
+            const downloadBtn = document.getElementById('downloadBtn');
+            const clearBtn = document.getElementById('clearBtn');
+            const statusIndicator = document.getElementById('statusIndicator');
+            const statusText = document.getElementById('statusText');
+            const wordCount = document.getElementById('wordCount');
+            const charCount = document.getElementById('charCount');
+            const menuIcon = document.getElementById('menuIcon');
+            const dropdownMenu = document.getElementById('dropdownMenu');
+            const autoSaveOption = document.getElementById('autoSaveOption');
+            const themeOption = document.getElementById('themeOption');
+            const exportOption = document.getElementById('exportOption');
+            const importOption = document.getElementById('importOption');
+            const aboutOption = document.getElementById('aboutOption');
+            
+            let autoSaveEnabled = true;
+            let isDarkTheme = false;
+            
+            // Load saved text from localStorage[citation:2]
+            const savedText = localStorage.getItem('notepadText');
+            if (savedText) {
+                notepad.value = savedText;
+                updateStats();
+            }
+            
+            // Toggle dropdown menu
+            menuIcon.addEventListener('click', function(e) {
+                dropdownMenu.classList.toggle('show');
+                e.stopPropagation();
+            });
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function() {
+                dropdownMenu.classList.remove('show');
+            });
+            
+            // Auto-save toggle
+            autoSaveOption.addEventListener('click', function() {
+                autoSaveEnabled = !autoSaveEnabled;
+                autoSaveOption.textContent = `Auto-save: ${autoSaveEnabled ? 'On' : 'Off'}`;
+                statusText.textContent = autoSaveEnabled ? 'Auto-save enabled' : 'Auto-save disabled';
+                setTimeout(() => {
+                    statusText.textContent = notepad.value === localStorage.getItem('notepadText') ? 
+                        'All changes saved' : 'Unsaved changes';
+                }, 2000);
+            });
+            
+            // Theme toggle
+            themeOption.addEventListener('click', function() {
+                isDarkTheme = !isDarkTheme;
+                document.body.style.background = isDarkTheme ? 
+                    'linear-gradient(135deg, #2c3e50 0%, #3498db 100%)' : 
+                    'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                themeOption.textContent = `Theme: ${isDarkTheme ? 'Dark' : 'Light'}`;
+            });
+            
+            // Export functionality
+            exportOption.addEventListener('click', function() {
+                downloadAsFile();
+                dropdownMenu.classList.remove('show');
+            });
+            
+            // Import functionality
+            importOption.addEventListener('click', function() {
+                importFromFile();
+                dropdownMenu.classList.remove('show');
+            });
+            
+            // About
+            aboutOption.addEventListener('click', function() {
+                alert('Upgraded Notepad v1.0\n\nThis notepad uses your browser\'s local storage to save your notes and allows you to download them as files.');
+                dropdownMenu.classList.remove('show');
+            });
+            
+            // Save text to localStorage[citation:2][citation:9]
+            function saveText() {
+                localStorage.setItem('notepadText', notepad.value);
+                statusIndicator.style.backgroundColor = '#4CAF50';
+                statusText.textContent = 'All changes saved';
+            }
+            
+            // Update word and character count
+            function updateStats() {
+                const text = notepad.value;
+                const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+                wordCount.textContent = words;
+                charCount.textContent = text.length;
+            }
+            
+            // Download text as a file
+            function downloadAsFile() {
+                const text = notepad.value;
+                const blob = new Blob([text], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `tonnytext.txt`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                statusText.textContent = 'File downloaded';
+                setTimeout(() => {
+                    statusText.textContent = 'All changes saved';
+                }, 2000);
+            }
+            
+            // Import from a file
+            function importFromFile() {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = 'text/plain';
+                
+                input.onchange = function(e) {
+                    const file = e.target.files[0];
+                    const reader = new FileReader();
+                    
+                    reader.onload = function(event) {
+                        notepad.value = event.target.result;
+                        if (autoSaveEnabled) {
+                            saveText();
+                        }
+                        updateStats();
+                        statusText.textContent = 'File imported';
+                        setTimeout(() => {
+                            statusText.textContent = autoSaveEnabled ? 'All changes saved' : 'Unsaved changes';
+                        }, 2000);
+                    };
+                    
+                    reader.readAsText(file);
+                };
+                
+                input.click();
+            }
+            
+            // Handle save button click
+            saveBtn.addEventListener('click', saveText);
+            
+            // Handle download button click
+            downloadBtn.addEventListener('click', downloadAsFile);
+            
+            // Handle clear button click
+            clearBtn.addEventListener('click', function() {
+                if (confirm('Are you sure you want to clear all text? This cannot be undone.')) {
+                    notepad.value = '';
+                    if (autoSaveEnabled) {
+                        saveText();
+                    }
+                    updateStats();
+                }
+            });
+            
+            // Auto-save when text changes[citation:2]
+            notepad.addEventListener('input', function() {
+                statusIndicator.style.backgroundColor = '#FF9800';
+                statusText.textContent = 'Unsaved changes';
+                updateStats();
+                
+                if (autoSaveEnabled) {
+                    // Debounce auto-save to prevent excessive writes
+                    clearTimeout(window.autoSaveTimeout);
+                    window.autoSaveTimeout = setTimeout(saveText, 1000);
+                }
+            });
+            
+            // Save when the page is about to be closed
+            window.addEventListener('beforeunload', function() {
+                if (autoSaveEnabled && statusText.textContent === 'Unsaved changes') {
+                    saveText();
+                }
+            })
+            // Focus on the textarea when the page loads
+            notepad.focus();
+        });
+    </script>
+</body>
+</html>

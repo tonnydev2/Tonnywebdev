@@ -1,0 +1,420 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Romantic Story Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .page {
+            padding: 40px;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            min-height: 500px;
+        }
+        
+        .active {
+            display: flex;
+        }
+        
+        h1 {
+            color: #6a11cb;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        h2 {
+            color: #2575fc;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        p {
+            line-height: 1.6;
+            margin-bottom: 15px;
+            text-align: center;
+            color: #333;
+        }
+        
+        .btn {
+            background: linear-gradient(to right, #6a11cb, #2575fc);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .scenario-container {
+            background: url('https://images.unsplash.com/photo-1513584684374-8bab748fbf90?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80') center/cover;
+            border-radius: 15px;
+            padding: 10px;
+            margin: 20px 0;
+            width: 250px;
+            min-height: 300px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            box-shadow: inset 0 0 0 2000px rgba(255, 255, 255, 0.85);
+            border: 5px solid #6a11cb;
+        }
+        
+        .scenario-text {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            color: #333;
+            text-align: left;
+            min-height: 200px;
+        }
+        
+        .typing-cursor {
+            display: inline-block;
+            width: 3px;
+            background-color: #6a11cb;
+            margin-left: 2px;
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+        
+        .riddle-container {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+            width: 100%;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border: 2px solid #2575fc;
+        }
+        
+        .riddle-question {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            color: #2575fc;
+            font-weight: 600;
+        }
+        
+        .answer-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #6a11cb;
+            border-radius: 10px;
+            font-size: 1rem;
+            margin-bottom: 15px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+        
+        .answer-input:focus {
+            border-color: #2575fc;
+            box-shadow: 0 0 0 3px rgba(37, 117, 252, 0.3);
+        }
+        
+        .feedback {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: 600;
+            display: none;
+        }
+        
+        .correct {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .sound-btn {
+            background: transparent;
+            border: 2px solid #6a11cb;
+            color: #6a11cb;
+            padding: 8px 15px;
+            border-radius: 50px;
+            cursor: pointer;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .sound-btn:hover {
+            background: #6a11cb;
+            color: white;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-top: 20px;
+        }
+        
+        .progress {
+            text-align: center;
+            margin-top: 10px;
+            color: #6a11cb;
+            font-weight: 600;
+        }
+        
+        .instructions {
+            background: rgba(106, 17, 203, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            width: 100%;
+        }
+        
+        .instructions ul {
+            padding-left: 20px;
+            margin-top: 10px;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+        }
+        
+        .heart {
+            color: #ff4d6d;
+            font-size: 1.5rem;
+            margin: 0 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Welcome Page -->
+        <div id="welcome-page" class="page active">
+            <h1>Romantic Story Adventure <span class="heart">♥</span></h1>
+            <div class="instructions">
+                <p>Welcome to an interactive romantic story game! Here's how it works:</p>
+                <ul>
+                    <li>Read the story as it unfolds with beautiful animations</li>
+                    <li>Solve riddles to progress in the story</li>
+                    <li>Type your answers and check if you're correct</li>
+                    <li>Enjoy the romantic journey with Amanda</li>
+                </ul>
+            </div>
+            <p>Click the button below to begin your romantic adventure!</p>
+            <button id="start-btn" class="btn">Start Your Story</button>
+        </div>
+        
+        <!-- Scenario Page -->
+        <div id="scenario-page" class="page">
+            <h2>Your Romantic Encounter</h2>
+            <div class="scenario-container">
+                <div id="scenario-text" class="scenario-text"></div>
+            </div>
+            <button id="riddle-btn" class="btn" style="display: none;">Answer the Riddles</button>
+        </div>
+  
+        <!-- Riddle Page -->
+        <div id="riddle-page" class="page">
+            <h2>Amanda's Riddles</h2>
+            <p>Answer correctly to enter Amanda's apartment!</p>
+            <div class="riddle-container">
+                <div class="riddle-question" id="riddle-question"></div>
+                <button class="sound-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M11.536 14.01A8.473 8.473 0 0 0 14.026 8a8.473 8.473 0 0 0-2.49-6.01l-.708.707A7.476 7.476 0 0 1 13.025 8c0 2.071-.84 3.946-2.197 5.303l.708.707z"/>
+                        <path d="M10.121 12.596A6.48 6.48 0 0 0 12.025 8a6.48 6.48 0 0 0-1.904-4.596l-.707.707A5.483 5.483 0 0 1 11.025 8a5.483 5.483 0 0 1-1.61 3.89l.706.706z"/>
+                        <path d="M8.707 11.182A4.486 4.486 0 0 0 10.025 8a4.486 4.486 0 0 0-1.318-3.182L8 5.525A3.489 3.489 0 0 1 9.025 8 3.49 3.49 0 0 1 8 10.475l.707.707zM6.717 3.55A.5.5 0 0 1 7.4 4.2L4.667 6.933h-1.59a.5.5 0 0 0-.5.5v1.134a.5.5 0 0 0 .5.5h1.59L7.4 11.8a.5.5 0 0 1-.717.7l-3.5-3.5a.5.5 0 0 1 0-.7l3.5-3.5a.5.5 0 0 1 .534-.05z"/>
+                    </svg>
+                    Listen to Riddle
+                </button>
+                <input type="text" class="answer-input" id="answer-input" placeholder="Type your answer here...">
+                <div id="feedback" class="feedback"></div>
+                <div class="controls">
+                    <button id="submit-btn" class="btn">Submit Answer</button>
+                    <button id="next-riddle-btn" class="btn" style="display: none;">Next Riddle</button>
+                </div>
+                <div class="progress" id="progress">Riddle 1 of 4</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game data
+        const scenarioText = `You have been moving around your place and come across your neighbour who has newly settled at your place. She looks up her gaze on you and smiled gently. "Hi, I'm Amanda, it's good to meet you." She blushes faintly and finally she composed herself. "Okay, do you mind if I take you to my apartment and... um we have more of the conversation and maybe I prepare you some coffee if you don't mind." She lifts up your hand and leads you to her apartment door. "Hmm... Before you come in, uh... first answer these riddles and then I will grant you access to my room."`;
+        
+        const riddles = [
+            {
+                question: "I am dirty when I'm white but clean when black, who am I?",
+                answer: "black board"
+            },
+            {
+                question: "I am as light as a feather but the strongest man can't hold me for 5 minutes, who am I?",
+                answer: "breath"
+            },
+            {
+                question: "I start with 'e' and end with 'e' but contain only one letter, who am I?",
+                answer: "envelope"
+            },
+            {
+                question: "I never was but always will be and I'm the fate of every living man, who am I?",
+                answer: "tomorrow"
+            }
+        ];
+    
+        // DOM elements
+        const welcomePage = document.getElementById('welcome-page');
+        const scenarioPage = document.getElementById('scenario-page');
+
+        const riddlePage = document.getElementById('riddle-page');
+        const startBtn = document.getElementById('start-btn');
+        const riddleBtn = document.getElementById('riddle-btn');
+        const scenarioTextElement = document.getElementById('scenario-text');
+        const riddleQuestion = document.getElementById('riddle-question');
+        const answerInput = document.getElementById('answer-input');
+        const submitBtn = document.getElementById('submit-btn');
+        const nextRiddleBtn = document.getElementById('next-riddle-btn');
+        const feedback = document.getElementById('feedback');
+        const progress = document.getElementById('progress');
+        
+        // Game state
+        let currentRiddleIndex = 0;
+        let typedText = '';
+        let typingIndex = 0;
+        let typingSpeed = 30; // milliseconds per character
+        
+        // Functions
+        function typeText() {
+            if (typingIndex < scenarioText.length) {
+                typedText += scenarioText.charAt(typingIndex);
+                scenarioTextElement.innerHTML = typedText + '<span class="typing-cursor">|</span>';
+                typingIndex++;
+                setTimeout(typeText, typingSpeed);
+            } else {
+                // Show the riddle button after typing is complete
+                riddleBtn.style.display = 'block';
+            }
+        }
+        
+        function showRiddle() {
+            if (currentRiddleIndex < riddles.length) {
+                riddleQuestion.textContent = riddles[currentRiddleIndex].question;
+                answerInput.value = '';
+                feedback.style.display = 'none';
+                progress.textContent = `Riddle ${currentRiddleIndex + 1} of ${riddles.length}`;
+            } else {
+                // All riddles completed
+                alert("Congratulations! You've answered all riddles correctly. The story continues...");
+                // Here you would normally proceed to the next part of the story
+            }
+        }
+        
+        function checkAnswer() {
+            const userAnswer = answerInput.value.trim().toLowerCase();
+            const correctAnswer = riddles[currentRiddleIndex].answer.toLowerCase();
+            
+            if (userAnswer === correctAnswer) {
+                feedback.textContent = "Correct! Well done!";
+                feedback.className = "feedback correct";
+                feedback.style.display = 'block';
+                nextRiddleBtn.style.display = 'block';
+                submitBtn.style.display = 'none';
+            } else {
+                feedback.textContent = "Incorrect. Try again!";
+                feedback.className = "feedback incorrect";
+                feedback.style.display = 'block';
+            }
+        }
+        
+        function nextRiddle() {
+            currentRiddleIndex++;
+            if (currentRiddleIndex < riddles.length) {
+                showRiddle();
+                nextRiddleBtn.style.display = 'none';
+                submitBtn.style.display = 'block';
+            } else {
+                // All riddles completed
+                alert("Congratulations! You've answered all riddles correctly. Amanda welcomes you into her apartment!");
+                // Reset for potential future gameplay
+                currentRiddleIndex = 0;
+                showRiddle();
+                riddlePage.classList.remove('active');
+                scenarioPage.classList.add('active');
+            }
+        }
+        
+        // Event listeners
+        startBtn.addEventListener('click', function() {
+            welcomePage.classList.remove('active');
+            scenarioPage.classList.add('active');
+            // Start typing the scenario text
+            setTimeout(typeText, 500);
+        });
+        
+        riddleBtn.addEventListener('click', function() {
+            scenarioPage.classList.remove('active');
+            riddlePage.classList.add('active');
+            showRiddle();
+        });
+        
+        submitBtn.addEventListener('click', checkAnswer);
+        
+        nextRiddleBtn.addEventListener('click', nextRiddle);
+        
+        // Allow pressing Enter to submit answer
+        answerInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                checkAnswer();
+            }
+        });
+        
+        // Sound button functionality (placeholder)
+        document.querySelector('.sound-btn').addEventListener('click', function() {
+            // In a real implementation, this would play audio of the riddle
+            alert("Audio feature would play here in a full implementation");
+        });
+    </script>
+</body>
+</html>
