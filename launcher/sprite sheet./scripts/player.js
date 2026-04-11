@@ -3,14 +3,15 @@ import {Idle,Running,Jumping,KO,Punching} from './states.js';
 import {images,index} from './constants.js';
 
 export class Player{
-    constructor(game){
-        this.game = game;
-        this.width = 100;
-        this.height = 100;
+    constructor(game,width,height){
+        this.game =  game;
+        this.width = width || 100;
+        this.height = height || 100;
         this.playerSpeed = 0;
         this.x = 30;
         this.y = this.game.height - this.height-this.game.groundMargin;
-        
+        this.health = 100;
+        this.lastAnimationTimer = 0;
         // Create all states
         this.states = {
             idle: new Idle(this),
@@ -20,7 +21,7 @@ export class Player{
             punching: new Punching(this)
         };
         
-        // Start with punching state
+        // Start with idle state
         this.currentState = this.states.idle;
         this.currentState.enter();  // Initialize the state
         this.num = 0;  // Start at frame 0
@@ -37,6 +38,12 @@ export class Player{
     }
     
     update(input,deltaTime){
+        if(this.health <= 0){
+            this.health = 0;
+            this.setState(this.states.ko.handleInput(input));
+            this.lastAnimationTimer++;  
+            if(this.lastAnimationTimer > 150) this.game.gameOver = true;
+        }
         // Animation update
         if(this.frameTimer > this.interval){
             this.frameTimer = 0;
@@ -100,6 +107,10 @@ export class Player{
         
         // Try-catch for drawing errors
         try {
+            ctx.fillStyle = 'red';
+            ctx.fillRect(this.x,this.y,this.width,5);
+            ctx.fillStyle = 'green';
+            ctx.fillRect(this.x,this.y,this.health,5);
             ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
         } catch(error) {
             console.error("Error drawing image:", error);

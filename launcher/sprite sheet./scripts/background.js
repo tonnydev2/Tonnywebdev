@@ -1,13 +1,14 @@
 export class Background{
-				constructor(game){
+				constructor(game,height){
 								this.game = game;
 								this.x = 0;
 								this.y = 0;
 								this.width = 1000;
-								this.height = 350;
+								this.height = height;
 								this.image = document.getElementById('background');
 				}
 				update(speed){
+								this.width * this.game.ratio;
 								this.x-= speed;
 								if(this.x + this.width <= 0){
 												this.x = 0;

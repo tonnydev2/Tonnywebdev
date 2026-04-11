@@ -4,37 +4,98 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ludo Game</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background-color: #333;
-        }
-        canvas {
-            border: 2px solid black;
-            width: 350px;
-        		   height: 550px;
-        		   position: absolute;
-        		   top: 50%;
-        		   left: 50%;
-        		   transform: translate(-50%, -50%);
-        }
-		   #ludo{
-		   		display: none;
-		   }
-    #dice{
-        display: none;
-    		   max-width: 600px;
-    		   max-height: 600px;
-    }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+   
+    <div id="screen1">
+        <h1>Welcome to LUDO board game</h1>
+        <h2><em>Build with vanilla JavaScript</em></h2>
+             <img src="ludo2.png" class="ludo-img">
+        <div class="progress-bar">
+            <div class="progress"></div>
+        </div>
+        <div class="percent">0%</div>
+    </div>
+    <div id="screen2">
+        <!-- Screen 2: Player Selection -->
+  <h1>SELECT PLAYER MODES</h1>
+  
+  <div class="player-selection-container">
+    <!-- Red Player -->
+    <div class="player-select red-player">
+      <h3>RED PLAYER</h3>
+      <div class="mode-toggle">
+        <img id="redModeImg" src="vsHuman.jpg" alt="Human" 
+             data-color="red" data-type="human" class="mode-btn active">
+        <img id="redModeImg2" src="vsComp.png" alt="Computer" 
+             data-color="red" data-type="computer" class="mode-btn">
+      </div>
+      <select id="redDifficulty" class="difficulty-select" data-color="red" style="display: none;">
+        <option value="easy">Easy</option>
+        <option value="medium" selected>Medium</option>
+        <option value="hard">Hard</option>
+      </select>
+    </div>
+    
+    <!-- Green Player -->
+    <div class="player-select green-player">
+      <h3>GREEN PLAYER</h3>
+      <div class="mode-toggle">
+        <img id="greenModeImg" src="vsHuman.jpg" alt="Human" 
+             data-color="green" data-type="human" class="mode-btn active">
+        <img id="greenModeImg2" src="vsComp.png" alt="Computer" 
+             data-color="green" data-type="computer" class="mode-btn">
+      </div>
+      <select id="greenDifficulty" class="difficulty-select" data-color="green" style="display: none;">
+        <option value="easy">Easy</option>
+        <option value="medium" selected>Medium</option>
+        <option value="hard">Hard</option>
+      </select>
+    </div>
+    
+    <!-- Blue Player -->
+    <div class="player-select blue-player">
+      <h3>BLUE PLAYER</h3>
+      <div class="mode-toggle">
+        <img id="blueModeImg" src="vsHuman.jpg" alt="Human" 
+             data-color="blue" data-type="human" class="mode-btn active">
+        <img id="blueModeImg2" src="vsComp.png" alt="Computer" 
+             data-color="blue" data-type="computer" class="mode-btn">
+      </div>
+      <select id="blueDifficulty" class="difficulty-select" data-color="blue" style="display: none;">
+        <option value="easy">Easy</option>
+        <option value="medium" selected>Medium</option>
+        <option value="hard">Hard</option>
+      </select>
+    </div>
+    
+    <!-- Yellow Player -->
+    <div class="player-select yellow-player">
+      <h3>YELLOW PLAYER</h3>
+      <div class="mode-toggle">
+        <img id="yellowModeImg" src="vsHuman.jpg" alt="Human" 
+             data-color="yellow" data-type="human" class="mode-btn active">
+        <img id="yellowModeImg2" src="vsComp.png" alt="Computer" 
+             data-color="yellow" data-type="computer" class="mode-btn">
+      </div>
+      <select id="yellowDifficulty" class="difficulty-select" data-color="yellow" style="display: none;">
+        <option value="easy">Easy</option>
+        <option value="medium" selected>Medium</option>
+        <option value="hard">Hard</option>
+      </select>
+    </div>
+  </div>
+  
+  <button id="startGameBtn" class="start-btn">START GAME</button>
+</div>
+     <div id="screen3">
     <canvas id="canvas1"></canvas>
+    </div>
+    <!--  <div class="house red" id="red"></div>
+    <div class="house green" id="green"></div>
+    <div class="house blue" id="blue"></div>
+    <div class="house yellow" id="yellow"></div>-->
     <img src="ludo~2.jpg" id="ludo">
 		<div id="dice">
 		   <img src="dice1.jpg" id="dice1" width="80" height="100">

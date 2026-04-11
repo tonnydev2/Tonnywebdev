@@ -1,0 +1,81 @@
+h1{
+		background: linear-gradient(to right, red, orange, yellow, green, blue,
+indigo, violet);
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
+		margin-top: 50px;
+		text-align: center;
+}
+body{
+		background: linear-gradient(45deg, #ff1e00,#1eff96,#003dff);
+		height: 100vh;
+}
+.container{
+		padding: 30px;
+		border-radius: 20px;
+		width: 70%;
+		height: 400px;
+		border: 4px solid black;
+		background: rgba(225,225,225,0.5);
+		position: relative;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+}
+.controls{
+		position: absolute;
+		top: 170px;
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+}
+label{
+		text-align: center;
+}
+.colorBox{
+		width: 50px;
+		height: 50px;
+		border-radius: 50%;
+		border: 2px solid black;
+}
+#redBox{
+		background: #ff0000;
+}
+#greenBox{
+		background: #00ff00;
+}
+#blueBox{
+		background: #0000ff;
+}
+.redControls,.greenControls,.blueControls{
+		 display: flex;
+		 flex-direction: row;
+		 gap: 5px;
+}
+#display{
+		width: 200px;
+		height: 50px;
+	border: 2px solid black;	
+		position: absolute;
+		top: 60px;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		left: 50%;
+		transform: translateX(-50%);
+}
+p{
+		font-size: 30px;
+		color: #333;
+		font-weight: bold;
+}
+#copy{
+		position: absolute;
+		top: 380px;
+		padding: 10px 30px;
+		border-radius: 20px;
+		background: #FFA65D;
+		left: 50%;
+		transform: translateX(-50%)
+		
+}

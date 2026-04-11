@@ -70,8 +70,8 @@ function detectCollision(element1, element2) {
 window.addEventListener('load',function(){
     const canvas = document.getElementById('canvas1');
     const ctx = canvas.getContext('2d');
-    canvas.width = 350;
-    canvas.height = 300;
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
     
     class Game{
         constructor(width,height){
@@ -79,7 +79,7 @@ window.addEventListener('load',function(){
             this.height = height;
             this.speed = 0;
             this.maxSpeed = 6;
-            this.groundMargin = 50;
+            this.groundMargin = 95;
             this.background = new Background(this);
             this.player = new Player(this);
             this.input = new InputHandler();
@@ -307,9 +307,18 @@ window.addEventListener('load',function(){
         }
     }
     
-    const game = new Game(canvas.width,canvas.height);
+    let game = new Game(canvas.width,canvas.height);
     console.log(game);
     let lastTime = 0;
+    
+    window.addEventListener('resize',(e)=>{
+    canvas.width = e.currentTarget.innerWidth;
+    canvas.height = e.currentTarget.innerHeight;
+    const ratioX = canvas.width/baseWidth;
+    const ratioY = canvas.height/baseHeight;
+    game = new Game(canvas.width,canvas.height);    
+    });
+
     
     function animate(timeStamp){
         const deltaTime = timeStamp-lastTime;

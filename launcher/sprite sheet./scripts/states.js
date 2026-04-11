@@ -74,6 +74,7 @@ export class Idle extends State{
         else if(input.includes('up')){
             return 'jumping';
         }
+        else if(this.player.health <= 0) return 'ko';
         return null;
     }
 }
@@ -113,7 +114,7 @@ export class Idle extends State{
             return 'idle';
         }
     				      else if(input.includes('enter')) return 'punching';
-    				      
+    				      else if(this.player.health <= 0) return 'ko' 
         return null;
     }
 }
@@ -164,7 +165,7 @@ export class Idle extends State{
         this.player.maxFrame = 42;
         this.currentFrame = 0;  // Reset frame counter
         // Don't return, just set up the state
-        console.log("Entered punching state");
+        console.log("Entered ko state");
     }
     
     getCurrentFrame(){
@@ -182,7 +183,6 @@ export class Idle extends State{
     }
     
     handleInput(input){
-        // Return next state name if needed
         return null; // Stay in punching state
     }
 }

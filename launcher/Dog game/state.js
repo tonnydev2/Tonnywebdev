@@ -73,7 +73,7 @@ export class Jumping extends State {
     enter() {
         this.player.frameY = 1;
         this.player.frameX = 0;
-        this.player.vy -= 20; // Apply jump force
+        this.player.vy -= 30; // Apply jump force
         this.player.stopRunningSound();
     }
     handleInput(input) {

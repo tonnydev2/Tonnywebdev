@@ -5,8 +5,8 @@
 }
 		 
 #canvas1{
-		width: 350px;
-		height: 300px;
+	max-width: 100%;
+		max-height: 100%;
 		border: 5px solid black;
 		position: absolute;
 		top: 50%;
@@ -21,7 +21,7 @@
 		top: 80%;
 		left: 0;
 		padding: 10px;
-		border: 2px solid black;
+		
 		width: 100%;
 		height: 20%;
 }
