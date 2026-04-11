@@ -3,6 +3,9 @@ name: Unpack Launcher
 on:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   unpack:
     runs-on: ubuntu-latest
@@ -20,5 +23,9 @@ jobs:
           git config --local user.email 'actions@github.com'
           git config --local user.name 'GitHub Actions'
           git add -A
-          git commit -m 'Unpacked launcher.zip and updated launcher folder' || echo 'No changes to commit'
-          git push
+          if git diff --cached --quiet; then
+            echo 'No changes to commit'
+          else
+            git commit -m 'Unpacked launcher.zip and updated launcher folder'
+            git push
+          fi
