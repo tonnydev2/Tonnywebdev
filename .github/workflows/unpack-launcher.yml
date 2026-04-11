@@ -1,0 +1,24 @@
+name: Unpack Launcher
+
+on:
+  workflow_dispatch:
+
+jobs:
+  unpack:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Unzip launcher.zip
+        run: |
+          unzip -o launcher.zip
+          rm launcher.zip
+
+      - name: Commit and push changes
+        run: |
+          git config --local user.email 'actions@github.com'
+          git config --local user.name 'GitHub Actions'
+          git add -A
+          git commit -m 'Unpacked launcher.zip and updated launcher folder' || echo 'No changes to commit'
+          git push
