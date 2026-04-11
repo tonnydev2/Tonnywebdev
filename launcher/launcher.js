@@ -17,7 +17,7 @@
             { name: "Lucky spin", icon: "payment-modal.png", link: "payment model.html" },
 																												{ name: "Hex Colors", icon: "hex.png", link: "HexColorConverter/index.html"},
 																												{ name: "Word Guess", icon: "wordguess.png", link: "wordGuess.html"},
-            { name: "Flappy bird", icon: "flappy.png", link: "Flappy 🐦/index.html"}
+            { name: "Flappy bird", icon: "flappy.png", link: "Flappy ЁЯРж/index.html"}
         ];
 
         // Function to render apps
