@@ -1,3 +1,6 @@
+// Initialize EmailJS
+emailjs.init('-yFWcCKSnWFhyazHM');
+
 // Mobile Menu Toggle
         document.querySelector('.menu-toggle').addEventListener('click', function() {
             document.querySelector('.nav-links').classList.toggle('active');
@@ -67,7 +70,7 @@
             }
         });
 
-        // Contact Form Handler
+        // Contact Form Handler with EmailJS
         const contactForm = document.querySelector('.contact-form form');
         if(contactForm) {
             contactForm.addEventListener('submit', function(e) {
@@ -100,18 +103,38 @@
                     return;
                 }
                 
-                // If validation passes, you can send the form data here
-                console.log('Form Data:', {
-                    name: name,
-                    email: email,
+                // Send email using EmailJS
+                const templateParams = {
+                    to_email: 'tonnoidgames@gmail.com',
+                    from_name: name,
+                    from_email: email,
                     subject: subject,
                     message: message
+                };
+                
+                // Show loading state
+                const submitButton = contactForm.querySelector('button[type="submit"]');
+                const originalButtonText = submitButton.textContent;
+                submitButton.textContent = 'Sending...';
+                submitButton.disabled = true;
+                
+                // Send auto-reply to user
+                emailjs.send('service_3s7uxlj', 'template_q0ol9um', {
+                    to_email: email,
+                    user_name: name
+                }).then(() => {
+                    // Send notification email to you
+                    return emailjs.send('service_3s7uxlj', 'template_vjtmznj', templateParams);
+                }).then(() => {
+                    alert('Thank you! Your message has been sent successfully.');
+                    contactForm.reset();
+                    submitButton.textContent = originalButtonText;
+                    submitButton.disabled = false;
+                }).catch((error) => {
+                    console.error('EmailJS error:', error);
+                    alert('Sorry, there was an error sending your message. Please try again.');
+                    submitButton.textContent = originalButtonText;
+                    submitButton.disabled = false;
                 });
-                
-                // Success message
-                alert('Thank you! Your message has been sent successfully.');
-                
-                // Clear form
-                contactForm.reset();
             });
         }
