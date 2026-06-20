@@ -67,3 +67,51 @@
             }
         });
 
+        // Contact Form Handler
+        const contactForm = document.querySelector('.contact-form form');
+        if(contactForm) {
+            contactForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Get form inputs using correct selectors from index.html
+                const formInputs = document.querySelectorAll('.contact-form .form-control');
+                
+                const nameInput = formInputs[0];
+                const emailInput = formInputs[1];
+                const subjectInput = formInputs[2];
+                const messageInput = formInputs[3];
+                
+                // Get values
+                const name = nameInput.value.trim();
+                const email = emailInput.value.trim();
+                const subject = subjectInput.value.trim();
+                const message = messageInput.value.trim();
+                
+                // Basic validation
+                if(!name || !email || !message) {
+                    alert('Please fill in all required fields (Name, Email, and Message)');
+                    return;
+                }
+                
+                // Email validation
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if(!emailRegex.test(email)) {
+                    alert('Please enter a valid email address');
+                    return;
+                }
+                
+                // If validation passes, you can send the form data here
+                console.log('Form Data:', {
+                    name: name,
+                    email: email,
+                    subject: subject,
+                    message: message
+                });
+                
+                // Success message
+                alert('Thank you! Your message has been sent successfully.');
+                
+                // Clear form
+                contactForm.reset();
+            });
+        }
