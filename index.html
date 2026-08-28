@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -6,22 +6,40 @@
     <title>Tonnoid Port | Tonny Web Dev</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
-								<link rel="stylesheet" href="Portstyles.css">
+    <link rel="stylesheet" href="Portstyles.css">
 </head>
 <body>
+    <!-- Galaxy Background -->
+    <div class="galaxy-background">
+        <div class="stars"></div>
+        <div class="nebula nebula-1"></div>
+        <div class="nebula nebula-2"></div>
+        <div class="nebula nebula-3"></div>
+    </div>
+
+    <!-- Page Loader -->
+    <div class="page-loader" id="pageLoader">
+        <div class="loader-content">
+            <div class="loader-logo">TonnoidPort</div>
+            <div class="loader-text">Building Something Amazing...</div>
+            <div class="loader-bar">
+                <div class="loader-bar-fill"></div>
+            </div>
+        </div>
+    </div>
+
     <!-- Header & Navigation -->
     <header>
         <div class="container">
             <nav class="navbar">
                 <a href="#" class="logo">TonnoidPort</a>
-                <ul class="nav-links">
-                    <li><a href="#home">Home</a></li>
-                    <li><a href="intro.html">About</a></li>
-                    <li><a href="#skills">Skills</a></li>
-                    <li><a href="#projects">Projects</a></li>
-                    <li><a href="#testimonials">Testimonials</a></li>
-                    <li><a href="#contact">Contact</a></li>
-                </ul>
+               <ul class="nav-links">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#skills">Skills</a></li>
+                <li><a href="#projects">Projects</a></li>
+                <li><a href="#contact">Contact</a></li>
+               </ul>
                 <div class="menu-toggle">
                     <i class="fas fa-bars"></i>
                 </div>
@@ -33,47 +51,46 @@
     <section class="hero" id="home">
         <div class="container">
             <div class="hero-content">
-                <h1>Turning Ideas Into <span style="color: var(--primary);">Inspirational</span> Digital Experiences</h1>
-                <p>I'm a passionate designer & developer creating beautiful, functional websites that inspire and engage users. Let's build something amazing together.</p>
+                <h1 class="slide-from-left">Turning Ideas Into <span class="gradient-text">Inspirational</span> Digital Experiences</h1>
+                <p class="slide-from-right">I'm a passionate designer & developer creating beautiful, functional websites that inspire and engage users. Let's build something amazing together.</p>
                 <div class="hero-btns">
-                    <a href="#projects" class="btn">View My Work</a>
-                    <a href="#contact" class="btn btn-outline">Get In Touch</a>
+                    <a href="#skills" class="btn slide-from-bottom">View My Skills</a>
+                    <a href="#contact" class="btn btn-outline slide-from-top">Get In Touch</a>
                 </div>
             </div>
         </div>
-        <div class="hero-image"></div>
     </section>
 
     <!-- About Section -->
     <section id="about">
         <div class="container">
-            <div class="section-title">
+            <div class="section-title slide-from-top">
                 <h2>About Me</h2>
                 <p>Get to know more about my journey and passion</p>
-            		<p>Web coding is my passion and my world and I invite you all into my world where we weave dreams.</p>
+                <p>Web coding is my passion and my world and I invite you all into my world where we weave dreams.</p>
             </div>
             <div class="about-content">
-                <div class="about-image">
-                    <img src="myphoto2.jpg" alt="About Me">
+                <div class="about-image slide-from-left">
+                    <img src="myPhoto.webp" alt="About Me">
                 </div>
                 <div class="about-text">
-                    <h3>Hello! I'm Tonny Da Vinci, a Creative Designer & Developer</h3>
-                    <p>With over 5 years of experience in the digital industry, I specialize in creating visually stunning and highly functional websites and applications. My passion lies in solving complex problems through clean, efficient code and intuitive design.</p>
-                    <p>I believe that great design is not just about aesthetics, but about creating meaningful experiences that connect with users on an emotional level.</p>
+                    <h3 class="slide-from-right">Hello! I'm Tonny Da Vinci, a Creative Designer & Developer</h3>
+                    <p class="slide-from-left">With over 5 years of experience in the digital industry, I specialize in creating visually stunning and highly functional websites and applications. My passion lies in solving complex problems through clean, efficient code and intuitive design.</p>
+                    <p class="slide-from-right">I believe that great design is not just about aesthetics, but about creating meaningful experiences that connect with users on an emotional level.</p>
                     <div class="stats">
-                        <div class="stat-item">
+                        <div class="stat-item slide-from-bottom">
                             <div class="stat-number">50+</div>
                             <div class="stat-text">Projects Completed</div>
                         </div>
-                    		 <div class="stat-item">
+                        <div class="stat-item slide-from-top">
                             <div class="stat-number">50+</div>
-                            <div class="stat-text">Projects InDevelopment</div>
-         
-                        <div class="stat-item">
+                            <div class="stat-text">Projects In Development</div>
+                        </div>
+                        <div class="stat-item slide-from-bottom">
                             <div class="stat-number">25+</div>
                             <div class="stat-text">Happy Clients</div>
                         </div>
-                        <div class="stat-item">
+                        <div class="stat-item slide-from-top">
                             <div class="stat-number">5+</div>
                             <div class="stat-text">Years Experience</div>
                         </div>
@@ -82,17 +99,79 @@
             </div>
         </div>
     </section>
+    
+    <!-- Projects Section -->
+<section id="projects">
+    <div class="container">
+        <div class="section-title slide-from-left">
+            <h2>Featured Projects</h2>
+            <p>Some of my recent work that showcases my skills</p>
+        </div>
+        <div class="projects-grid">
+           <!-- School Management System -->
+<div class="project-card slide-from-left">
+    <div class="project-image">
+        <img src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=600&h=400&fit=crop" alt="School Management System">
+    </div>
+    <div class="project-content">
+        <h3 class="project-title">School Management System</h3>
+        <p class="project-description">A comprehensive management system for schools to handle students, teachers, courses, grades, and attendance efficiently.</p>
+        <div class="project-tags">
+            <span class="project-tag">JavaScript</span>
+            <span class="project-tag">Dynamic</span>
+            <span class="project-tag">Module</span>
+        </div>
+        <a href="#" class="project-link" data-project="school-management">View Project <i class="fas fa-arrow-right"></i></a>
+    </div>
+</div>
+
+<!-- Business Management System -->
+<div class="project-card slide-from-top">
+    <div class="project-image">
+        <img src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=600&h=400&fit=crop" alt="Business Management System">
+    </div>
+    <div class="project-content">
+        <h3 class="project-title">Business Management System</h3>
+        <p class="project-description">Enterprise solution for managing business operations, inventory, sales, customer relationships, and financial reporting.</p>
+        <div class="project-tags">
+            <span class="project-tag">PHP</span>
+            <span class="project-tag">MySQL</span>
+            <span class="project-tag">JavaScript</span>
+        </div>
+        <a href="#" class="project-link" data-project="business-management">View Project <i class="fas fa-arrow-right"></i></a>
+    </div>
+</div>
+
+<!-- Service Management System -->
+<div class="project-card slide-from-right">
+    <div class="project-image">
+        <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&h=400&fit=crop" alt="Service Management System">
+    </div>
+    <div class="project-content">
+        <h3 class="project-title">Service Management System</h3>
+        <p class="project-description">A platform for managing service requests, scheduling, customer communication, and service delivery tracking.</p>
+        <div class="project-tags">
+            <span class="project-tag">Python</span>
+            <span class="project-tag">Django</span>
+            <span class="project-tag">PostgreSQL</span>
+        </div>
+        <a href="#" class="project-link" data-project="service-management">View Project <i class="fas fa-arrow-right"></i></a>
+    </div>
+</div>
+       </div>    
+  </div>
+</section>
 
     <!-- Skills Section -->
     <section id="skills">
         <div class="container">
-            <div class="section-title">
+            <div class="section-title slide-from-left">
                 <h2>My Skills</h2>
                 <p>Here are the technologies and tools I work with</p>
             </div>
             <div class="skills-container">
                 <div class="skills-column">
-                    <div class="skill-item">
+                    <div class="skill-item slide-from-left">
                         <div class="skill-header">
                             <span class="skill-name">UI/UX Design</span>
                             <span class="skill-percentage">95%</span>
@@ -101,7 +180,7 @@
                             <div class="skill-progress" data-width="95"></div>
                         </div>
                     </div>
-                    <div class="skill-item">
+                    <div class="skill-item slide-from-right">
                         <div class="skill-header">
                             <span class="skill-name">Web Development</span>
                             <span class="skill-percentage">90%</span>
@@ -110,7 +189,7 @@
                             <div class="skill-progress" data-width="90"></div>
                         </div>
                     </div>
-                    <div class="skill-item">
+                    <div class="skill-item slide-from-left">
                         <div class="skill-header">
                             <span class="skill-name">JavaScript</span>
                             <span class="skill-percentage">95%</span>
@@ -121,7 +200,7 @@
                     </div>
                 </div>
                 <div class="skills-column">
-                    <div class="skill-item">
+                    <div class="skill-item slide-from-right">
                         <div class="skill-header">
                             <span class="skill-name">React</span>
                             <span class="skill-percentage">80%</span>
@@ -130,7 +209,7 @@
                             <div class="skill-progress" data-width="80"></div>
                         </div>
                     </div>
-                    <div class="skill-item">
+                    <div class="skill-item slide-from-left">
                         <div class="skill-header">
                             <span class="skill-name">Graphic Design</span>
                             <span class="skill-percentage">75%</span>
@@ -139,7 +218,7 @@
                             <div class="skill-progress" data-width="75"></div>
                         </div>
                     </div>
-                    <div class="skill-item">
+                    <div class="skill-item slide-from-right">
                         <div class="skill-header">
                             <span class="skill-name">Photography</span>
                             <span class="skill-percentage">70%</span>
@@ -153,143 +232,16 @@
         </div>
     </section>
 
-    <!-- Projects Section -->
-    <section id="projects">
-        <div class="container">
-            <div class="section-title">
-                <h2>My Projects</h2>
-                <p>Check out some of my recent work</p>
-            		<p> I also included some projects that are still in development.</p>
-            </div>
-            <div class="projects-grid">
-                <div class="project-card">
-                    <div class="project-image">
-                        <img src="notes.png" alt="Project 1">
-                    </div>
-                    <div class="project-content">
-                        <h3 class="project-title">Online NotePad Application</h3>
-                        <p class="project-description">A mobile application that helps users write notes and automatically save them online.</p>
-                        <div class="project-tags">
-                            <span class="project-tag">JavaScript</span>
-                            <span class="project-tag">HTML</span>
-                            <span class="project-tag">Firebase</span>
-                        </div>
-                        <a href="notepad.html" class="project-link">View Project <i class="fas fa-arrow-right"></i></a>
-                    </div>
-                </div>
-                <div class="project-card">
-                    <div class="project-image">
-                        <img src="speech-text.png" alt="Project 2">
-                    </div>
-                    <div class="project-content">
-                        <h3 class="project-title">Speech To Text</h3>
-                        <p class="project-description">A web responsive API application that converts speech sounds to written text.</p>
-                        <div class="project-tags">
-                            <span class="project-tag">React</span>
-                            <span class="project-tag">D3.js</span>
-                            <span class="project-tag">Node.js</span>
-                        </div>
-                        <a href="speech to text technology.html" class="project-link">View Project <i class="fas fa-arrow-right"></i></a>
-                    </div>
-                </div>
-                <div class="project-card">
-                    <div class="project-image">
-                        <img src="projectile-simulator.png" alt="Project 3">
-                    </div>
-                    <div class="project-content">
-                        <h3 class="project-title">Projectile Motion Physics simulator</h3>
-                        <p class="project-description">An experimenting apllication for physics students for a core topic "projectile motion".</p>
-                        <div class="project-tags">
-                            <span class="project-tag">WordPress</span>
-                            <span class="project-tag">PHP</span>
-                            <span class="project-tag">MySQL</span>
-                        </div>
-                        <a href="projectile-simulator.html" class="project-link">View Project <i class="fas fa-arrow-right"></i></a>
-                    </div>
-                </div>
-            </div>
-            <div class="project-card">
-                    <div class="project-image">
-                        <img src="amazon.png"alt="Project 3">
-                    </div>
-                    <div class="project-content">
-                        <h3 class="project-title">Amazon simple version</h3>
-                        <p class="project-description">An application still in devrlopment that will connect buyers and sellers online.</p>
-                        <div class="project-tags">
-                            <span class="project-tag">WordPress</span>
-                            <span class="project-tag">PHP</span>
-                            <span class="project-tag">MySQL</span>
-                        </div>
-                        <a href="Amazon.html".html" class="project-link">View Project <i class="fas fa-arrow-right"></i></a>
-                    </div>
-                </div>
-            </div>
-        		<h2>Now I invite you to my game world thats a stress killer.</h2>
-        		    <div class="project-card">
-                    <div class="project-image">
-                        <img src="launcher.png" alt="Project 2">
-                    </div>
-                    <div class="project-content">
-                        <h3 class="project-title">Tonnoid 2d games.</h3>
-                        <p class="project-description">I built these games using on web building languages only. No frame works. No libraries.
-                        </p>
-                        <div class="project-tags">
-                            <span class="project-tag">HTML</span>
-                            <span class="project-tag">D3.js</span>
-                            <span class="project-tag">Node.js</span>
-                        </div>
-                        <a href="launcher/Launcher.html" class="project-link">View Project <i class="fas fa-arrow-right"></i></a>
-                    </div>
-                </div>
-        </div>
-    </section>
-
-    <!-- Testimonials Section -->
-    <section class="testimonials" id="testimonials">
-        <div class="container">
-            <div class="section-title">
-                <h2>Testimonials</h2>
-                <p>What clients say about my work</p>
-            </div>
-            <div class="testimonials-container">
-                <div class="testimonial-card">
-                    <p class="testimonial-text">Working with Tonny Da Vinci was an absolute pleasure. Their attention to detail and creative approach resulted in a website that exceeded our expectations. The project was delivered on time and within budget.</p>
-                    <div class="testimonial-author">
-                        <div class="author-image">
-                            <img src="testimonial.png" alt="Sarah Johnson">
-                        </div>
-                        <div class="author-info">
-                            <h4>Sarah Johnson</h4>
-                            <p>Marketing Director, TechCorp</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="testimonial-card">
-                    <p class="testimonial-text">Tonny Da Vinci transformed our outdated website into a modern, user-friendly platform that has significantly increased our online conversions. Their technical expertise and design sensibility are exceptional.</p>
-                    <div class="testimonial-author">
-                        <div class="author-image">
-                            <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80" alt="Michael Chen">
-                        </div>
-                        <div class="author-info">
-                            <h4>Michael Chen</h4>
-                            <p>CEO, Innovate Solutions</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
     <!-- Contact Section -->
     <section id="contact">
         <div class="container">
-            <div class="section-title">
+            <div class="section-title slide-from-right">
                 <h2>Get In Touch</h2>
-                <p>Let's discuss my next project</p>
+                <p>Let's discuss your next project</p>
             </div>
             <div class="contact-container">
                 <div class="contact-info">
-                    <div class="contact-item">
+                    <div class="contact-item slide-from-left">
                         <div class="contact-icon">
                             <i class="fas fa-map-marker-alt"></i>
                         </div>
@@ -298,7 +250,7 @@
                             <p>Masaka, Uganda</p>
                         </div>
                     </div>
-                    <div class="contact-item">
+                    <div class="contact-item slide-from-right">
                         <div class="contact-icon">
                             <i class="fas fa-envelope"></i>
                         </div>
@@ -307,17 +259,16 @@
                             <p>tonnoidgames@gmail.com</p>
                         </div>
                     </div>
-                		<div class="contact-item">
+                    <div class="contact-item slide-from-left">
                         <div class="contact-icon">
                             <i class="fas fa-envelope"></i>
                         </div>
                         <div class="contact-details">
                             <h4>Email</h4>
-                            <p>jasontonny80@gmail.com
-                            </p>
+                            <p>jasontonny80@gmail.com</p>
                         </div>
                     </div>
-                    <div class="contact-item">
+                    <div class="contact-item slide-from-right">
                         <div class="contact-icon">
                             <i class="fas fa-phone"></i>
                         </div>
@@ -326,14 +277,14 @@
                             <p>+256 758123943</p>
                         </div>
                     </div>
-                    <div class="social-links">
+                    <div class="social-links slide-from-bottom">
                         <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
                         <a href="#" class="social-link"><i class="fab fa-linkedin-in"></i></a>
                         <a href="#" class="social-link"><i class="fab fa-github"></i></a>
                         <a href="#" class="social-link"><i class="fab fa-dribbble"></i></a>
                     </div>
                 </div>
-                <div class="contact-form">
+                <div class="contact-form slide-from-right">
                     <form>
                         <div class="form-group">
                             <input type="text" class="form-control" placeholder="Your Name" required>
@@ -353,25 +304,25 @@
             </div>
         </div>
     </section>
-    		 <!-- Footer -->
+
+    <!-- Footer -->
     <footer>
         <div class="container">
             <div class="footer-content">
-                <div class="footer-column">
+                <div class="footer-column slide-from-left">
                     <h3>TonnoidPort</h3>
                     <p>Creating inspirational digital experiences that connect brands with their audience through thoughtful design and development.</p>
                 </div>
-                <div class="footer-column">
+                <div class="footer-column slide-from-bottom">
                     <h3>Quick Links</h3>
                     <ul class="footer-links">
                         <li><a href="#home">Home</a></li>
                         <li><a href="#about">About</a></li>
                         <li><a href="#skills">Skills</a></li>
-                        <li><a href="#projects">Projects</a></li>
                         <li><a href="#contact">Contact</a></li>
                     </ul>
                 </div>
-                <div class="footer-column">
+                <div class="footer-column slide-from-right">
                     <h3>Services</h3>
                     <ul class="footer-links">
                         <li><a href="#">UI/UX Design</a></li>
@@ -387,5 +338,7 @@
             </div>
         </div>
     </footer>
-		<script src="Portscripts.js"></script>
+
+    <script type="module" src="Portscripts.js"></script>
 </body>
+</html>
