@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tonnoid Port | Tonny Web Dev</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="Portstyles.css">
+    <style>
+        /* Glass Container Styles - Added inline to ensure they work */
+        .glass-container {
+            background: rgba(255, 255, 255, 0.05) !important;
+            backdrop-filter: blur(15px) !important;
+            -webkit-backdrop-filter: blur(15px) !important;
+            border-radius: 20px !important;
+            border: 1px solid rgba(108, 99, 255, 0.2) !important;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3) !important;
+            padding: 30px !important;
+            margin: 20px 0 !important;
+        }
+        
+        .glass-container-inner {
+            background: rgba(255, 255, 255, 0.08) !important;
+            backdrop-filter: blur(10px) !important;
+            -webkit-backdrop-filter: blur(10px) !important;
+            border-radius: 15px !important;
+            border: 1px solid rgba(108, 99, 255, 0.3) !important;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2) !important;
+            padding: 20px !important;
+            margin: 15px 0 !important;
+        }
+        
+         .about-image-container {
+    background: rgba(255, 255, 255, 0.05) !important;
+    backdrop-filter: blur(15px) !important;
+    -webkit-backdrop-filter: blur(15px) !important;
+    border-radius: 20px !important;
+    border: 1px solid rgba(108, 99, 255, 0.2) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3) !important;
+    padding: 30px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    overflow: hidden !important;
+    min-height: 400px !important;
+}
+
+.about-image-inner {
+    background: rgba(255, 255, 255, 0.08) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    border-radius: 15px !important;
+    border: 1px solid rgba(108, 99, 255, 0.3) !important;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2) !important;
+    padding: 15px !important;
+    width: 60% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    overflow: hidden !important;
+    margin-bottom: 20px !important;
+}
+
+.about-image-inner img {
+    width: 100% !important;
+    height: auto !important;
+    border-radius: 10px !important;
+    display: block !important;
+    transition: all 0.5s ease !important;
+}
+
+.about-image-inner:hover img {
+    transform: scale(1.05) !important;
+}
+
+.about-image-text {
+    width: 90% !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    border-radius: 15px !important;
+    border: 1px solid rgba(108, 99, 255, 0.3) !important;
+    padding: 20px !important;
+}
+
+.about-content {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 50px !important;
+    align-items: start !important;
+}
+
+@media (max-width: 768px) {
+    .about-content {
+        grid-template-columns: 1fr !important;
+    }
+}
+    
+        /* Contact info and form glass effect */
+        .contact-info, .contact-form {
+            background: rgba(255, 255, 255, 0.05) !important;
+            backdrop-filter: blur(15px) !important;
+            -webkit-backdrop-filter: blur(15px) !important;
+            border-radius: 20px !important;
+            border: 1px solid rgba(108, 99, 255, 0.2) !important;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3) !important;
+            padding: 30px !important;
+        }
+        .hidden {
+    display: none !important;
+}
+
+.spinner {
+    display: inline-block;
+}
+
+.submit-btn {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.submit-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+    </style>
+</head>
+<body>
+    <!-- Galaxy Background -->
+    <div class="galaxy-background">
+        <div class="stars"></div>
+        <div class="nebula nebula-1"></div>
+        <div class="nebula nebula-2"></div>
+        <div class="nebula nebula-3"></div>
+    </div>
+
+    <!-- Page Loader -->
+    <div class="page-loader" id="pageLoader">
+        <div class="loader-content">
+            <div class="loader-logo">TonnoidPort</div>
+            <div class="loader-text">Building Something Amazing...</div>
+            <div class="loader-bar">
+                <div class="loader-bar-fill"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Header & Navigation -->
+    <header>
+        <div class="container">
+            <nav class="navbar">
+                <a href="#" class="logo">TonnoidPort</a>
+               <ul class="nav-links">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#skills">Skills</a></li>
+                <li><a href="#projects">Projects</a></li>
+                <li><a href="#contact">Contact</a></li>
+               </ul>
+                <div class="menu-toggle">
+                    <i class="fas fa-bars"></i>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="container">
+            <div class="hero-content">
+                <h1 class="slide-from-left">Turning Ideas Into <span class="gradient-text">Inspirational</span> Digital Experiences</h1>
+                <p class="slide-from-right">I'm a passionate designer & developer creating beautiful, functional websites that inspire and engage users. Let's build something amazing together.</p>
+                <div class="hero-btns">
+                    <a href="#skills" class="btn slide-from-bottom">View My Skills</a>
+                    <a href="#contact" class="btn btn-outline slide-from-top">Get In Touch</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+       <!-- About Section -->
+<section id="about">
+    <div class="container">
+        <div class="section-title slide-from-top">
+            <h2>About Me</h2>
+            <p>Get to know more about my journey and passion</p>
+        </div>
+        <div class="about-content">
+            <div class="about-image-container slide-from-left">
+                <div class="about-image-inner">
+                    <img src="myPhoto.webp" alt="About Me">
+                </div>
+                <div class="about-image-text">
+                    <p style="color: #ccc; margin-top: 20px; text-align: center; font-style: italic;">
+                        "Web coding is my passion and my world and I invite you all into my world where we weave dreams."
+                    </p>
+                </div>
+            </div>
+            <div class="about-text">
+                <div class="glass-container slide-from-right">
+                    <h3>Hello! I'm Tonny Jason, a Creative Designer & Developer</h3>
+                    <p>With over 5 years of experience in the digital industry, I specialize in creating visually stunning and highly functional websites and applications. My passion lies in solving complex problems through clean, efficient code and intuitive design.</p>
+                    <p>I believe that great design is not just about aesthetics, but about creating meaningful experiences that connect with users on an emotional level.</p>
+                </div>
+                <div class="stats">
+                    <div class="stat-item glass-container-inner slide-from-bottom">
+                        <div class="stat-number">50+</div>
+                        <div class="stat-text">Projects Completed</div>
+                    </div>
+                    <div class="stat-item glass-container-inner slide-from-top">
+                        <div class="stat-number">50+</div>
+                        <div class="stat-text">Projects In Development</div>
+                    </div>
+                    <div class="stat-item glass-container-inner slide-from-bottom">
+                        <div class="stat-number">25+</div>
+                        <div class="stat-text">Happy Clients</div>
+                    </div>
+                    <div class="stat-item glass-container-inner slide-from-top">
+                        <div class="stat-number">5+</div>
+                        <div class="stat-text">Years Experience</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+    
+    <!-- Skills Section -->
+    <section id="skills">
+        <div class="container">
+            <div class="section-title slide-from-left">
+                <h2>My Skills</h2>
+                <p>Here are the technologies and tools I work with</p>
+            </div>
+            <div class="glass-container">
+                <div class="skills-container">
+                    <div class="skills-column">
+                        <div class="skill-item slide-from-left">
+                            <div class="skill-header">
+                                <span class="skill-name">UI/UX Design</span>
+                                <span class="skill-percentage">95%</span>
+                            </div>
+                            <div class="skill-bar">
+                                <div class="skill-progress" data-width="95"></div>
+                            </div>
+                        </div>
+                        <div class="skill-item slide-from-right">
+                            <div class="skill-header">
+                                <span class="skill-name">Web Development</span>
+                                <span class="skill-percentage">90%</span>
+                            </div>
+                            <div class="skill-bar">
+                                <div class="skill-progress" data-width="90"></div>
+                            </div>
+                        </div>
+                        <div class="skill-item slide-from-left">
+                            <div class="skill-header">
+                                <span class="skill-name">JavaScript</span>
+                                <span class="skill-percentage">95%</span>
+                            </div>
+                            <div class="skill-bar">
+                                <div class="skill-progress" data-width="95"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="skills-column">
+                        <div class="skill-item slide-from-right">
+                            <div class="skill-header">
+                                <span class="skill-name">React</span>
+                                <span class="skill-percentage">80%</span>
+                            </div>
+                            <div class="skill-bar">
+                                <div class="skill-progress" data-width="80"></div>
+                            </div>
+                        </div>
+                        <div class="skill-item slide-from-left">
+                            <div class="skill-header">
+                                <span class="skill-name">Graphic Design</span>
+                                <span class="skill-percentage">75%</span>
+                            </div>
+                            <div class="skill-bar">
+                                <div class="skill-progress" data-width="75"></div>
+                            </div>
+                        </div>
+                        <div class="skill-item slide-from-right">
+                            <div class="skill-header">
+                                <span class="skill-name">Photography</span>
+                                <span class="skill-percentage">70%</span>
+                            </div>
+                            <div class="skill-bar">
+                                <div class="skill-progress" data-width="70"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Projects Section -->
+    <section id="projects">
+        <div class="container">
+            <div class="section-title slide-from-left">
+                <h2>Featured Projects</h2>
+                <p>Some of my recent work that showcases my skills</p>
+            </div>
+            <div class="projects-grid">
+                <!-- School Management System -->
+                <div class="project-card glass-container-inner slide-from-left">
+                    <div class="project-image">
+                        <img src="https://plus.unsplash.com/premium_photo-1681681082165-fd333bbc037a?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTN8fGxlYXJuaW5nJTIwc3R1ZGVudHN8ZW58MHx8MHx8fDA%3D" alt="School Management System">
+                    </div>
+                    <div class="project-content">
+                        <h3 class="project-title">School Management System</h3>
+                        <p class="project-description">A comprehensive management system for schools to handle students, teachers, courses, grades, and attendance efficiently.</p>
+                        <div class="project-tags">
+                            <span class="project-tag">JavaScript</span>
+                            <span class="project-tag">Dynamic</span>
+                            <span class="project-tag">Module</span>
+                        </div>
+                        <a href="#" class="project-link" data-project="school-management">View Project <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+                
+                <!-- Business Management System -->
+                <div class="project-card glass-container-inner slide-from-top">
+                    <div class="project-image">
+                        <img src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=600&h=400&fit=crop" alt="Business Management System">
+                    </div>
+                    <div class="project-content">
+                        <h3 class="project-title">Business Management System</h3>
+                        <p class="project-description">Enterprise solution for managing business operations, inventory, sales, customer relationships, and financial reporting.</p>
+                        <div class="project-tags">
+                            <span class="project-tag">PHP</span>
+                            <span class="project-tag">MySQL</span>
+                            <span class="project-tag">JavaScript</span>
+                        </div>
+                        <a href="#" class="project-link" data-project="business-management">View Project <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+
+                <!-- Service Management System -->
+                <div class="project-card glass-container-inner slide-from-right">
+                    <div class="project-image">
+                        <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&h=400&fit=crop" alt="Service Management System">
+                    </div>
+                    <div class="project-content">
+                        <h3 class="project-title">Service Management System</h3>
+                        <p class="project-description">A platform for managing service requests, scheduling, customer communication, and service delivery tracking.</p>
+                        <div class="project-tags">
+                            <span class="project-tag">Python</span>
+                            <span class="project-tag">Django</span>
+                            <span class="project-tag">PostgreSQL</span>
+                        </div>
+                        <a href="#" class="project-link" data-project="service-management">View Project <i class="fas fa-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>    
+        </div>
+    </section>
+    
+    <!-- Contact Section -->
+<section id="contact">
+    <div class="container">
+        <div class="section-title slide-from-right">
+            <h2>Get In Touch</h2>
+            <p>Let's discuss your next project</p>
+        </div>
+        <div class="contact-container">
+            <div class="contact-info glass-container slide-from-left">
+                <div class="contact-item">
+                    <div class="contact-icon">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <div class="contact-details">
+                        <h4>Location</h4>
+                        <p>Masaka, Uganda</p>
+                    </div>
+                </div>
+                <div class="contact-item">
+                    <div class="contact-icon">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <div class="contact-details">
+                        <h4>Email</h4>
+                        <p>tonnoidgames@gmail.com</p>
+                    </div>
+                </div>
+                <div class="contact-item">
+                    <div class="contact-icon">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <div class="contact-details">
+                        <h4>Email</h4>
+                        <p>jasontonny80@gmail.com</p>
+                    </div>
+                </div>
+                <div class="contact-item">
+                    <div class="contact-icon">
+                        <i class="fas fa-phone"></i>
+                    </div>
+                    <div class="contact-details">
+                        <h4>Phone</h4>
+                        <p>+256 758123943</p>
+                    </div>
+                </div>
+                <div class="social-links slide-from-bottom">
+                    <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="social-link"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="#" class="social-link"><i class="fab fa-github"></i></a>
+                    <a href="#" class="social-link"><i class="fab fa-dribbble"></i></a>
+                </div>
+            </div>
+            <div class="contact-form glass-container slide-from-right">
+                <form id="contact-form">
+                    <div class="form-group">
+                        <label for="from_name" style="color: #ccc; margin-bottom: 5px; display: block;">Your Name</label>
+                        <input type="text" id="from_name" class="form-control" placeholder="Enter your name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="from_email" style="color: #ccc; margin-bottom: 5px; display: block;">Your Email</label>
+                        <input type="email" id="from_email" class="form-control" placeholder="Enter your email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="subject" style="color: #ccc; margin-bottom: 5px; display: block;">Subject</label>
+                        <input type="text" id="subject" class="form-control" placeholder="Subject">
+                    </div>
+                    <div class="form-group">
+                        <label for="message" style="color: #ccc; margin-bottom: 5px; display: block;">Message</label>
+                        <textarea id="message" class="form-control" placeholder="Your Message" required></textarea>
+                    </div>
+                    <button type="submit" class="btn submit-btn" style="width: 100%; position: relative;">
+                        <span class="btn-text">Send Email</span>
+                        <span class="spinner hidden" style="display: inline-block; margin-left: 10px;">
+                            <i class="fas fa-spinner fa-spin"></i>
+                        </span>
+                    </button>
+                </form>
+                <div id="success-message" class="hidden" style="display: none; margin-top: 15px; padding: 15px; border-radius: 8px; background: rgba(76, 175, 80, 0.2); border: 1px solid #4CAF50; color: #4CAF50; text-align: center;">
+                    ✓ Email sent successfully! I'll get back to you soon.
+                </div>
+                <div id="error-message" class="hidden" style="display: none; margin-top: 15px; padding: 15px; border-radius: 8px; background: rgba(244, 67, 54, 0.2); border: 1px solid #f44336; color: #f44336; text-align: center;">
+                    ✗ Failed to send email. Please try again.
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column slide-from-left">
+                    <h3>TonnoidPort</h3>
+                    <p>Creating inspirational digital experiences that connect brands with their audience through thoughtful design and development.</p>
+                </div>
+                <div class="footer-column slide-from-bottom">
+                    <h3>Quick Links</h3>
+                    <ul class="footer-links">
+                        <li><a href="#home">Home</a></li>
+                        <li><a href="#about">About</a></li>
+                        <li><a href="#skills">Skills</a></li>
+                        <li><a href="#contact">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column slide-from-right">
+                    <h3>Services</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">UI/UX Design</a></li>
+                        <li><a href="#">Web Development</a></li>
+                        <li><a href="#">Mobile Apps</a></li>
+                        <li><a href="#">Brand Identity</a></li>
+                        <li><a href="#">Digital Marketing</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2023 TonnoidPort. All Rights Reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script type="module" src="Portscripts.js"></script>
+</body>
+</html>
