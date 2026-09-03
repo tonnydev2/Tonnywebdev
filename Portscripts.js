@@ -344,4 +344,87 @@ document.addEventListener('keydown', function(e) {
     }
 });
 
+// Initialize EmailJS with your Public Key
+const EMAILJS_PUBLIC_KEY = "-yFWcCKSnWFhyazHM";
+emailjs.init(EMAILJS_PUBLIC_KEY);
+
+// Your EmailJS configuration
+const EMAILJS_CONFIG = {
+    serviceId: 'service_3s7uxlj',
+    templateId: 'template_q0ol9um'
+};
+
+// Email functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const contactForm = document.getElementById('contact-form');
+    
+    // Check if contact form exists (it might be hidden during school management)
+    if (!contactForm) return;
+    
+    const submitBtn = contactForm.querySelector('.submit-btn');
+    const btnText = submitBtn.querySelector('.btn-text');
+    const spinner = submitBtn.querySelector('.spinner');
+    const successMessage = document.getElementById('success-message');
+    const errorMessage = document.getElementById('error-message');
+
+    contactForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        // Show loading state
+        btnText.textContent = 'Sending...';
+        spinner.classList.remove('hidden');
+        submitBtn.disabled = true;
+        
+        // Hide any previous messages
+        successMessage.style.display = 'none';
+        errorMessage.style.display = 'none';
+        
+        try {
+            // Get form data
+            const formData = {
+                from_name: document.getElementById('from_name').value,
+                from_email: document.getElementById('from_email').value,
+                subject: document.getElementById('subject').value,
+                message: document.getElementById('message').value,
+                to_email: 'jasontonny80@gmail.com'
+            };
+            
+            // Send email using EmailJS
+            const response = await emailjs.send(
+                EMAILJS_CONFIG.serviceId,
+                EMAILJS_CONFIG.templateId,
+                formData
+            );
+            
+            console.log('Email sent successfully:', response);
+            
+            // Show success message
+            successMessage.style.display = 'block';
+            
+            // Reset form
+            contactForm.reset();
+            
+        } catch (error) {
+            console.error('Error sending email:', error);
+            
+            // Show error message
+            errorMessage.textContent = `✗ Error: ${error.text || 'Failed to send email'}`;
+            errorMessage.style.display = 'block';
+            
+        } finally {
+            // Reset button state
+            btnText.textContent = 'Send Email';
+            spinner.classList.add('hidden');
+            submitBtn.disabled = false;
+            
+            // Hide success message after 5 seconds
+            if (successMessage.style.display === 'block') {
+                setTimeout(() => {
+                    successMessage.style.display = 'none';
+                }, 5000);
+            }
+        }
+    });
+});
+
 console.log('Portfolio script loaded successfully');

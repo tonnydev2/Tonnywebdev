@@ -14,11 +14,86 @@ export class SchoolData {
         
         // Initialize with default data
         this.students = [
-            { id: 1, name: 'John Doe', grade: 'Grade 10', age: 15, email: 'john.doe@student.com', guardian: 'Mr. Doe' },
-            { id: 2, name: 'Jane Smith', grade: 'Grade 11', age: 16, email: 'jane.smith@student.com', guardian: 'Mrs. Smith' },
-            { id: 3, name: 'Michael Johnson', grade: 'Grade 9', age: 14, email: 'michael.j@student.com', guardian: 'Mr. Johnson' },
-            { id: 4, name: 'Sarah Williams', grade: 'Grade 12', age: 17, email: 'sarah.w@student.com', guardian: 'Mrs. Williams' },
-            { id: 5, name: 'David Brown', grade: 'Grade 10', age: 15, email: 'david.b@student.com', guardian: 'Mr. Brown' }
+            { 
+                id: 1, 
+                name: 'John Doe', 
+                grade: 'Grade 10', 
+                age: 15, 
+                email: 'john.doe@student.com', 
+                guardian: 'Mr. Doe',
+                photo: 'https://ui-avatars.com/api/?name=John+Doe&background=6C63FF&color=fff&size=200',
+                course: 'Mathematics',
+                feesBalance: 150,
+                payCode: 'PAY-000001',
+                registerNumber: 'REG-0001',
+                attendance: 95,
+                performance: 'Excellent',
+                comment: 'Consistent performer with great potential.'
+            },
+            { 
+                id: 2, 
+                name: 'Jane Smith', 
+                grade: 'Grade 11', 
+                age: 16, 
+                email: 'jane.smith@student.com', 
+                guardian: 'Mrs. Smith',
+                photo: 'https://ui-avatars.com/api/?name=Jane+Smith&background=FF6584&color=fff&size=200',
+                course: 'Science',
+                feesBalance: 0,
+                payCode: 'PAY-000002',
+                registerNumber: 'REG-0002',
+                attendance: 98,
+                performance: 'Outstanding',
+                comment: 'Top of her class in all subjects.'
+            },
+            { 
+                id: 3, 
+                name: 'Michael Johnson', 
+                grade: 'Grade 9', 
+                age: 14, 
+                email: 'michael.j@student.com', 
+                guardian: 'Mr. Johnson',
+                photo: 'https://ui-avatars.com/api/?name=Michael+Johnson&background=4ECDC4&color=fff&size=200',
+                course: 'English',
+                feesBalance: 300,
+                payCode: 'PAY-000003',
+                registerNumber: 'REG-0003',
+                attendance: 88,
+                performance: 'Good',
+                comment: 'Shows improvement in participation.'
+            },
+            { 
+                id: 4, 
+                name: 'Sarah Williams', 
+                grade: 'Grade 12', 
+                age: 17, 
+                email: 'sarah.w@student.com', 
+                guardian: 'Mrs. Williams',
+                photo: 'https://ui-avatars.com/api/?name=Sarah+Williams&background=FF6584&color=fff&size=200',
+                course: 'History',
+                feesBalance: 50,
+                payCode: 'PAY-000004',
+                registerNumber: 'REG-0004',
+                attendance: 92,
+                performance: 'Very Good',
+                comment: 'Active in extracurricular activities.'
+            },
+            { 
+                id: 5, 
+                name: 'David Brown', 
+                grade: 'Grade 10', 
+                age: 15, 
+                email: 'david.b@student.com', 
+                guardian: 'Mr. Brown',
+                photo: 'https://ui-avatars.com/api/?name=David+Brown&background=6C63FF&color=fff&size=200',
+                course: 'Geography',
+                feesBalance: 200,
+                payCode: 'PAY-000005',
+                registerNumber: 'REG-0005',
+                attendance: 85,
+                performance: 'Average',
+                comment: 'Needs improvement in homework completion.'
+            }
         ];
         
         this.teachers = [
@@ -54,6 +129,17 @@ export class SchoolData {
 
     addStudent(student) {
         student.id = this.students.length + 1;
+        if (!student.photo) {
+            student.photo = `https://ui-avatars.com/api/?name=${encodeURIComponent(student.name)}&background=6C63FF&color=fff&size=200`;
+        }
+        if (!student.course) student.course = 'General Studies';
+        if (!student.feesBalance) student.feesBalance = 0;
+        if (!student.payCode) student.payCode = 'PAY-' + String(student.id).padStart(6, '0');
+        if (!student.registerNumber) student.registerNumber = 'REG-' + String(student.id).padStart(4, '0');
+        if (!student.attendance) student.attendance = 95;
+        if (!student.performance) student.performance = 'Good';
+        if (!student.comment) student.comment = 'No comments yet.';
+        
         this.students.push(student);
         this.saveToStorage();
         return student;
@@ -97,7 +183,8 @@ export class SchoolData {
             schoolName: this.schoolName,
             location: this.location,
             students: this.students,
-            teachers: this.teachers
+            teachers: this.teachers,
+            advertisements: this.advertisements
         };
         
         localStorage.setItem('schoolManagementData', JSON.stringify(data));
@@ -109,6 +196,7 @@ export class SchoolData {
             const data = JSON.parse(savedData);
             this.students = data.students || [];
             this.teachers = data.teachers || [];
+            this.advertisements = data.advertisements || [];
         }
     }
 }

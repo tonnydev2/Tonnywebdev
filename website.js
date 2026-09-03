@@ -7,6 +7,11 @@ export class SchoolWebsite {
         this.assistant = null;
         this.currentPage = 'home';
         this.studentViewMode = 'grid';
+        this.currentPageIndex = 0;
+        this.pages = ['home', 'students', 'teachers', 'advertisements', 'contacts', 'admissions'];
+        this.isAnimating = false;
+        this.navContainer = null;
+        this.floatingButtonsContainer = null;
     }
 
     async generate(schoolName, location, parentContainer = document.body, data = null, assistant = null) {
@@ -33,13 +38,14 @@ export class SchoolWebsite {
         this.generateHeader(schoolName, location);
         this.generateNavigation();
         this.generatePages(schoolName, location);
+        this.generateActivitySections();
+        this.generateFloatingButtons();
         
         return Promise.resolve();
     }
 
     generateHeader(schoolName, location) {
         const header = document.createElement('div');
-        header.className = 'school-header';
         header.style.cssText = `
             background: rgba(108, 99, 255, 0.1);
             backdrop-filter: blur(10px);
@@ -61,7 +67,6 @@ export class SchoolWebsite {
 
     generateNavigation() {
         const nav = document.createElement('nav');
-        nav.className = 'school-nav';
         nav.style.cssText = `
             background: rgba(10, 10, 26, 0.9);
             backdrop-filter: blur(10px);
@@ -79,11 +84,11 @@ export class SchoolWebsite {
             margin: 0 auto;
             display: flex;
             justify-content: center;
-            gap: 20px;
+            gap: 15px;
             flex-wrap: wrap;
         `;
         
-        const pages = ['Home', 'Students', 'Teachers', 'Advertisements', 'Contacts'];
+        const pages = ['Home', 'Students', 'Teachers', 'Advertisements', 'Admissions', 'Contacts'];
         pages.forEach((page, index) => {
             const link = document.createElement('a');
             link.className = 'nav-link';
@@ -107,7 +112,7 @@ export class SchoolWebsite {
             }
             
             link.addEventListener('click', (e) => {
-                this.switchPage(link.dataset.page, navContainer);
+                this.switchPageWithAnimation(link.dataset.page, navContainer);
             });
             
             navContainer.appendChild(link);
@@ -115,43 +120,70 @@ export class SchoolWebsite {
         
         nav.appendChild(navContainer);
         this.websiteContainer.appendChild(nav);
+        this.navContainer = navContainer;
     }
 
-    switchPage(pageName, navContainer) {
-        navContainer.querySelectorAll('.nav-link').forEach(l => {
-            l.classList.remove('active');
-            l.style.background = 'none';
-            l.style.color = '#fff';
-        });
-        
-        const activeLink = navContainer.querySelector(`[data-page="${pageName}"]`);
-        if (activeLink) {
-            activeLink.classList.add('active');
-            activeLink.style.background = 'linear-gradient(135deg, #6C63FF, #FF6584)';
-            activeLink.style.color = 'white';
-        }
+    switchPageWithAnimation(pageName, navContainer) {
+        if (this.isAnimating || pageName === this.currentPage) return;
+        this.isAnimating = true;
         
         const content = this.websiteContainer.querySelector('.content');
         if (!content) return;
         
-        const pageElements = content.querySelectorAll('.page');
-        pageElements.forEach(p => {
-            p.style.display = 'none';
-        });
+        const currentPageElement = content.querySelector(`#${this.currentPage}Page`);
+        const targetPageElement = content.querySelector(`#${pageName}Page`);
         
-        const targetPage = content.querySelector(`#${pageName}Page`);
-        if (targetPage) {
-            targetPage.style.display = 'block';
-            this.currentPage = pageName;
+        if (!currentPageElement || !targetPageElement) return;
+        
+        // Fade out current page
+        currentPageElement.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+        currentPageElement.style.opacity = '0';
+        currentPageElement.style.transform = 'translateX(-50px)';
+        
+        setTimeout(() => {
+            currentPageElement.style.display = 'none';
             
-            if (pageName === 'students') {
-                this.updateStudentsGrid();
-            } else if (pageName === 'teachers') {
-                this.updateTeachersTable();
-            } else if (pageName === 'advertisements') {
-                this.updateAdvertisements();
-            }
-        }
+            // Fade in target page
+            targetPageElement.style.display = 'block';
+            targetPageElement.style.opacity = '0';
+            targetPageElement.style.transform = 'translateX(50px)';
+            
+            setTimeout(() => {
+                targetPageElement.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+                targetPageElement.style.opacity = '1';
+                targetPageElement.style.transform = 'translateX(0)';
+                
+                this.currentPage = pageName;
+                this.currentPageIndex = this.pages.indexOf(pageName);
+                
+                // Update nav active state
+                if (navContainer) {
+                    navContainer.querySelectorAll('.nav-link').forEach(l => {
+                        l.classList.remove('active');
+                        l.style.background = 'none';
+                        l.style.color = '#fff';
+                    });
+                    
+                    const activeLink = navContainer.querySelector(`[data-page="${pageName}"]`);
+                    if (activeLink) {
+                        activeLink.classList.add('active');
+                        activeLink.style.background = 'linear-gradient(135deg, #6C63FF, #FF6584)';
+                        activeLink.style.color = 'white';
+                    }
+                }
+                
+                // Update content
+                if (pageName === 'students') {
+                    this.updateStudentsGrid();
+                } else if (pageName === 'teachers') {
+                    this.updateTeachersTable();
+                } else if (pageName === 'advertisements') {
+                    this.updateAdvertisements();
+                }
+                
+                this.isAnimating = false;
+            }, 50);
+        }, 300);
     }
 
     generatePages(schoolName, location) {
@@ -200,10 +232,10 @@ export class SchoolWebsite {
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
                         <h2 style="color: white;">Students</h2>
                         <div style="display: flex; gap: 10px;">
-                            <button id="gridViewBtn" onclick="window.schoolWebsite.toggleStudentView('grid')" style="background: linear-gradient(135deg, #6C63FF, #FF6584); color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-family: 'Poppins', sans-serif; font-size: 14px;">
+                            <button onclick="window.schoolWebsite.toggleStudentView('grid')" style="background: linear-gradient(135deg, #6C63FF, #FF6584); color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-family: 'Poppins', sans-serif; font-size: 14px;">
                                 <i class="fas fa-th-large"></i> Grid View
                             </button>
-                            <button id="manageViewBtn" onclick="window.schoolWebsite.toggleStudentView('manage')" style="background: rgba(255, 255, 255, 0.1); color: white; border: 1px solid rgba(108, 99, 255, 0.3); padding: 12px 24px; border-radius: 8px; cursor: pointer; font-family: 'Poppins', sans-serif; font-size: 14px;">
+                            <button onclick="window.schoolWebsite.toggleStudentView('manage')" style="background: rgba(255, 255, 255, 0.1); color: white; border: 1px solid rgba(108, 99, 255, 0.3); padding: 12px 24px; border-radius: 8px; cursor: pointer; font-family: 'Poppins', sans-serif; font-size: 14px;">
                                 <i class="fas fa-cog"></i> Manage Students
                             </button>
                         </div>
@@ -234,6 +266,32 @@ export class SchoolWebsite {
                         </button>
                     </div>
                     <div id="advertisementsContainer"></div>
+                </div>
+            </div>
+            
+            <div class="page" id="admissionsPage" style="display: none;">
+                <div style="background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); border: 1px solid rgba(108, 99, 255, 0.2);">
+                    <h2 style="color: white; margin-bottom: 20px; text-align: center;">Admissions & Fees</h2>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                        <div style="background: rgba(255, 255, 255, 0.1); padding: 25px; border-radius: 15px; border: 1px solid rgba(108, 99, 255, 0.3); cursor: pointer;" onclick="window.schoolWebsite.showTuitionMenu('primary')">
+                            <i class="fas fa-child" style="font-size: 50px; color: #6C63FF; margin-bottom: 15px;"></i>
+                            <h3 style="color: white; margin-bottom: 10px;">Primary School</h3>
+                            <p style="color: #ccc;">Grades 1-6</p>
+                            <button style="margin-top: 15px; background: linear-gradient(135deg, #6C63FF, #FF6584); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">View Tuition & Requirements</button>
+                        </div>
+                        <div style="background: rgba(255, 255, 255, 0.1); padding: 25px; border-radius: 15px; border: 1px solid rgba(108, 99, 255, 0.3); cursor: pointer;" onclick="window.schoolWebsite.showTuitionMenu('secondary')">
+                            <i class="fas fa-user-graduate" style="font-size: 50px; color: #6C63FF; margin-bottom: 15px;"></i>
+                            <h3 style="color: white; margin-bottom: 10px;">Secondary School</h3>
+                            <p style="color: #ccc;">Grades 7-12</p>
+                            <button style="margin-top: 15px; background: linear-gradient(135deg, #6C63FF, #FF6584); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">View Tuition & Requirements</button>
+                        </div>
+                        <div style="background: rgba(255, 255, 255, 0.1); padding: 25px; border-radius: 15px; border: 1px solid rgba(108, 99, 255, 0.3); cursor: pointer;" onclick="window.schoolWebsite.showTuitionMenu('advanced')">
+                            <i class="fas fa-flask" style="font-size: 50px; color: #6C63FF; margin-bottom: 15px;"></i>
+                            <h3 style="color: white; margin-bottom: 10px;">Advanced Level</h3>
+                            <p style="color: #ccc;">A-Level</p>
+                            <button style="margin-top: 15px; background: linear-gradient(135deg, #6C63FF, #FF6584); color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer;">View Tuition & Requirements</button>
+                        </div>
+                    </div>
                 </div>
             </div>
             
@@ -278,6 +336,175 @@ export class SchoolWebsite {
         window.schoolWebsite = this;
     }
 
+    showTuitionMenu(level) {
+        const tuitionData = {
+            primary: {
+                title: 'Primary School Tuition',
+                fees: [
+                    { grade: 'Grade 1-2', tuition: '$500', requirements: 'Birth certificate, Previous report card' },
+                    { grade: 'Grade 3-4', tuition: '$550', requirements: 'Birth certificate, Previous report card' },
+                    { grade: 'Grade 5-6', tuition: '$600', requirements: 'Birth certificate, Previous report card' }
+                ]
+            },
+            secondary: {
+                title: 'Secondary School Tuition',
+                fees: [
+                    { grade: 'Grade 7-8', tuition: '$700', requirements: 'Primary leaving certificate, Birth certificate' },
+                    { grade: 'Grade 9-10', tuition: '$800', requirements: 'Previous report card, Birth certificate' },
+                    { grade: 'Grade 11-12', tuition: '$900', requirements: 'Previous report card, National ID' }
+                ]
+            },
+            advanced: {
+                title: 'Advanced Level Tuition',
+                fees: [
+                    { grade: 'Senior 5', tuition: '$1000', requirements: 'O-Level certificate, National ID' },
+                    { grade: 'Senior 6', tuition: '$1100', requirements: 'Previous report card, National ID' }
+                ]
+            }
+        };
+        
+        const data = tuitionData[level];
+        if (!data) return;
+        
+        const overlay = document.createElement('div');
+        overlay.style.cssText = `position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); z-index: 999999; display: flex; align-items: center; justify-content: center;`;
+        
+        let feesHTML = '';
+        data.fees.forEach(fee => {
+            feesHTML += `
+                <div style="background: rgba(255, 255, 255, 0.1); padding: 20px; border-radius: 10px; border: 1px solid rgba(108, 99, 255, 0.3);">
+                    <h4 style="color: white; margin-bottom: 10px;">${fee.grade}</h4>
+                    <p style="color: #FF6584; font-size: 18px; font-weight: bold; margin-bottom: 10px;">${fee.tuition} per term</p>
+                    <p style="color: #ccc; font-size: 13px;"><strong style="color: white;">Requirements:</strong> ${fee.requirements}</p>
+                </div>
+            `;
+        });
+        
+        overlay.innerHTML = `
+            <div style="background: linear-gradient(135deg, #1a1a3e, #2a2a4e); border-radius: 20px; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto; border: 1px solid rgba(108, 99, 255, 0.5);">
+                <div style="background: linear-gradient(135deg, #6C63FF, #FF6584); padding: 30px; text-align: center; position: relative;">
+                    <button onclick="this.closest('div[style]').parentElement.remove()" style="position: absolute; top: 20px; right: 20px; background: #f44336; border: none; color: white; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 20px;">×</button>
+                    <h2 style="color: white; margin-bottom: 10px;">${data.title}</h2>
+                </div>
+                <div style="padding: 30px; display: grid; gap: 20px;">
+                    ${feesHTML}
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(overlay);
+        
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                overlay.remove();
+            }
+        });
+    }
+
+    generateActivitySections() {
+        const homePage = this.websiteContainer.querySelector('#homePage');
+        if (!homePage) return;
+        
+        const activitiesHTML = `
+            <div style="margin-top: 30px; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                <div style="background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border-radius: 20px; overflow: hidden; border: 1px solid rgba(108, 99, 255, 0.2);">
+                    <img src="https://images.unsplash.com/photo-1509062522246-3755977927d7?w=600&h=400&fit=crop" alt="Students Learning" style="width: 100%; height: 200px; object-fit: cover;">
+                    <div style="padding: 20px;">
+                        <h3 style="color: white; margin-bottom: 10px;">Interactive Learning</h3>
+                        <p style="color: #ccc; font-size: 14px; line-height: 1.6;">Our students engage in interactive learning sessions that promote critical thinking and creativity. Modern teaching methods ensure every student reaches their full potential.</p>
+                    </div>
+                </div>
+                <div style="background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border-radius: 20px; overflow: hidden; border: 1px solid rgba(108, 99, 255, 0.2);">
+                    <img src="https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=600&h=400&fit=crop" alt="Sports Activities" style="width: 100%; height: 200px; object-fit: cover;">
+                    <div style="padding: 20px;">
+                        <h3 style="color: white; margin-bottom: 10px;">Sports & Athletics</h3>
+                        <p style="color: #ccc; font-size: 14px; line-height: 1.6;">Physical education and sports are integral parts of our curriculum. Students participate in various athletic activities that build teamwork and discipline.</p>
+                    </div>
+                </div>
+                <div style="background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border-radius: 20px; overflow: hidden; border: 1px solid rgba(108, 99, 255, 0.2);">
+                    <img src="https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=600&h=400&fit=crop" alt="Science Experiments" style="width: 100%; height: 200px; object-fit: cover;">
+                    <div style="padding: 20px;">
+                        <h3 style="color: white; margin-bottom: 10px;">Science Experiments</h3>
+                        <p style="color: #ccc; font-size: 14px; line-height: 1.6;">Hands-on laboratory experiments help students understand scientific concepts practically. Our well-equipped labs provide the perfect environment for discovery.</p>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        homePage.insertAdjacentHTML('beforeend', activitiesHTML);
+    }
+
+    generateFloatingButtons() {
+        // Remove existing floating buttons if any
+        if (this.floatingButtonsContainer) {
+            this.floatingButtonsContainer.remove();
+        }
+        
+        // Create container for floating buttons within the school container
+        this.floatingButtonsContainer = document.createElement('div');
+        this.floatingButtonsContainer.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 0;
+            right: 0;
+            transform: translateY(-50%);
+            z-index: 999;
+            pointer-events: none;
+        `;
+        
+        // Left floating button
+        const leftBtn = document.createElement('button');
+        leftBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
+        leftBtn.style.cssText = `
+            position: absolute;
+            left: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6C63FF, #FF6584);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 20px;
+            box-shadow: 0 5px 20px rgba(108, 99, 255, 0.4);
+            transition: all 0.3s;
+            pointer-events: auto;
+        `;
+        leftBtn.onclick = () => this.navigatePages(-1);
+        
+        // Right floating button
+        const rightBtn = document.createElement('button');
+        rightBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
+        rightBtn.style.cssText = `
+            position: absolute;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6C63FF, #FF6584);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 20px;
+            box-shadow: 0 5px 20px rgba(108, 99, 255, 0.4);
+            transition: all 0.3s;
+            pointer-events: auto;
+        `;
+        rightBtn.onclick = () => this.navigatePages(1);
+        
+        this.floatingButtonsContainer.appendChild(leftBtn);
+        this.floatingButtonsContainer.appendChild(rightBtn);
+        this.parentContainer.appendChild(this.floatingButtonsContainer);
+    }
+
+    navigatePages(direction) {
+        const newIndex = this.currentPageIndex + direction;
+        if (newIndex < 0 || newIndex >= this.pages.length) return;
+        
+        const pageName = this.pages[newIndex];
+        this.switchPageWithAnimation(pageName, this.navContainer);
+    }
+
     toggleStudentView(mode) {
         this.studentViewMode = mode;
         const gridContainer = this.websiteContainer.querySelector('#studentsGridContainer');
@@ -307,24 +534,13 @@ export class SchoolWebsite {
             return;
         }
         
-        students.forEach(student => {
-            const photoUrl = student.photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(student.name)}&background=6C63FF&color=fff&size=150`;
-            
-           let gridHTML = `<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 20px;">`;
+        let gridHTML = '<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 20px;">';
         
         students.forEach(student => {
             const photoUrl = student.photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(student.name)}&background=6C63FF&color=fff&size=150`;
             
             gridHTML += `
-                <div onclick="window.schoolWebsite.showStudentProfile(${student.id})" style="
-                    background: rgba(255, 255, 255, 0.1);
-                    border-radius: 12px;
-                    padding: 20px;
-                    text-align: center;
-                    cursor: pointer;
-                    transition: all 0.3s;
-                    border: 2px solid rgba(108, 99, 255, 0.3);
-                ">
+                <div onclick="window.schoolWebsite.showStudentProfile(${student.id})" style="background: rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.3s; border: 2px solid rgba(108, 99, 255, 0.3);">
                     <div style="width: 100px; height: 100px; margin: 0 auto 15px; border-radius: 50%; overflow: hidden; border: 3px solid #6C63FF;">
                         <img src="${photoUrl}" alt="${student.name}" style="width: 100%; height: 100%; object-fit: cover;">
                     </div>
@@ -335,8 +551,7 @@ export class SchoolWebsite {
         });
         
         gridHTML += '</div>';
-        container.innerHTML = gridHTML;  
-        });
+        container.innerHTML = gridHTML;
     }
 
     updateStudentsManageTable() {
@@ -345,18 +560,9 @@ export class SchoolWebsite {
         
         const students = this.data.getStudents();
         
-         let manageHTML = `
+        let manageHTML = `
             <div style="margin-bottom: 20px;">
-                <button onclick="window.schoolWebsite.showAddStudentForm()" style="
-                    background: linear-gradient(135deg, #6C63FF, #FF6584);
-                    color: white;
-                    border: none;
-                    padding: 12px 24px;
-                    border-radius: 8px;
-                    cursor: pointer;
-                    font-family: 'Poppins', sans-serif;
-                    font-size: 14px;
-                ">
+                <button onclick="window.schoolWebsite.showAddStudentForm()" style="background: linear-gradient(135deg, #6C63FF, #FF6584); color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-family: 'Poppins', sans-serif; font-size: 14px;">
                     <i class="fas fa-plus"></i> Add Student
                 </button>
             </div>
@@ -373,9 +579,6 @@ export class SchoolWebsite {
                                 <th style="padding: 15px; text-align: left; color: white;">ID</th>
                                 <th style="padding: 15px; text-align: left; color: white;">Name</th>
                                 <th style="padding: 15px; text-align: left; color: white;">Grade</th>
-                                <th style="padding: 15px; text-align: left; color: white;">Age</th>
-                                <th style="padding: 15px; text-align: left; color: white;">Email</th>
-                                <th style="padding: 15px; text-align: left; color: white;">Guardian</th>
                                 <th style="padding: 15px; text-align: left; color: white;">Actions</th>
                             </tr>
                         </thead>
@@ -388,19 +591,8 @@ export class SchoolWebsite {
                         <td style="padding: 12px 15px; color: white;">${student.id}</td>
                         <td style="padding: 12px 15px; color: white; font-weight: 500;">${student.name}</td>
                         <td style="padding: 12px 15px; color: #ccc;">${student.grade || 'N/A'}</td>
-                        <td style="padding: 12px 15px; color: #ccc;">${student.age || 'N/A'}</td>
-                        <td style="padding: 12px 15px; color: #ccc;">${student.email || 'N/A'}</td>
-                        <td style="padding: 12px 15px; color: #ccc;">${student.guardian || 'N/A'}</td>
                         <td style="padding: 12px 15px;">
-                            <button onclick="window.schoolWebsite.deleteStudent(${student.id})" style="
-                                background: #f44336;
-                                color: white;
-                                border: none;
-                                padding: 8px 16px;
-                                border-radius: 5px;
-                                cursor: pointer;
-                                font-size: 12px;
-                            ">Delete</button>
+                            <button onclick="window.schoolWebsite.deleteStudent(${student.id})" style="background: #f44336; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer; font-size: 12px;">Delete</button>
                         </td>
                     </tr>
                 `;
@@ -485,44 +677,17 @@ export class SchoolWebsite {
     }
 
     showAddStudentForm() {
-        if (this.assistant) {
-            this.assistant.show();
-            this.assistant.guideAddStudent();
-        }
-        
         const overlay = document.createElement('div');
-        overlay.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 100001;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        `;
+        overlay.style.cssText = `position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); z-index: 999999; display: flex; align-items: center; justify-content: center;`;
         
         const form = document.createElement('div');
-        form.style.cssText = `
-            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3e 25%, #0d0d2b 50%, #1a0a2e 75%, #0a0a1a 100%);
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-            width: 400px;
-            max-width: 90vw;
-            border: 1px solid rgba(108, 99, 255, 0.3);
-        `;
+        form.style.cssText = `background: linear-gradient(135deg, #1a1a3e, #2a2a4e); padding: 30px; border-radius: 20px; width: 400px; max-width: 90vw; border: 1px solid rgba(108, 99, 255, 0.5);`;
         
         form.innerHTML = `
-            <h3 style="margin-bottom: 20px; color: white; text-align: center; font-family: 'Poppins', sans-serif;">Add Student</h3>
-            <input type="text" id="studentName" placeholder="Student Name" style="width: 100%; padding: 12px; margin-bottom: 15px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(108, 99, 255, 0.3); border-radius: 8px; font-size: 14px; font-family: 'Poppins', sans-serif; box-sizing: border-box; color: white;">
-            <input type="text" id="studentGrade" placeholder="Grade (e.g., Grade 10)" style="width: 100%; padding: 12px; margin-bottom: 15px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(108, 99, 255, 0.3); border-radius: 8px; font-size: 14px; font-family: 'Poppins', sans-serif; box-sizing: border-box; color: white;">
-            <input type="number" id="studentAge" placeholder="Age" style="width: 100%; padding: 12px; margin-bottom: 15px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(108, 99, 255, 0.3); border-radius: 8px; font-size: 14px; font-family: 'Poppins', sans-serif; box-sizing: border-box; color: white;">
-            <input type="email" id="studentEmail" placeholder="Email" style="width: 100%; padding: 12px; margin-bottom: 15px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(108, 99, 255, 0.3); border-radius: 8px; font-size: 14px; font-family: 'Poppins', sans-serif; box-sizing: border-box; color: white;">
-            <input type="text" id="studentGuardian" placeholder="Guardian Name" style="width: 100%; padding: 12px; margin-bottom: 20px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(108, 99, 255, 0.3); border-radius: 8px; font-size: 14px; font-family: 'Poppins', sans-serif; box-sizing: border-box; color: white;">
-            <button onclick="window.schoolWebsite.submitStudent()" style="width: 100%; padding: 12px; background: linear-gradient(135deg, #6C63FF, #FF6584); color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; font-family: 'Poppins', sans-serif;">Add Student</button>
+            <h3 style="margin-bottom: 20px; color: white; text-align: center;">Add Student</h3>
+            <input type="text" id="studentName" placeholder="Student Name" style="width: 100%; padding: 12px; margin-bottom: 15px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(108, 99, 255, 0.5); border-radius: 8px; color: white; box-sizing: border-box;">
+            <input type="text" id="studentGrade" placeholder="Grade" style="width: 100%; padding: 12px; margin-bottom: 15px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(108, 99, 255, 0.5); border-radius: 8px; color: white; box-sizing: border-box;">
+            <button onclick="window.schoolWebsite.submitStudent()" style="width: 100%; padding: 12px; background: linear-gradient(135deg, #6C63FF, #FF6584); color: white; border: none; border-radius: 8px; cursor: pointer;">Add Student</button>
         `;
         
         overlay.appendChild(form);
@@ -533,21 +698,14 @@ export class SchoolWebsite {
     submitStudent() {
         const name = document.getElementById('studentName').value;
         const grade = document.getElementById('studentGrade').value;
-        const age = parseInt(document.getElementById('studentAge').value);
-        const email = document.getElementById('studentEmail').value;
-        const guardian = document.getElementById('studentGuardian').value;
         
-        if (name && grade && age && email && guardian) {
-            this.data.addStudent({ name, grade, age, email, guardian });
+        if (name && grade) {
+            this.data.addStudent({ name, grade });
             this.updateStudentsGrid();
             this.updateStudentsManageTable();
             
             if (window.currentStudentForm) {
                 window.currentStudentForm.remove();
-            }
-            
-            if (this.assistant) {
-                this.assistant.showStudentAdded(name);
             }
         } else {
             alert('Please fill in all fields');
@@ -631,92 +789,26 @@ export class SchoolWebsite {
         const photoUrl = student.photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(student.name)}&background=6C63FF&color=fff&size=200`;
         
         const overlay = document.createElement('div');
-        overlay.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 100001;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        `;
+        overlay.style.cssText = `position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); z-index: 999999; display: flex; align-items: center; justify-content: center;`;
         
         overlay.innerHTML = `
-            <div style="
-                background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3e 25%, #0d0d2b 50%, #1a0a2e 75%, #0a0a1a 100%);
-                border-radius: 20px;
-                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-                width: 90%;
-                max-width: 600px;
-                max-height: 90vh;
-                overflow-y: auto;
-                position: relative;
-                border: 1px solid rgba(108, 99, 255, 0.3);
-            ">
-                <button onclick="this.closest('div[style]').parentElement.remove()" style="
-                    position: absolute;
-                    top: 20px;
-                    right: 20px;
-                    background: #f44336;
-                    border: none;
-                    color: white;
-                    width: 40px;
-                    height: 40px;
-                    border-radius: 50%;
-                    cursor: pointer;
-                    font-size: 20px;
-                    z-index: 10;
-                ">×</button>
-                <div style="
-                    background: linear-gradient(135deg, #6C63FF, #FF6584);
-                    padding: 30px;
-                    text-align: center;
-                ">
-                    <img src="${photoUrl}" alt="${student.name}" style="
-                        width: 120px;
-                        height: 120px;
-                        border-radius: 50%;
-                        border: 4px solid white;
-                        margin-bottom: 15px;
-                    ">
+            <div style="background: linear-gradient(135deg, #1a1a3e, #2a2a4e); border-radius: 20px; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto; border: 1px solid rgba(108, 99, 255, 0.5);">
+                <div style="background: linear-gradient(135deg, #6C63FF, #FF6584); padding: 30px; text-align: center; position: relative;">
+                    <button onclick="this.closest('div[style]').parentElement.remove()" style="position: absolute; top: 20px; right: 20px; background: #f44336; border: none; color: white; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 20px;">×</button>
+                    <img src="${photoUrl}" alt="${student.name}" style="width: 120px; height: 120px; border-radius: 50%; border: 4px solid white; margin-bottom: 15px;">
                     <h2 style="color: white; margin-bottom: 5px;">${student.name}</h2>
-                    <p style="color: rgba(255, 255, 255, 0.9);">${student.grade || 'Grade Not Assigned'}</p>
+                    <p style="color: rgba(255, 255, 255, 0.9);">${student.grade || 'Not Assigned'}</p>
                 </div>
                 <div style="padding: 30px;">
                     <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
-                        <div style="background: rgba(255, 255, 255, 0.1); padding: 15px; border-radius: 10px; border: 1px solid rgba(108, 99, 255, 0.3);">
+                        <div style="background: rgba(255, 255, 255, 0.1); padding: 15px; border-radius: 10px;">
                             <h4 style="color: #ccc; font-size: 12px; margin-bottom: 5px;">REGISTER NUMBER</h4>
-                            <p style="color: white; font-weight: 500;">${student.registerNumber || 'REG-' + String(student.id).padStart(4, '0')}</p>
+                            <p style="color: white;">${student.registerNumber || 'REG-' + String(student.id).padStart(4, '0')}</p>
                         </div>
-                        <div style="background: rgba(255, 255, 255, 0.1); padding: 15px; border-radius: 10px; border: 1px solid rgba(108, 99, 255, 0.3);">
-                            <h4 style="color: #ccc; font-size: 12px; margin-bottom: 5px;">SCHOOL PAY CODE</h4>
-                            <p style="color: white; font-weight: 500;">${student.payCode || 'PAY-' + String(student.id).padStart(6, '0')}</p>
-                        </div>
-                        <div style="background: rgba(255, 255, 255, 0.1); padding: 15px; border-radius: 10px; border: 1px solid rgba(108, 99, 255, 0.3);">
-                            <h4 style="color: #ccc; font-size: 12px; margin-bottom: 5px;">COURSE</h4>
-                            <p style="color: white; font-weight: 500;">${student.course || 'General Studies'}</p>
-                        </div>
-                        <div style="background: rgba(255, 255, 255, 0.1); padding: 15px; border-radius: 10px; border: 1px solid rgba(108, 99, 255, 0.3);">
+                        <div style="background: rgba(255, 255, 255, 0.1); padding: 15px; border-radius: 10px;">
                             <h4 style="color: #ccc; font-size: 12px; margin-bottom: 5px;">FEES BALANCE</h4>
-                            <p style="color: ${student.feesBalance > 0 ? '#f44336' : '#4CAF50'}; font-weight: 500;">
-                                $${student.feesBalance || 0}
-                            </p>
+                            <p style="color: white;">$${student.feesBalance || 0}</p>
                         </div>
-                        <div style="background: rgba(255, 255, 255, 0.1); padding: 15px; border-radius: 10px; border: 1px solid rgba(108, 99, 255, 0.3);">
-                            <h4 style="color: #ccc; font-size: 12px; margin-bottom: 5px;">ATTENDANCE</h4>
-                            <p style="color: white; font-weight: 500;">${student.attendance || 95}%</p>
-                        </div>
-                        <div style="background: rgba(255, 255, 255, 0.1); padding: 15px; border-radius: 10px; border: 1px solid rgba(108, 99, 255, 0.3);">
-                            <h4 style="color: #ccc; font-size: 12px; margin-bottom: 5px;">PERFORMANCE</h4>
-                            <p style="color: white; font-weight: 500;">${student.performance || 'Good'}</p>
-                        </div>
-                    </div>
-                    <div style="margin-top: 20px; background: rgba(255, 255, 255, 0.1); padding: 15px; border-radius: 10px; border: 1px solid rgba(108, 99, 255, 0.3);">
-                        <h4 style="color: #ccc; font-size: 12px; margin-bottom: 5px;">COMMENT</h4>
-                        <p style="color: white;">${student.comment || 'No comments yet.'}</p>
                     </div>
                 </div>
             </div>

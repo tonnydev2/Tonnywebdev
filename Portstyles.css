@@ -149,6 +149,7 @@ html, body {
     66% { transform: translate(-20px, 20px) scale(0.9); }
 }
 
+
 /* Page Load Animation */
 .page-loader {
     position: fixed;
@@ -189,6 +190,8 @@ html, body {
     margin-bottom: 30px;
     animation: textFade 2s ease-in-out forwards;
 }
+
+
 
 .loader-bar {
     width: 200px;
