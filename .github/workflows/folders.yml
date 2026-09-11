@@ -1,0 +1,27 @@
+name: Unzip Folders
+
+on:
+  workflow_dispatch
+
+jobs:
+  unzip:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Unzip folders.zip
+        run: |
+          unzip -o folders.zip
+          rm folders.zip
+
+      - name: Commit and push changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add -A
+          git commit -m "Unzip folders.zip and remove archive"
+          git push
