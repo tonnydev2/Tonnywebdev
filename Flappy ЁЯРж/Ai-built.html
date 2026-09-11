@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flappy Bird</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            overflow: hidden;
+        }
+        #canvas1 {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: skyblue;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas1"></canvas>
+    
+    <!-- Hidden images -->
+    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='50' height='50' viewBox='0 0 50 50'%3E%3Ccircle cx='25' cy='25' r='20' fill='yellow'/%3E%3C/svg%3E" id="frame1" class="hidden">
+    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='50' height='50' viewBox='0 0 50 50'%3E%3Ccircle cx='25' cy='25' r='20' fill='orange'/%3E%3C/svg%3E" id="frame2" class="hidden">
+    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='50' height='50' viewBox='0 0 50 50'%3E%3Ccircle cx='25' cy='25' r='20' fill='gold'/%3E%3C/svg%3E" id="frame3" class="hidden">
+    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='50' height='50' viewBox='0 0 50 50'%3E%3Ccircle cx='25' cy='25' r='20' fill='yellowgreen'/%3E%3C/svg%3E" id="frame4" class="hidden">
+    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1000' height='600'%3E%3Crect width='1000' height='600' fill='lightblue'/%3E%3C/svg%3E" id="background" class="hidden">
+
+    <script>
+        window.addEventListener('load', () => {
+            const canvas = document.getElementById('canvas1');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            const baseWidth = 384;
+            const baseHeight = 582;
+
+            let score = 0;
+            let gameOver = false;
+            
+            // Create audio objects but don't load files to avoid errors
+            const gameOverSound = new Audio();
+            const flapSound = new Audio();
+
+            class Game {
+                constructor(width, height, ratioX = canvas.width / baseWidth, ratioY = canvas.height / baseHeight) {
+                    this.width = width;
+                    this.height = height;
+                    this.ratioX = ratioX;
+                    this.ratioY = ratioY;
+                    this.player = new Player(this);
+                    this.pipes = [];
+                    this.pipeTimer = 0;
+                    this.pipeInterval = 2000; // Time in milliseconds between pipes
+                    this.speed = 2;
+                    this.background = new Background(this);
+                    this.frameTimer = 0;
+                    this.fps = 30;
+                    this.frameInterval = 1000 / this.fps;
+                }
+
+                update(deltaTime) {
+                    if (gameOver) return;
+
+                    // Draw score
+                    ctx.fillStyle = '#333';
+                    ctx.font = `${30 * (this.ratioX + this.ratioY) / 2}px Arial`;
+                    ctx.fillText(`Score: ${score}`, this.width / 3, 0.1 * this.height);
+
+                    // Increase speed gradually (max speed 5)
+                    if (this.speed < 5) this.speed += 0.001;
+
+                    // Pipe spawning with consistent interval
+                    this.pipeTimer += deltaTime;
+                    if (this.pipeTimer > this.pipeInterval) {
+                        this.pipeTimer = 0;
+                        
+                        // Decrease interval over time for more challenge (minimum 800ms)
+                        if (this.pipeInterval > 800) {
+                            this.pipeInterval -= 20;
+                        }
+                        
+                        this.createPipes();
+                    }
+
+                    // Update game objects
+                    this.player.update(deltaTime);
+                    this.background.update();
+                    
+                    // Update and check pipes
+                    for (let i = this.pipes.length - 1; i >= 0; i--) {
+                        const pipe = this.pipes[i];
+                        pipe.update();
+                        
+                        // Remove off-screen pipes
+                        if (pipe.x + pipe.width < 0) {
+                            this.pipes.splice(i, 1);
+                            continue;
+                        }
+                        
+                        // Score only for top pipes and only once
+                        if (pipe.constructor.name === 'Pipe' && !pipe.scored) {
+                            if (pipe.x + pipe.width < this.player.x) {
+                                score++;
+                                pipe.scored = true;
+                            }
+                        }
+                        
+                        // Collision detection
+                        if (this.detectCollision(this.player, pipe)) {
+                            gameOver = true;
+                        }
+                    }
+                }
+
+                createPipes() {
+                    // Random gap size between 120-200 pixels
+                    const gapSize = 150 * this.ratioY;
+                    
+                    // Random position for the gap (between 20% and 70% of screen height)
+                    const minGapY = this.height * 0.2;
+                    const maxGapY = this.height * 0.7;
+                    const gapY = minGapY + Math.random() * (maxGapY - minGapY);
+                    
+                    // Calculate pipe heights
+                    const topPipeHeight = gapY;
+                    const bottomPipeY = gapY + gapSize;
+                    const bottomPipeHeight = this.height - bottomPipeY;
+                    
+                    // Create pipes
+                    const topPipe = new Pipe(this, 0, topPipeHeight, true);
+                    const bottomPipe = new Pipe(this, bottomPipeY, bottomPipeHeight, false);
+                    
+                    this.pipes.push(topPipe, bottomPipe);
+                }
+
+                detectCollision(player, pipe) {
+                    // Simple AABB collision detection
+                    return !(
+                        player.x + player.width < pipe.x ||
+                        player.x > pipe.x + pipe.width ||
+                        player.y + player.height < pipe.y ||
+                        player.y > pipe.y + pipe.height
+                    );
+                }
+
+                draw() {
+                    this.background.draw();
+                    this.pipes.forEach(pipe => pipe.draw());
+                    this.player.draw();
+                    
+                    if (gameOver) {
+                        ctx.fillStyle = 'rgba(0,0,0,0.5)';
+                        ctx.fillRect(0, 0, this.width, this.height);
+                        
+                        ctx.fillStyle = 'white';
+                        ctx.font = `${50 * (this.ratioX + this.ratioY) / 2}px Arial`;
+                        ctx.textAlign = 'center';
+                        ctx.fillText('GAME OVER', this.width / 2, this.height / 2 - 50);
+                        ctx.font = `${30 * (this.ratioX + this.ratioY) / 2}px Arial`;
+                        ctx.fillText(`Final Score: ${score}`, this.width / 2, this.height / 2);
+                        ctx.fillText('Click to Restart', this.width / 2, this.height / 2 + 50);
+                        ctx.textAlign = 'left';
+                    }
+                }
+            }
+
+            class Player {
+                constructor(game) {
+                    this.game = game;
+                    this.x = 100 * this.game.ratioX;
+                    this.width = 50 * this.game.ratioX;
+                    this.height = 50 * this.game.ratioY;
+                    this.y = this.game.height / 2;
+                    
+                    this.velocity = 0;
+                    this.gravity = 0.4 * this.game.ratioY;
+                    this.jumpForce = -8 * this.game.ratioY;
+                    
+                    // Animation
+                    this.images = [
+                        document.getElementById('frame1'),
+                        document.getElementById('frame2'),
+                        document.getElementById('frame3'),
+                        document.getElementById('frame4')
+                    ];
+                    this.frame = 0;
+                    this.maxFrame = 3;
+                    this.frameTimer = 0;
+                    this.frameInterval = 100;
+                    
+                    // Input
+                    canvas.addEventListener('click', () => this.jump());
+                    canvas.addEventListener('touchstart', (e) => {
+                        e.preventDefault();
+                        this.jump();
+                    });
+                }
+
+                jump() {
+                    if (!gameOver) {
+                        this.velocity = this.jumpForce;
+                        // Play sound safely
+                        try { flapSound.play(); } catch(e) {}
+                    }
+                }
+
+                update(deltaTime) {
+                    if (gameOver) return;
+
+                    // Physics
+                    this.velocity += this.gravity;
+                    this.y += this.velocity;
+
+                    // Boundaries
+                    if (this.y < 0) {
+                        this.y = 0;
+                        this.velocity = 0;
+                    }
+                    if (this.y + this.height > this.game.height) {
+                        this.y = this.game.height - this.height;
+                        this.velocity = 0;
+                        gameOver = true;
+                    }
+
+                    // Animation
+                    if (this.frameTimer > this.frameInterval) {
+                        this.frameTimer = 0;
+                        this.frame = (this.frame + 1) % (this.maxFrame + 1);
+                    } else {
+                        this.frameTimer += deltaTime;
+                    }
+                }
+
+                draw() {
+                    const image = this.images[this.frame] || this.images[0];
+                    ctx.drawImage(image, this.x, this.y, this.width, this.height);
+                }
+            }
+
+            class Pipe {
+                constructor(game, y, height, isTop) {
+                    this.game = game;
+                    this.x = this.game.width;
+                    this.y = y;
+                    this.width = 60 * this.game.ratioX;
+                    this.height = height;
+                    this.isTop = isTop;
+                    this.scored = false;
+                    
+                    // Ensure minimum height
+                    if (this.height < 20) this.height = 20;
+                }
+
+                update() {
+                    this.x -= this.game.speed;
+                }
+
+                draw() {
+                    // Create gradient
+                    const gradient = ctx.createLinearGradient(this.x, this.y, this.x + this.width, this.y + this.height);
+                    gradient.addColorStop(0, '#2e7d32');
+                    gradient.addColorStop(1, '#1b5e20');
+                    
+                    // Draw pipe body
+                    ctx.fillStyle = gradient;
+                    ctx.fillRect(this.x, this.y, this.width, this.height);
+                    
+                    // Draw pipe border
+                    ctx.strokeStyle = '#0d3c0d';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(this.x, this.y, this.width, this.height);
+                    
+                    // Draw pipe cap
+                    ctx.fillStyle = '#1b5e20';
+                    if (this.isTop) {
+                        // Top pipe cap at bottom
+                        ctx.fillRect(this.x - 10, this.y + this.height - 20, this.width + 20, 20);
+                    } else {
+                        // Bottom pipe cap at top
+                        ctx.fillRect(this.x - 10, this.y, this.width + 20, 20);
+                    }
+                }
+            }
+
+            class Background {
+                constructor(game) {
+                    this.game = game;
+                    this.x = 0;
+                    this.y = 0;
+                    this.width = canvas.width;
+                    this.height = canvas.height;
+                    this.image = document.getElementById('background');
+                }
+
+                update() {
+                    this.x -= this.game.speed * 0.5; // Parallax effect
+                    if (this.x + this.width < 0) this.x = 0;
+                }
+
+                draw() {
+                    // Simple sky gradient
+                    const gradient = ctx.createLinearGradient(0, 0, 0, this.height);
+                    gradient.addColorStop(0, '#87CEEB');
+                    gradient.addColorStop(1, '#98D8E8');
+                    ctx.fillStyle = gradient;
+                    ctx.fillRect(0, 0, this.width, this.height);
+                    
+                    // Draw clouds (simple representation)
+                    ctx.fillStyle = 'rgba(255,255,255,0.7)';
+                    for (let i = 0; i < 3; i++) {
+                        const cloudX = (this.x + i * 300) % (this.width + 300) - 300;
+                        ctx.beginPath();
+                        ctx.arc(cloudX + 50, 50, 30, 0, Math.PI * 2);
+                        ctx.arc(cloudX + 80, 70, 35, 0, Math.PI * 2);
+                        ctx.arc(cloudX + 20, 70, 30, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+            }
+
+            function restartGame() {
+                gameOver = false;
+                score = 0;
+                game = new Game(canvas.width, canvas.height);
+            }
+
+            // Initialize game
+            let game = new Game(canvas.width, canvas.height);
+
+            // Handle resize
+            window.addEventListener('resize', (e) => {
+                canvas.width = e.currentTarget.innerWidth;
+                canvas.height = e.currentTarget.innerHeight;
+                const ratioX = canvas.width / baseWidth;
+                const ratioY = canvas.height / baseHeight;
+                
+                if (!gameOver) {
+                    // Save game state during resize
+                    const oldScore = score;
+                    game = new Game(canvas.width, canvas.height, ratioX, ratioY);
+                    score = oldScore;
+                } else {
+                    game = new Game(canvas.width, canvas.height, ratioX, ratioY);
+                }
+            });
+
+            // Click to restart when game over
+            canvas.addEventListener('click', () => {
+                if (gameOver) {
+                    restartGame();
+                }
+            });
+
+            // Game loop
+            let lastTime = 0;
+            
+            function animate(timeStamp) {
+                const deltaTime = Math.min(timeStamp - lastTime, 100); // Cap delta time
+                lastTime = timeStamp;
+                
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                game.update(deltaTime);
+                game.draw();
+                
+                requestAnimationFrame(animate);
+            }
+
+            animate(0);
+        });
+    </script>
+</body>
+</html>

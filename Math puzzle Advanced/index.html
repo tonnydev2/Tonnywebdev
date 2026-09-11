@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+  <meta http-equiv="CONTENT-TYPE" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" href="styles/style.css"/>
+  <title>Advanced Math Puzzle</title>
+</head>
+<body>
+  <div class="screen active" id="screen1">
+    <h1>Math Puzzle 2</h1>
+    <img src="puzzle.png" class="puzzle-img">
+    <button class="start">Start</button>
+    <h2 class="comp">By Tonnoid.studios</h2>
+  </div>
+  <div class="screen " id="screen2">
+    <h1>Select Diffculty:</h1>
+    <div class="controls">
+      <button class="difficulty" id="easy">Easy</button>
+      <button class="difficulty" id="normal">Medium</button>
+      <button class="difficulty" id="hard">Hard</button>
+    </div>
+  </div>
+  <div class="screen " id="screen3">
+    <div class="status-bar">
+      <p class="levelEl">Level: <span id="level">1</span></p>
+      <p class="puzzles">Puzzle: <span class="puzzle">1/5</span></p>
+      <p class="scoreEl">Coins: <span class="coins">0</span></p>
+    </div>
+      <div class="equationEl">
+       
+      </div>
+    <div class="numberpool">
+      
+    </div>
+      <p class="feedback">Feedback will go here...</p>
+      <button id="checkAnswer">Check Answer</button>
+  </div>
+  <script src="scripts/main.js"></script>
+</body>
+</html>

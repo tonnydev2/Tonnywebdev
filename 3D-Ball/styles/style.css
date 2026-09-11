@@ -1,0 +1,28 @@
+ 
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: #1a1a1a;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+#canvas1 {
+    width: 450px;
+    height: 500px;
+    background: #2a5a3a;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    clip-path: polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    border-radius: 5px;
+}
+
