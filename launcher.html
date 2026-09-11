@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nova Launcher</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-deep:#0a0e1a;
+    --bg-panel:#121a2b;
+    --bg-panel-hover:#182338;
+    --line:#212c42;
+    --cyan:#4ce0d2;
+    --violet:#8b7cff;
+    --coral:#ff6b81;
+    --amber:#ffc96b;
+    --text-primary:#e8ecf4;
+    --text-muted:#79869c;
+  }
+
+  *{box-sizing:border-box;}
+
+  html,body{
+    margin:0;
+    padding:0;
+    height:100%;
+    background:var(--bg-deep);
+    color:var(--text-primary);
+    font-family:'Inter',sans-serif;
+    overflow-x:hidden;
+  }
+
+  /* subtle animated grid backdrop */
+  body::before{
+    content:'';
+    position:fixed;
+    inset:0;
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size:48px 48px;
+    opacity:0.25;
+    mask-image:radial-gradient(circle at 50% 20%, rgba(0,0,0,0.9) 0%, transparent 70%);
+    -webkit-mask-image:radial-gradient(circle at 50% 20%, rgba(0,0,0,0.9) 0%, transparent 70%);
+    pointer-events:none;
+    z-index:0;
+  }
+
+  body::after{
+    content:'';
+    position:fixed;
+    top:-20%;
+    left:50%;
+    width:900px;
+    height:900px;
+    transform:translateX(-50%);
+    background:radial-gradient(circle, rgba(139,124,255,0.18) 0%, rgba(76,224,210,0.08) 40%, transparent 70%);
+    pointer-events:none;
+    z-index:0;
+  }
+
+  .screen{
+    position:relative;
+    z-index:1;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:56px 24px 40px;
+  }
+
+  /* ---- Clock ---- */
+  .clock-wrap{
+    text-align:center;
+    margin-bottom:34px;
+  }
+
+  #clock{
+    font-family:'Orbitron',sans-serif;
+    font-weight:700;
+    font-size:clamp(48px, 9vw, 92px);
+    letter-spacing:2px;
+    line-height:1;
+    background:linear-gradient(120deg, var(--cyan), var(--violet) 60%, var(--coral));
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    text-shadow:0 0 40px rgba(139,124,255,0.25);
+  }
+
+  #date{
+    margin-top:10px;
+    font-size:14px;
+    letter-spacing:3px;
+    color:var(--text-muted);
+    font-weight:500;
+  }
+
+  /* ---- Search ---- */
+  .search-wrap{
+    width:100%;
+    max-width:520px;
+    margin-bottom:48px;
+    position:relative;
+  }
+
+  .search-wrap input{
+    width:100%;
+    padding:15px 20px 15px 46px;
+    border-radius:14px;
+    border:1px solid var(--line);
+    background:var(--bg-panel);
+    color:var(--text-primary);
+    font-family:'Inter',sans-serif;
+    font-size:15px;
+    outline:none;
+    transition:border-color .2s ease, box-shadow .2s ease;
+  }
+
+  .search-wrap input::placeholder{ color:var(--text-muted); }
+
+  .search-wrap input:focus{
+    border-color:var(--cyan);
+    box-shadow:0 0 0 3px rgba(76,224,210,0.15);
+  }
+
+  .search-icon{
+    position:absolute;
+    left:16px;
+    top:50%;
+    transform:translateY(-50%);
+    width:18px;
+    height:18px;
+    stroke:var(--text-muted);
+  }
+
+  /* ---- App grid ---- */
+  .app-grid{
+    width:100%;
+    max-width:960px;
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(96px, 1fr));
+    gap:20px;
+  }
+
+  .app-tile{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:10px;
+    text-decoration:none;
+    color:var(--text-primary);
+    padding:18px 8px 14px;
+    border-radius:18px;
+    background:var(--bg-panel);
+    border:1px solid var(--line);
+    transition:transform .15s ease, border-color .15s ease, background .15s ease, box-shadow .15s ease;
+  }
+
+  .app-tile:hover, .app-tile:focus-visible{
+    transform:translateY(-4px);
+    background:var(--bg-panel-hover);
+    border-color:var(--tile-accent, var(--cyan));
+    box-shadow:0 10px 30px -10px var(--tile-accent, var(--cyan));
+    outline:none;
+  }
+
+  .app-tile:active{
+    transform:translateY(-1px) scale(.98);
+  }
+
+  .icon-box{
+    width:52px;
+    height:52px;
+    border-radius:14px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:color-mix(in srgb, var(--tile-accent, var(--cyan)) 16%, var(--bg-panel));
+    overflow:hidden;
+  }
+
+  .icon-box img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    border-radius:14px;
+  }
+
+  .app-label{
+    font-size:12.5px;
+    font-weight:500;
+    color:var(--text-muted);
+    letter-spacing:.2px;
+    text-align:center;
+    line-height:1.3;
+  }
+
+  .app-tile:hover .app-label{ color:var(--text-primary); }
+
+  footer{
+    margin-top:48px;
+    font-size:12px;
+    color:var(--text-muted);
+    text-align:center;
+    max-width:520px;
+    line-height:1.6;
+  }
+
+  footer code{
+    background:var(--bg-panel);
+    padding:2px 6px;
+    border-radius:6px;
+    color:var(--cyan);
+    font-size:11.5px;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .app-tile{ transition:none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="screen">
+
+  <div class="clock-wrap">
+    <div id="clock">00:00</div>
+    <div id="date">LOADING</div>
+  </div>
+
+  <div class="search-wrap">
+    <svg class="search-icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" stroke-width="1.8" stroke="currentColor" fill="none"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke-width="1.8" stroke="currentColor"/></svg>
+    <input type="text" id="search" placeholder="Search apps..." autocomplete="off">
+  </div>
+
+  <!-- APP GRID - Recreated from notebook list -->
+  <div class="app-grid" id="appGrid">
+
+    <a class="app-tile" href="Math puzzle Advanced/index.html" style="--tile-accent:#4ce0d2;" data-name="Math Puzzle Advanced">
+      <div class="icon-box"><img src="Math puzzle Advanced/icon.jpg" alt="Math Puzzle Advanced"></div>
+      <div class="app-label">Math Puzzle<br>Advanced</div>
+    </a>
+
+    <a class="app-tile" href="ludo/index.html" style="--tile-accent:#8b7cff;" data-name="Ludo">
+      <div class="icon-box"><img src="ludo/icon.jpg" alt="Ludo"></div>
+      <div class="app-label">Ludo</div>
+    </a>
+
+    <a class="app-tile" href="rainBytes/index.html" style="--tile-accent:#ff6b81;" data-name="Rain By Tar">
+      <div class="icon-box"><img src="rainBytes/icon.jpg" alt="Rain By Tar"></div>
+      <div class="app-label">Rain By Tar</div>
+    </a>
+
+    <a class="app-tile" href="webSearch/index.html" style="--tile-accent:#ffc96b;" data-name="Web Search">
+      <div class="icon-box"><img src="webSearch/icon.jpg" alt="Web Search"></div>
+      <div class="app-label">Web Search</div>
+    </a>
+
+    <a class="app-tile" href="numberTiles/index.html" style="--tile-accent:#4ce0d2;" data-name="Number Tiles">
+      <div class="icon-box"><img src="numberTiles/icon.jpg" alt="Number Tiles"></div>
+      <div class="app-label">Number Tiles</div>
+    </a>
+
+    <a class="app-tile" href="cartesianContainer/index.html" style="--tile-accent:#8b7cff;" data-name="Cartesian Calculator">
+      <div class="icon-box"><img src="cartesianContainer/icon.jpg" alt="Cartesian Calculator"></div>
+      <div class="app-label">Cartesian<br>Calculator</div>
+    </a>
+
+    <a class="app-tile" href="skyAliens/index.html" style="--tile-accent:#ff6b81;" data-name="Sky Aliens">
+      <div class="icon-box"><img src="skyAliens/icon.jpg" alt="Sky Aliens"></div>
+      <div class="app-label">Sky Aliens</div>
+    </a>
+
+    <a class="app-tile" href="calculator/index.html" style="--tile-accent:#ffc96b;" data-name="Calculator">
+      <div class="icon-box"><img src="calculator/icon.jpg" alt="Calculator"></div>
+      <div class="app-label">Calculator</div>
+    </a>
+
+    <a class="app-tile" href="towerDefence/index.html" style="--tile-accent:#4ce0d2;" data-name="Tower Defence">
+      <div class="icon-box"><img src="towerDefence/icon.jpg" alt="Tower Defence"></div>
+      <div class="app-label">Tower Defence</div>
+    </a>
+
+    <a class="app-tile" href="collisions/index.html" style="--tile-accent:#8b7cff;" data-name="Collisions">
+      <div class="icon-box"><img src="collisions/icon.jpg" alt="Collisions"></div>
+      <div class="app-label">Collisions</div>
+    </a>
+
+    <a class="app-tile" href="solitare/index.html" style="--tile-accent:#ff6b81;" data-name="Solitaire">
+      <div class="icon-box"><img src="solitare/icon.jpg" alt="Solitaire"></div>
+      <div class="app-label">Solitaire</div>
+    </a>
+
+    <a class="app-tile" href="3D-Ball/index.html" style="--tile-accent:#ffc96b;" data-name="3D Ball">
+      <div class="icon-box"><img src="3D-Ball/icon.jpg" alt="3D Ball"></div>
+      <div class="app-label">3D Ball</div>
+    </a>
+
+    <a class="app-tile" href="clock/index.html" style="--tile-accent:#4ce0d2;" data-name="Clock">
+      <div class="icon-box"><img src="clock/icon.jpg" alt="Clock"></div>
+      <div class="app-label">Clock</div>
+    </a>
+
+    <a class="app-tile" href="angles/index.html" style="--tile-accent:#8b7cff;" data-name="Angies">
+      <div class="icon-box"><img src="angles/icon.jpg" alt="Angies"></div>
+      <div class="app-label">Angies</div>
+    </a>
+
+    <a class="app-tile" href="tikTacToe/index.html" style="--tile-accent:#ff6b81;" data-name="Tik Tac Toe">
+      <div class="icon-box"><img src="tikTacToe/icon.jpg" alt="Tik Tac Toe"></div>
+      <div class="app-label">Tik Tac Toe</div>
+    </a>
+
+    <a class="app-tile" href="sinWave/index.html" style="--tile-accent:#ffc96b;" data-name="sin Wave">
+      <div class="icon-box"><img src="sinWave/icon.jpg" alt="Sin Wave"></div>
+      <div class="app-label">Sin wave</div>
+    </a>
+
+    <a class="app-tile" href="solarSystem.html" style="--tile-accent:#4ce0d2;" data-name="Solar System">
+      <div class="icon-box"><img src="solar.jpg" alt="Solar System"></div>
+      <div class="app-label">Solar System</div>
+    </a>
+
+    <a class="app-tile" href="wordGuess.html" style="--tile-accent:#ff6b81;" data-name="Word Guess">
+      <div class="icon-box"><img src="wordguess.png" alt="Word Guess"></div>
+      <div class="app-label">Word Guess</div>
+    </a>
+
+    <a class="app-tile" href="trigonometry.html" style="--tile-accent:#ffc96b;" data-name="Trigonometry">
+      <div class="icon-box"><img src="trig.jpg" alt="Trigonometry"></div>
+      <div class="app-label">Trigonometry</div>
+    </a>
+
+    <a class="app-tile" href="erala.html" style="--tile-accent:#4ce0d2;" data-name="Enata">
+      <div class="icon-box"><img src="erala.jpg" alt="Erala"></div>
+      <div class="app-label">Erala</div>
+    </a>
+
+    <a class="app-tile" href="Typer/index.html" style="--tile-accent:#8b7cff;" data-name="Typer">
+      <div class="icon-box"><img src="Typer/icon.jpg" alt="Typer"></div>
+      <div class="app-label">Typer</div>
+    </a>
+
+    <a class="app-tile" href="checkers-v2.html" style="--tile-accent:#ff6b81;" data-name="Checkers">
+      <div class="icon-box"><img src="chess.jpg" alt="Checkers"></div>
+      <div class="app-label">Checkers</div>
+    </a>
+
+    <a class="app-tile" href="apple_of_my_eye.html" style="--tile-accent:#ffc96b;" data-name="Apple">
+      <div class="icon-box"><img src="apple.jpg" alt="Apple"></div>
+      <div class="app-label">Apple</div>
+    </a>
+
+    <a class="app-tile" href="Tonnoid Notepad/index.html" style="--tile-accent:#4ce0d2;" data-name="Notepad">
+      <div class="icon-box"><img src="Tonnoid notepad/icon.jpg" alt="Notepad"></div>
+      <div class="app-label">Notepad</div>
+    </a>
+
+    <a class="app-tile" href="weather.html" style="--tile-accent:#8b7cff;" data-name="Weather">
+      <div class="icon-box"><img src="weather.jpg" alt="Weather"></div>
+      <div class="app-label">Weather</div>
+    </a>
+
+  </div>
+
+  <footer>
+    <code>Developed by Tonnoid Launcher</code>
+  </footer>
+
+</div>
+
+<script>
+  // Live clock
+  function tick(){
+    const now = new Date();
+    const h = String(now.getHours()).padStart(2,'0');
+    const m = String(now.getMinutes()).padStart(2,'0');
+    document.getElementById('clock').textContent = `${h}:${m}`;
+    document.getElementById('date').textContent = now.toLocaleDateString(undefined, {
+      weekday:'long', month:'long', day:'numeric'
+    }).toUpperCase();
+  }
+  tick();
+  setInterval(tick, 1000);
+
+  // Simple live filter for the search bar
+  const search = document.getElementById('search');
+  const tiles = Array.from(document.querySelectorAll('.app-tile'));
+  search.addEventListener('input', () => {
+    const q = search.value.trim().toLowerCase();
+    tiles.forEach(t => {
+      const name = (t.dataset.name || '').toLowerCase();
+      t.style.display = name.includes(q) ? '' : 'none';
+    });
+  });
+</script>
+
+</body>
+</html>
