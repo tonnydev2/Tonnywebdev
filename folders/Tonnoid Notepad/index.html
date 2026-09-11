@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <link rel="stylesheet" href="styles/style.css">
+  </head>
+<body>
+  <div class="container">
+    <div class="dialogue">
+      <p class="size">font size</p>
+      <p class="darkMode">Dark Theme</p>
+      <p class="textColor">Code highlighting</p>
+      <p class="auto-save">Auto save</p>
+    </div>
+    <input type="range" min="15" max="40" value="20" class="range">
+    <label for="range">20px</label>
+    <input type="radio" name="theme" value="OFF" class="radio"><p class="radioLabel">OFF</p>
+    <input type="radio" name="theme" value="ON" class="radio" style="top: 14%;"><p class="radioLabel" style="top: 12%;">ON</p>
+    <input type="text" placeholder="Type color name in 5seconds..." class="colorInput">
+    <div class="settings">⚙️ settings</div>
+    <h1 class="header">📒Tonnoid Notepad</h1>
+  <input type='file' id="fileInput" multiple>
+    <p id="status">Unsaved changes</p>
+  <textarea class="text-box" id="textContainer"></textarea>
+  <div class="footer">
+  <button class="download" onclick="download()">Download</button>
+  <div class="count">Word Count: <span id="count">0</span></div>
+  <div class="char">Character Count: <span id="charCount">0</span></div>
+  </div>
+  </div>
+  <div class="images" id="imageContainer"><h2>Images will be displayed here</h2></div>
+  <script src="scripts/main.js"></script>
+</body>
+</script>

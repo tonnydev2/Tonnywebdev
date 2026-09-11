@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Merge Drop - Exact Replica</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #4a4a4a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: sans-serif;
+            overflow: hidden;
+            touch-action: none;
+        }
+        #game-container {
+            position: relative;
+            width: 100%;
+            max-width: 420px;
+            height: 100%;
+            max-height: 900px;
+            background: linear-gradient(to bottom, #5c9eef 0%, #6eb9eb 15%, #8bd8d4 100%);
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            overflow: hidden;
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        #top-bar {
+            position: absolute;
+            top: 20px;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 15px;
+            box-sizing: border-box;
+            z-index: 10;
+            pointer-events: none;
+        }
+        .btn-icon {
+            background: rgba(255, 255, 255, 0.2);
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 20px;
+        }
+        .score-pill {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 5px 15px;
+            border-radius: 20px;
+            color: white;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        .coin-icon {
+            color: #ffcc00;
+            font-size: 20px;
+        }
+        #overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            color: white;
+            z-index: 20;
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px 30px;
+            font-size: 18px;
+            border: none;
+            border-radius: 25px;
+            background: #ffcc00;
+            color: #333;
+            cursor: pointer;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <div id="top-bar">
+        <div class="btn-icon">⏸</div>
+        <div class="score-pill"><span class="coin-icon">⚡</span> <span id="score">00042</span></div>
+        <div class="score-pill"><span class="coin-icon">🏆</span> <span id="best">04588</span></div>
+    </div>
+    
+    <canvas id="gameCanvas"></canvas>
+    
+    <div id="overlay">
+        <h1>Game Over</h1>
+        <p>Score: <span id="final-score">0</span></p>
+        <button onclick="startGame()">Play Again</button>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    // Constants
+    const COLS = 5;
+    const ROWS = 5;
+    const GRID_WIDTH_RATIO = 0.85;
+    const TOP_PADDING_RATIO = 0.12;
+    const LAUNCHER_HEIGHT_RATIO = 0.15;
+    
+    let cellSize, gridX, gridY, canvasW, canvasH;
+    
+    // State
+    let grid = [];
+    let score = 0;
+    let best = localStorage.getItem('mergeDropBest') || 4588;
+    let gameOver = false;
+    
+    // Active Launcher Block
+    let activeBlock = null;
+    let isAnimating = false;
+    let nextSpawnTimeout = null;
+    
+    // Colors matching the image
+    const colors = {
+        2: '#47a447',   // Green
+        4: '#00bcd4',   // Cyan
+        8: '#2196f3',   // Blue
+        16: '#9c27b0',  // Purple
+        32: '#ff9800',  // Orange
+        64: '#e91e63',  // Pink
+        128: '#ffeb3b', // Yellow
+        256: '#795548', // Brown
+        512: '#f44336', // Red
+        1024: '#607d8b' // Grey
+    };
+
+    function resizeCanvas() {
+        const container = document.getElementById('game-container');
+        canvasW = canvas.width = container.clientWidth;
+        canvasH = canvas.height = container.clientHeight;
+        
+        let gridW = canvasW * GRID_WIDTH_RATIO;
+        cellSize = gridW / COLS;
+        gridX = (canvasW - gridW) / 2;
+        gridY = canvasH * TOP_PADDING_RATIO;
+        
+        // Adjust size if too tall
+        let gridH = cellSize * ROWS;
+        if (gridY + gridH > canvasH - canvasH * LAUNCHER_HEIGHT_RATIO) {
+            cellSize = (canvasH * (1 - TOP_PADDING_RATIO - LAUNCHER_HEIGHT_RATIO)) / ROWS;
+            gridX = (canvasW - (cellSize * COLS)) / 2;
+            gridH = cellSize * ROWS;
+        }
+    }
+
+    function initGrid() {
+        grid = Array(ROWS).fill().map(() => Array(COLS).fill(0));
+    }
+
+    // CRITICAL: Stacking logic from TOP TO BOTTOM
+    // Finds the lowest empty row in a column, starting from the top (0)
+    function getBottomRow(col) {
+        for (let r = 0; r < ROWS; r++) {
+            if (grid[r][col] === 0) {
+                return r;
+            }
+        }
+        return ROWS; // Column is full
+    }
+
+    function spawnLauncherBlock() {
+        if (gameOver) return;
+
+        const r = Math.random();
+        let value;
+        if (r < 0.6) value = 2;
+        else if (r < 0.9) value = 4;
+        else value = 16;
+
+        // Start in a random column, but the user can change it immediately
+        const col = Math.floor(Math.random() * COLS); 
+        
+        activeBlock = {
+            value: value,
+            col: col,
+            // Starts at the launcher area
+            y: canvasH - (canvasH * LAUNCHER_HEIGHT_RATIO * 0.8), 
+            targetY: null
+        };
+        isAnimating = true;
+    }
+
+    function update() {
+        if (!activeBlock || gameOver) return;
+
+        // Calculate target Y based on TOP-to-BOTTOM stacking
+        let targetRow = getBottomRow(activeBlock.col);
+        activeBlock.targetY = gridY + (targetRow * cellSize);
+
+        // Move block up
+        let speed = 25;
+        activeBlock.y -= speed;
+
+        if (activeBlock.y <= activeBlock.targetY) {
+            activeBlock.y = activeBlock.targetY;
+            placeBlock();
+            isAnimating = false;
+            activeBlock = null;
+            
+            // Resolve merges and check game over
+            setTimeout(() => {
+                resolveMerges();
+                if (checkGameOver()) {
+                    // Game over
+                } else {
+                    // Spawn next block after a delay
+                    nextSpawnTimeout = setTimeout(spawnLauncherBlock, 300);
+                }
+            }, 150);
+        }
+    }
+
+    function placeBlock() {
+        let targetRow = getBottomRow(activeBlock.col);
+        // Since getBottomRow returns the first empty row, 
+        // we need to place it one row above that (if not empty)
+        if (targetRow >= ROWS) { 
+            // Shouldn't happen due to game over check, but safety
+            gameOver = true;
+            return;
+        }
+        
+        grid[targetRow][activeBlock.col] = activeBlock.value;
+        score += activeBlock.value;
+        document.getElementById('score').innerText = String(score).padStart(5, '0');
+    }
+
+    function resolveMerges() {
+        let merged = false;
+        
+        // Scan Right
+        for (let r = 0; r < ROWS; r++) {
+            for (let c = 0; c < COLS - 1; c++) {
+                if (grid[r][c] !== 0 && grid[r][c] === grid[r][c+1]) {
+                    grid[r][c] *= 2;
+                    grid[r][c+1] = 0;
+                    score += grid[r][c];
+                    merged = true;
+                }
+            }
+        }
+
+        // Scan Down (since stacks from top to bottom, gravity pulls down)
+        for (let r = 0; r < ROWS - 1; r++) {
+            for (let c = 0; c < COLS; c++) {
+                if (grid[r][c] !== 0 && grid[r][c] === grid[r+1][c]) {
+                    grid[r+1][c] *= 2;
+                    grid[r][c] = 0;
+                    score += grid[r+1][c];
+                    merged = true;
+                }
+            }
+        }
+
+        if (merged) {
+            applyGravity();
+            document.getElementById('score').innerText = String(score).padStart(5, '0');
+        }
+    }
+
+    // Apply gravity so empty spaces are filled downwards
+    function applyGravity() {
+        for (let c = 0; c < COLS; c++) {
+            let emptyRow = ROWS - 1;
+            for (let r = ROWS - 1; r >= 0; r--) {
+                if (grid[r][c] !== 0) {
+                    if (r !== emptyRow) {
+                        grid[emptyRow][c] = grid[r][c];
+                        grid[r][c] = 0;
+                    }
+                    emptyRow--;
+                }
+            }
+        }
+    }
+
+    function checkGameOver() {
+        // Game over if TOP row (index 0) is full
+        for (let c = 0; c < COLS; c++) {
+            if (grid[0][c] !== 0) {
+                gameOver = true;
+                if (score > best) {
+                    best = score;
+                    localStorage.setItem('mergeDropBest', best);
+                }
+                document.getElementById('best').innerText = String(best).padStart(5, '0');
+                document.getElementById('final-score').innerText = score;
+                document.getElementById('overlay').style.display = 'flex';
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function drawRoundedRect(x, y, w, h, r) {
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.lineTo(x + w - r, y);
+        ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+        ctx.lineTo(x + w, y + h - r);
+        ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+        ctx.lineTo(x + r, y + h);
+        ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+        ctx.lineTo(x, y + r);
+        ctx.quadraticCurveTo(x, y, x + r, y);
+        ctx.closePath();
+    }
+
+    function drawBlock(x, y, value, size) {
+        const margin = size * 0.08;
+        const color = colors[value] || '#333';
+        
+        // Shadow
+        ctx.fillStyle = 'rgba(0,0,0,0.15)';
+        drawRoundedRect(x + margin, y + margin + 4, size - (margin*2), size - (margin*2), size * 0.1);
+        ctx.fill();
+
+        // Main block
+        ctx.fillStyle = color;
+        drawRoundedRect(x + margin, y + margin, size - (margin*2), size - (margin*2), size * 0.1);
+        ctx.fill();
+
+        // Text
+        ctx.fillStyle = 'white';
+        ctx.font = `bold ${size * 0.35}px Arial`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(value, x + size / 2, y + size / 2 + 2);
+    }
+
+    function draw() {
+        ctx.clearRect(0, 0, canvasW, canvasH);
+        
+        // Draw Grid Backgrounds
+        for (let r = 0; r < ROWS; r++) {
+            for (let c = 0; c < COLS; c++) {
+                const x = gridX + (c * cellSize);
+                const y = gridY + (r * cellSize);
+                
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+                drawRoundedRect(x + 1, y + 1, cellSize - 2, cellSize - 2, cellSize * 0.15);
+                ctx.fill();
+                
+                if (grid[r][c] !== 0) {
+                    drawBlock(x, y, grid[r][c], cellSize);
+                }
+            }
+        }
+
+        // Draw Grid Border
+        ctx.strokeStyle = 'white';
+        ctx.lineWidth = 4;
+        ctx.strokeRect(gridX, gridY, cellSize * COLS, cellSize * ROWS);
+        
+        // Draw Launcher Funnel Lines
+        ctx.beginPath();
+        ctx.moveTo(gridX, canvasH);
+        ctx.lineTo(gridX + cellSize * 1.2, canvasH - (canvasH * LAUNCHER_HEIGHT_RATIO * 0.6));
+        ctx.lineTo(canvasW - gridX - cellSize * 1.2, canvasH - (canvasH * LAUNCHER_HEIGHT_RATIO * 0.6));
+        ctx.lineTo(canvasW - gridX, canvasH);
+        ctx.stroke();
+
+        // Draw Active Launcher Block
+        if (activeBlock) {
+            let x = gridX + (activeBlock.col * cellSize);
+            drawBlock(x, activeBlock.y, activeBlock.value, cellSize);
+        }
+    }
+
+    function gameLoop() {
+        update();
+        draw();
+        requestAnimationFrame(gameLoop);
+    }
+
+    // Input: Click/Touch to select column
+    function handleSelect(x) {
+        if (gameOver || !activeBlock || isAnimating) return;
+
+        let col = Math.floor((x - gridX) / cellSize);
+        if (col >= 0 && col < COLS) {
+            activeBlock.col = col;
+        }
+    }
+
+    canvas.addEventListener('click', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        let x = (e.clientX - rect.left) * scaleX;
+        handleSelect(x);
+    });
+
+    canvas.addEventListener('touchstart', (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        let x = (e.touches[0].clientX - rect.left) * scaleX;
+        handleSelect(x);
+    });
+
+    // Keyboard support
+    document.addEventListener('keydown', (e) => {
+        if (gameOver || !activeBlock) return;
+        if (e.key === 'ArrowLeft' && activeBlock.col > 0) {
+            activeBlock.col--;
+        } else if (e.key === 'ArrowRight' && activeBlock.col < COLS - 1) {
+            activeBlock.col++;
+        }
+    });
+
+    function startGame() {
+        // Clear any pending timeouts to fix auto-play bug
+        if (nextSpawnTimeout) clearTimeout(nextSpawnTimeout);
+
+        initGrid();
+        score = 0;
+        gameOver = false;
+        activeBlock = null;
+        isAnimating = false;
+        
+        document.getElementById('score').innerText = '00042';
+        document.getElementById('best').innerText = String(best).padStart(5, '0');
+        document.getElementById('overlay').style.display = 'none';
+        spawnLauncherBlock();
+    }
+
+    // Initialize
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+    startGame();
+    gameLoop();
+
+</script>
+</body>
+</html>

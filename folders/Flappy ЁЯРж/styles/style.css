@@ -1,0 +1,16 @@
+#canvas1{
+  max-width: 100%;
+  max-height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  border: 2px solid black;
+}
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+.sprite{
+  display: none;
+}
