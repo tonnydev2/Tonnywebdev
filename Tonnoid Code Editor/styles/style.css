@@ -254,8 +254,8 @@ footer {
 }
 /* ---------- Autocomplete dropdown ---------- */
 .autocomplete {
-    position: absolute;
-    z-index: 20;
+    position: fixed;
+    z-index: 60;
     min-width: 180px;
     max-width: 340px;
     max-height: 220px;
@@ -612,7 +612,7 @@ mark.find-hit.current {
     align-items: center;
     justify-content: center;
     min-width: 36px;
-    min-height: 36px;
+    min-height: 54px;
     padding: 0 10px;
     background: #252a33;
     color: var(--text);
@@ -665,7 +665,7 @@ body.no-shortcutbar .shortcutbar {
 }
 /* reserve space so the last line can still be reached while the bar is visible */
 body.shortcutbar-open .editor-inner {
-    padding-bottom: 52px;
+    padding-bottom: 70px;
 }
 /* ---------- Cloud sync indicator ---------- */
 .sync-dot {
@@ -686,4 +686,4 @@ body.shortcutbar-open .editor-inner {
 #syncBtn {
     display: inline-flex;
     align-items: center;
-}
+        }
