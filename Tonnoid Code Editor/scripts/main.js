@@ -12,7 +12,7 @@ import { closeAutocomplete, openAutocomplete, getWordAtCaret } from './autocompl
 import { onKeyDown, onBeforeInput } from './pairing.js';
 import { initFileButtons } from './files.js';
 import './find.js';   /* attaches find-bar listeners on import */
-import { initShortcutBar } from './shortcutbar.js';
+import { initShortcutBar } from './shortcutBar.js';
 import { initCloudUI } from './cloud-ui.js';
 
 /* ---- Input events ---- */
@@ -70,7 +70,7 @@ export function init() {
 
     initFileButtons();
     initShortcutBar();
-									initCloudUI();
+    initCloudUI();
 
     render();
 }
