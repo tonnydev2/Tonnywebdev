@@ -21,9 +21,27 @@ function makeBtn({ label, title, className, onClick }) {
     b.textContent = label;
     if (title) b.title = title;
     b.setAttribute('aria-label', title || label);
+
+    /* Prevent focus loss from the textarea, which would close (or
+       re-trigger) the soft keyboard on mobile. On touchscreens the browser
+       shifts focus to the tapped button as part of handling the touch
+       itself — before any mousedown/click ever fires — so touchstart has
+       to be the one that's cancelled, not just mousedown.
+
+       Caveat: once touchstart is cancelled, the browser will not follow up
+       with its usual synthetic mousedown/mouseup/click for that touch, so
+       the button's action has to be fired from touchend directly instead
+       of waiting on a 'click' that will never arrive. The 'click' listener
+       stays too, purely for real mouse/trackpad use and keyboard/assistive
+       activation, which don't go through touch events at all. */
+    b.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+    }, { passive: false });
+    b.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        onClick(e);
+    });
     b.addEventListener('mousedown', (e) => {
-        /* Prevent focus loss from the textarea, which would close the
-           soft keyboard on mobile. */
         e.preventDefault();
     });
     b.addEventListener('click', onClick);
@@ -409,7 +427,8 @@ function repositionBar() {
         0,
         (window.innerHeight - vv.height - vv.offsetTop)
     );
-    bar.style.bottom = (keyboardOffset + 26) + 'px';
+    const restingGap = 26; /* clearance above the footer when no keyboard is showing */
+    bar.style.bottom = (keyboardOffset > 0 ? keyboardOffset : restingGap) + 'px';
 }
 
 /* ---- Show/hide based on focus ---- */

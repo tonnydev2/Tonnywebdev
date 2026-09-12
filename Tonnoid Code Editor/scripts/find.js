@@ -204,8 +204,9 @@ function repositionFindBar() {
         (window.innerHeight - vv.height - vv.offsetTop)
     );
 
-    /* Push the bar up by the keyboard height, on top of the footer gap. */
-    findBarEl.style.bottom = (keyboardOffset + 26) + 'px';
+    /* Sit flush against the keyboard when it's up; otherwise rest just above the footer. */
+    const restingGap = 26;
+    findBarEl.style.bottom = (keyboardOffset > 0 ? keyboardOffset : restingGap) + 'px';
 }
 
 if (window.visualViewport) {
