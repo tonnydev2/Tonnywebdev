@@ -2,7 +2,7 @@ import { input } from './dom.js';
 import { currentFileLang, getActiveTab } from './tabs.js';
 import { render } from './render.js';
 import { closeAutocomplete, getAcState, renderAcBox } from './autocomplete.js';
-
+import { detectInlineLang } from './inline-lang.js';
 export const BRACKET_PAIRS = { '(': ')', '[': ']', '{': '}' };
 export const CLOSERS        = new Set(Object.values(BRACKET_PAIRS));
 export const QUOTE_CHARS    = new Set(['"', "'", '`']);
@@ -257,7 +257,6 @@ export function onBeforeInput(e) {
         setCaret(start + 1);
         return;
     }
-
     if (QUOTE_CHARS.has(key)) {
         e.preventDefault();
         if (hasSelection) {
@@ -276,12 +275,31 @@ export function onBeforeInput(e) {
         return;
     }
 
-    if (key === '>') {
+    /* ============================================================
+       HTML: typing '>' at the end of an open tag auto-inserts the
+       matching closing tag.
+
+       Only fires when:
+         - the current file is HTML
+         - the caret is NOT inside a <script> or <style> block
+         - the character right before the caret is inside an
+           unfinished opening tag (i.e. there's a `<tag` before the
+           caret with no `>` between)
+         - the tag is not void and not self-closing
+
+       The last check ensures we don't accidentally close a tag
+       that the user is already inside after typing `<div ` and
+       some attributes — that's still "inside the tag" and we DO
+       want to close it there. So the check is only about having
+       an unclosed `<` before the caret.
+       ============================================================ */
+    if (key === '>' && !hasSelection) {
         const fileLang = currentFileLang();
         const effective = fileLang === 'html'
             ? detectInlineLang(value, start).lang
             : fileLang;
-        if (effective === 'html' && !hasSelection) {
+
+        if (effective === 'html') {
             const tagName = openTagAtCursor(value, start);
             if (tagName) {
                 e.preventDefault();
@@ -289,6 +307,7 @@ export function onBeforeInput(e) {
                 input.value = value.slice(0, start) + '>' + closing + value.slice(end);
                 setCaret(start + 1);
                 render();
+                return;
             }
         }
     }
