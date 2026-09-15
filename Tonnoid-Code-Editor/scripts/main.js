@@ -11,7 +11,7 @@ import { onKeyDown, onBeforeInput } from './pairing.js';
 import { initFileButtons } from './files.js';
 import './find.js';
 import { initShortcutBar } from './shortcutBar.js';
-import { initCloudUI } from './cloud-ui.js';
+import { initCloud } from './cloud-ui.js';
 import { initPreview } from './preview.js';
 import { initConsole } from './console-pannel.js';
 import { loadAssets } from './assets.js';
@@ -100,7 +100,7 @@ export async function init() {
 
     initFileButtons();
     initShortcutBar();
-    initCloudUI();
+    initCloud();
     initPreview();
     initConsole();
     initOverflowMenu();
