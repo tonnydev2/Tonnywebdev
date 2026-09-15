@@ -1,0 +1,125 @@
+:root {
+    --bg: #14171c;
+    --panel: #1b1f26;
+    --gutter: #101317;
+    --rule: #2a2f38;
+    --text: #d8dee9;
+    --dim: #5b6472;
+    --accent: #e8b04b;
+    --keyword: #7aa2f7;
+    --string: #9ece6a;
+    --comment: #5b6472;
+    --number: #e0af68;
+    --func: #e8b04b;
+    --punct: #c0c9d6;
+    --op: #89ddff;
+    --tag: #7aa2f7;
+    --attr: #e0af68;
+    --selector: #e8b04b;
+    --property: #7aa2f7;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+    margin: 0;
+    height: 100%;
+    background: var(--bg);
+    font-family: "SF Mono", "Cascadia Code", "Fira Code", Consolas, monospace;
+    color: var(--text);
+}
+
+.wrap {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+/* ---------- Header ---------- */
+header {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: var(--panel);
+    border-bottom: 1px solid var(--rule);
+    flex-shrink: 0;
+    flex-wrap: wrap;
+}
+
+.dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+.dot.r { background: #f7768e; }
+.dot.y { background: #e0af68; }
+.dot.g { background: #9ece6a; }
+
+.fname {
+    margin-left: 6px;
+    color: var(--dim);
+    font-size: 13px;
+    letter-spacing: .02em;
+    white-space: nowrap;
+}
+.fname b {
+    color: var(--text);
+    font-weight: 600;
+}
+
+.header-actions {
+    display: flex;
+    gap: 6px;
+    margin-left: 12px;
+    flex-wrap: wrap;
+}
+
+.header-actions button,
+.header-actions select {
+    background: #252a33;
+    border: 1px solid var(--rule);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 12px;
+    padding: 5px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+    white-space: nowrap;
+}
+.header-actions button:hover,
+.header-actions select:hover {
+    background: #2f3540;
+    border-color: #4a5260;
+}
+.header-actions button.primary {
+    background: var(--accent);
+    color: #14171c;
+    border-color: var(--accent);
+    font-weight: 600;
+}
+.header-actions button.primary:hover {
+    background: #f0c060;
+}
+.header-actions select {
+    appearance: none;
+    padding-right: 22px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%235b6472'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+}
+
+.status {
+    margin-left: auto;
+    font-size: 12px;
+    color: var(--dim);
+    display: flex;
+    gap: 14px;
+}
+.status span b {
+    color: var(--accent);
+    font-weight: 600;
+}
