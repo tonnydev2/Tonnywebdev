@@ -22,29 +22,79 @@ function makeBtn({ label, title, className, onClick }) {
     if (title) b.title = title;
     b.setAttribute('aria-label', title || label);
 
-    /* Prevent focus loss from the textarea, which would close (or
-       re-trigger) the soft keyboard on mobile. On touchscreens the browser
-       shifts focus to the tapped button as part of handling the touch
-       itself — before any mousedown/click ever fires — so touchstart has
-       to be the one that's cancelled, not just mousedown.
+    /* We need to allow horizontal scroll of the parent row while still
+       firing taps on individual buttons. The browser can't tell the
+       difference between "user wants to scroll" and "user wants to tap"
+       until the finger actually moves — so we have to decide at
+       touchend time based on how far the finger travelled. */
 
-       Caveat: once touchstart is cancelled, the browser will not follow up
-       with its usual synthetic mousedown/mouseup/click for that touch, so
-       the button's action has to be fired from touchend directly instead
-       of waiting on a 'click' that will never arrive. The 'click' listener
-       stays too, purely for real mouse/trackpad use and keyboard/assistive
-       activation, which don't go through touch events at all. */
+    const TAP_DISTANCE = 10;   // px
+    const TAP_TIME     = 500;  // ms
+
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchStartTime = 0;
+    let touchMoved = false;
+    let touchCancelled = false;
+
     b.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-    }, { passive: false });
+        const t = e.touches[0];
+        if (!t) return;
+        touchStartX = t.clientX;
+        touchStartY = t.clientY;
+        touchStartTime = Date.now();
+        touchMoved = false;
+        touchCancelled = false;
+
+        /* Do NOT preventDefault here — that would kill scrolling. */
+    }, { passive: true });
+
+    b.addEventListener('touchmove', (e) => {
+        const t = e.touches[0];
+        if (!t) return;
+        const dx = t.clientX - touchStartX;
+        const dy = t.clientY - touchStartY;
+
+        /* If the finger has moved horizontally more than the tap
+           threshold, this is a scroll — mark it so touchend won't fire
+           the action. Also mark cancelled if the finger moved
+           vertically, in case the user is scrolling the whole page. */
+        if (Math.abs(dx) > TAP_DISTANCE || Math.abs(dy) > TAP_DISTANCE) {
+            touchMoved = true;
+            touchCancelled = true;
+        }
+    }, { passive: true });
+
     b.addEventListener('touchend', (e) => {
+        /* Ignore if the finger moved (it was a scroll). */
+        if (touchCancelled) return;
+
+        /* Ignore long presses too — they might be a "hold to see what
+           this does" gesture and shouldn't fire the action. */
+        if (Date.now() - touchStartTime > TAP_TIME) return;
+
+        /* At this point we're confident it was a tap. Prevent the
+           browser's synthetic click so it doesn't fire twice, and
+           call the handler directly. */
         e.preventDefault();
         onClick(e);
+    }, { passive: false });
+
+    b.addEventListener('touchcancel', () => {
+        touchCancelled = true;
     });
+
+    /* Mouse/trackpad path — unchanged, but skip it on touch devices so
+       the same tap doesn't fire twice (touchstart → touchend → click). */
     b.addEventListener('mousedown', (e) => {
         e.preventDefault();
     });
-    b.addEventListener('click', onClick);
+    b.addEventListener('click', (e) => {
+        /* Only honour click for real mouse/trackpad/pointer users. */
+        if (e.pointerType === 'touch' || e.sourceCapabilities?.firesTouchEvents) return;
+        onClick(e);
+    });
+
     return b;
 }
 
