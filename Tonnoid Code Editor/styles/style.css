@@ -977,3 +977,92 @@ body.preview-open .shortcutbar {
 body.console-open .preview-frame-wrap {
     padding-bottom: 0;
 }
+.autocomplete .ac-kind.file { color: #9ece6a; }
+/* ---------- Projects panel ---------- */
+.projects-panel {
+    position: fixed;
+    top: 60px;
+    right: 12px;
+    width: 320px;
+    max-width: 92vw;
+    max-height: 70vh;
+    background: var(--panel);
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+    z-index: 80;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+.projects-panel[hidden] { display: none; }
+
+.projects-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--rule);
+    font-size: 12px;
+    color: var(--dim);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+.projects-head > span { flex: 1; }
+.projects-head-actions { display: flex; gap: 6px; }
+
+.projects-list {
+    overflow-y: auto;
+    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.project-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    background: transparent;
+    transition: background 0.1s;
+}
+.project-item:hover { background: #232831; }
+.project-item.active {
+    background: #2a3240;
+    box-shadow: inset 3px 0 0 var(--accent);
+}
+.project-item-main { flex: 1; min-width: 0; }
+.project-item-name {
+    font-size: 13px;
+    color: var(--text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.project-item-meta {
+    font-size: 11px;
+    color: var(--dim);
+    margin-top: 2px;
+}
+.project-item-actions {
+    display: flex;
+    gap: 2px;
+    opacity: 0;
+    transition: opacity 0.1s;
+}
+.project-item:hover .project-item-actions { opacity: 1; }
+.project-act {
+    background: transparent;
+    border: none;
+    color: var(--dim);
+    cursor: pointer;
+    font-size: 13px;
+    padding: 4px 6px;
+    border-radius: 4px;
+    font-family: inherit;
+}
+.project-act:hover { background: #3a4150; color: var(--text); }
+
+.autocomplete .ac-kind.file { color: #9ece6a; }
