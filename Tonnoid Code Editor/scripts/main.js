@@ -1,6 +1,5 @@
 /* ============================================================
    Lantern — entry point.
-   Wire everything together after all modules are loaded.
    ============================================================ */
 
 import { input, fileTypeSelect } from './dom.js';
@@ -11,11 +10,15 @@ import { createTab, uniqueNewName, getActiveTab, renderTabs, switchToTab } from 
 import { closeAutocomplete, openAutocomplete, getWordAtCaret } from './autocomplete.js';
 import { onKeyDown, onBeforeInput } from './pairing.js';
 import { initFileButtons } from './files.js';
-import './find.js';   /* attaches find-bar listeners on import */
+import './find.js';
 import { initShortcutBar } from './shortcutBar.js';
 import { initCloudUI } from './cloud-ui.js';
+import { initPreview } from './preview.js';
+import { initConsole } from './console-pannel.js';
+import { loadAssets } from './assets.js';
+import { initOverflowMenu } from './overflow.js';
+import { initPWA } from './pwa.js';
 
-/* ---- Input events ---- */
 input.addEventListener('input', () => {
     const tab = getActiveTab();
     if (tab) tab.content = input.value;
@@ -27,20 +30,26 @@ input.addEventListener('input', () => {
     else closeAutocomplete();
 });
 
- input.addEventListener('scroll', () => {
+input.addEventListener('scroll', () => {
     const hp = document.getElementById('highlight');
     const g  = document.getElementById('gutter');
     if (hp) { hp.scrollTop = input.scrollTop; hp.scrollLeft = input.scrollLeft; }
     if (g)  { g.scrollTop  = input.scrollTop; }
-    /* reposition autocomplete if open */
     import('./autocomplete.js').then(m => m.repositionAutocomplete?.());
 });
 
-/* ---- Key events routed to pairing.js ---- */
+/* Re-render on selection change so bracket-match updates. */
+input.addEventListener('click', render);
+input.addEventListener('keyup', (e) => {
+    /* Only re-render for pure navigation keys that move the caret. */
+    const navKeys = ['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End','PageUp','PageDown'];
+    if (navKeys.includes(e.key)) render();
+});
+input.addEventListener('select', render);
+
 input.addEventListener('keydown', onKeyDown);
 input.addEventListener('beforeinput', onBeforeInput);
 
-/* ---- File-type dropdown ---- */
 fileTypeSelect.addEventListener('change', () => {
     const lang = fileTypeSelect.value;
     const tab = getActiveTab();
@@ -52,13 +61,11 @@ fileTypeSelect.addEventListener('change', () => {
     render();
 });
 
-/* ---- Resize ---- */
 window.addEventListener('resize', () => {
     syncSize();
     import('./autocomplete.js').then(m => m.repositionAutocomplete?.());
 });
 
-/* ---- Boot ---- */
 export function init() {
     loadSavedFiles();
 
@@ -71,6 +78,11 @@ export function init() {
     initFileButtons();
     initShortcutBar();
     initCloudUI();
+    initPreview();
+    initConsole();
+    initOverflowMenu();
+    initPWA();
+    loadAssets();
 
     render();
 }

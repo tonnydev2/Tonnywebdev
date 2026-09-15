@@ -1,5 +1,6 @@
 /* Shared mutable state. Import and mutate — don't rebind. */
 export const DEFAULT_LANG = 'html';
+/* name → { type, dataUrl } */
 
 export const DEFAULT_HTML = `<!DOCTYPE html>
 <html lang="en">
@@ -29,4 +30,6 @@ export function setActiveTabId(id) { activeTabId = id; }
 
 /* localStorage-backed saved files: name -> { name, lang, content } */
 export const savedFiles = {};
+
+export const assets = {};
 

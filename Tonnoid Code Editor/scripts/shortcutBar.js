@@ -441,7 +441,34 @@ function hideBar() {
     bar.classList.add('hidden');
     document.body.classList.remove('shortcutbar-open');
 }
+/* ---- Show/hide based on what actually has focus ---- */
+function shouldShowBar() {
+    /* Always show on touch devices / narrow screens, unless the preview
+       is open (which is a full-screen overlay). */
+    const isTouch = matchMedia('(hover: none)').matches || window.innerWidth < 720;
+    if (document.body.classList.contains('preview-open')) return false;
 
+    const ae = document.activeElement;
+    if (!ae) return isTouch;
+
+    /* Focused inside the editor? Show it. */
+    if (ae === input) return true;
+
+    /* Focused inside the shortcut bar itself? Keep it up. */
+    if (bar.contains(ae)) return true;
+
+    /* Focused inside the find bar? Keep it up too. */
+    const findBar = document.getElementById('findBar');
+    if (findBar && !findBar.hidden && findBar.contains(ae)) return true;
+
+    /* Otherwise (header buttons, tab strip, etc.): fall back to touch mode. */
+    return isTouch;
+}
+
+function refreshBarVisibility() {
+    if (shouldShowBar()) showBar();
+    else hideBar();
+}
 /* ---- Wire up ---- */
 export function initShortcutBar() {
     buildBar();

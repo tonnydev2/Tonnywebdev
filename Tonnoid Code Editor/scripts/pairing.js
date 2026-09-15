@@ -192,6 +192,22 @@ export function onBeforeInput(e) {
     const end   = input.selectionEnd;
     const hasSelection = start !== end;
 
+    /* Same "delete one side of an empty pair, both go" rule as onKeyDown,
+       kept here too. Some Android keyboard apps are inconsistent about
+       whether a Backspace/Delete tap surfaces cleanly through keydown vs.
+       beforeinput, so covering both is the reliable way to guarantee this
+       works regardless of which keyboard someone is using. Whichever
+       handler runs first wins — preventDefault() on one suppresses the
+       other for that same keystroke, so there's no double-handling. */
+    if ((e.inputType === 'deleteContentBackward' || e.inputType === 'deleteContentForward') &&
+        !hasSelection && isBetweenPair(value, start)) {
+        e.preventDefault();
+        input.value = value.slice(0, start - 1) + value.slice(start + 1);
+        setCaret(start - 1);
+        render();
+        return;
+    }
+
     if (e.inputType === 'insertLineBreak' && !hasSelection) {
         e.preventDefault();
         const lineStart = value.lastIndexOf('\n', start - 1) + 1;
@@ -260,15 +276,20 @@ export function onBeforeInput(e) {
         return;
     }
 
-    if (key === '>' && currentFileLang() === 'html' && !hasSelection) {
-        const tagName = openTagAtCursor(value, start);
-        if (tagName) {
-            e.preventDefault();
-            const closing = `</${tagName}>`;
-            input.value = value.slice(0, start) + '>' + closing + value.slice(end);
-            setCaret(start + 1);
-            render();
+    if (key === '>') {
+        const fileLang = currentFileLang();
+        const effective = fileLang === 'html'
+            ? detectInlineLang(value, start).lang
+            : fileLang;
+        if (effective === 'html' && !hasSelection) {
+            const tagName = openTagAtCursor(value, start);
+            if (tagName) {
+                e.preventDefault();
+                const closing = `</${tagName}>`;
+                input.value = value.slice(0, start) + '>' + closing + value.slice(end);
+                setCaret(start + 1);
+                render();
+            }
         }
     }
 }
-

@@ -1,3 +1,6 @@
+/* ============================================================
+   File operation buttons: New, Save, Download, Open, Import, Attach
+   ============================================================ */
 import { DEFAULT_LANG, tabs, savedFiles } from './state.js';
 import { input, fileTypeSelect } from './dom.js';
 import { askFileName } from './filename-dialog.js';
@@ -6,6 +9,7 @@ import { render } from './render.js';
 import { persistSavedFiles } from './storage.js';
 
 export function initFileButtons() {
+    /* ---------- New ---------- */
     document.getElementById('newFileBtn').addEventListener('click', () => {
         const lang = fileTypeSelect.value || DEFAULT_LANG;
         askFileName({
@@ -24,28 +28,29 @@ export function initFileButtons() {
         });
     });
 
+    /* ---------- Save (local + cloud) ---------- */
     document.getElementById('saveFileBtn').addEventListener('click', async () => {
-    const tab = getActiveTab();
-    if (!tab) return;
-    tab.content = input.value;
-    tab.savedContent = input.value;
-    savedFiles[tab.name] = { name: tab.name, lang: tab.lang, content: tab.content };
-    persistSavedFiles();
+        const tab = getActiveTab();
+        if (!tab) return;
+        tab.content = input.value;
+        tab.savedContent = input.value;
+        savedFiles[tab.name] = { name: tab.name, lang: tab.lang, content: tab.content };
+        persistSavedFiles();
 
-    /* Fire-and-forget cloud push (ignored when offline). */
-    import('./cloud.js')
-        .then(m => m.pushFile({ name: tab.name, lang: tab.lang, content: tab.content }))
-        .catch(() => {});
+        import('./cloud.js')
+            .then(m => m.pushFile({ name: tab.name, lang: tab.lang, content: tab.content }))
+            .catch(() => {});
 
-    const btn = document.getElementById('saveFileBtn');
-    const orig = btn.textContent;
-    btn.textContent = '✅ Saved!';
-    setTimeout(() => { btn.textContent = orig; }, 1000);
+        const btn = document.getElementById('saveFileBtn');
+        const orig = btn.textContent;
+        btn.textContent = '✅ Saved!';
+        setTimeout(() => { btn.textContent = orig; }, 1000);
 
-    renderTabs();
-    render();
-});
+        renderTabs();
+        render();
+    });
 
+    /* ---------- Download ---------- */
     document.getElementById('downloadBtn').addEventListener('click', () => {
         const tab = getActiveTab();
         if (!tab) return;
@@ -61,6 +66,7 @@ export function initFileButtons() {
         URL.revokeObjectURL(url);
     });
 
+    /* ---------- Open (from localStorage) ---------- */
     document.getElementById('openFileBtn').addEventListener('click', () => {
         const names = Object.keys(savedFiles);
         if (names.length === 0) {
@@ -87,6 +93,7 @@ export function initFileButtons() {
         });
     });
 
+    /* ---------- Import (from disk) ---------- */
     document.getElementById('importBtn').addEventListener('click', () => {
         const fileInput = document.createElement('input');
         fileInput.type = 'file';
@@ -107,5 +114,38 @@ export function initFileButtons() {
         });
         fileInput.click();
     });
-}
 
+    /* ---------- Attach (assets for preview) ---------- */
+    const attachBtn = document.getElementById('attachBtn');
+    if (attachBtn) {
+        attachBtn.addEventListener('click', () => {
+            const fi = document.createElement('input');
+            fi.type = 'file';
+            fi.multiple = true;
+            fi.accept = 'image/*,audio/*,video/*,font/*,.svg,.woff,.woff2,.ttf';
+            fi.addEventListener('change', async (e) => {
+                const files = Array.from(e.target.files || []);
+                if (files.length === 0) return;
+
+                const orig = attachBtn.textContent;
+
+                const { importAssetFiles } = await import('./assets.js');
+                const stored = await importAssetFiles(files);
+
+                /* Refresh the preview so new assets appear immediately —
+                   without needing a manual ↻. */
+                const previewMod = await import('./preview.js');
+                if (previewMod.isPreviewOpen()) previewMod.renderPreview();
+
+                /* Report status on the button itself. */
+                if (stored.allOk) {
+                    attachBtn.textContent = `✅ ${files.length} added`;
+                } else {
+                    attachBtn.textContent = `⚠️ ${stored.ok}/${files.length} stored`;
+                }
+                setTimeout(() => { attachBtn.textContent = orig; }, 1200);
+            });
+            fi.click();
+        });
+    }
+}

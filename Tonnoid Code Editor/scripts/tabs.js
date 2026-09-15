@@ -7,7 +7,7 @@ import { input, fileTypeSelect, tabsBar } from './dom.js';
 import { render } from './render.js';
 import { closeAutocomplete } from './autocomplete.js';
 import { askFileName } from './filename-dialog.js';
-
+ 
 function escapeHtml(s) {
     return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
@@ -75,6 +75,58 @@ export function switchToTab(id) {
     scrollTabsToActive();
 }
 
+
+/* Open the name dialog in rename mode for a given tab. */
+function promptRenameTab(tab) {
+    askFileName({
+        title: 'Rename file',
+        lang: tab.lang,
+        initial: tab.name,
+        mode: 'rename',
+        onConfirm: (newName) => {
+            /* Guard: don't allow renaming to a name that's already taken. */
+            const clash = tabs.find(t => t.name === newName && t.id !== tab.id);
+            if (clash) {
+                alert(`"${newName}" is already open.`);
+                return;
+            }
+
+            const oldName = tab.name;
+            tab.name = newName;
+
+            /* Migrate the savedFiles entry: rename the key and update
+               the `name` field inside. */
+            if (savedFiles[oldName]) {
+                const entry = savedFiles[oldName];
+                delete savedFiles[oldName];
+                entry.name = newName;
+                savedFiles[newName] = entry;
+
+                /* Re-persist so the new key survives a reload. */
+                import('./storage.js').then(m => m.persistSavedFiles());
+
+                /* Best-effort cloud rename: delete the old row, insert the
+                   new one. If the user is offline, this is a no-op. */
+                import('./cloud.js').then(async (m) => {
+                    try {
+                        await m.deleteCloudFile(oldName);
+                        await m.pushFile({
+                            name: newName,
+                            lang: tab.lang,
+                            content: tab.content,
+                        });
+                    } catch (e) {
+                        /* Silent: cloud sync will catch up on next save. */
+                    }
+                });
+            }
+
+            renderTabs();
+            render();
+        },
+    });
+}
+
 export function closeTab(id) {
     const idx = tabs.findIndex(t => t.id === id);
     if (idx === -1) return;
@@ -119,11 +171,19 @@ export function renderTabs() {
     tabsBar.innerHTML = parts.join('');
 
     tabsBar.querySelectorAll('.tab').forEach(el => {
-        el.addEventListener('click', (e) => {
-            if (e.target.closest('.tab-close')) return;
-            switchToTab(el.dataset.tabId);
-        });
+    el.addEventListener('click', (e) => {
+        if (e.target.closest('.tab-close')) return;
+        switchToTab(el.dataset.tabId);
     });
+
+    /* Double-click the tab body (but not the × button) to rename. */
+    el.addEventListener('dblclick', (e) => {
+        if (e.target.closest('.tab-close')) return;
+        const tab = tabs.find(t => t.id === el.dataset.tabId);
+        if (!tab) return;
+        promptRenameTab(tab);
+    });
+});
     tabsBar.querySelectorAll('.tab-close').forEach(el => {
         el.addEventListener('click', (e) => {
             e.stopPropagation();

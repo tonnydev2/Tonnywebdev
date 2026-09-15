@@ -10,13 +10,16 @@ import { renderTabs } from './tabs.js';
 let supabase = null;
 let currentUser = null;
 let syncState = 'offline';   /* 'offline' | 'online' | 'syncing' | 'error' */
+let lastSyncError = null;
 const listeners = new Set();
 
 export function getSyncState() { return syncState; }
 export function getCurrentUser() { return currentUser; }
+export function getLastSyncError() { return lastSyncError; }
 export function onSyncChange(fn) { listeners.add(fn); return () => listeners.delete(fn); }
 
-function setSyncState(state) {
+function setSyncState(state, error) {
+    lastSyncError = error ? (error.message || String(error)) : (state === 'error' ? lastSyncError : null);
     if (state === syncState) return;
     syncState = state;
     listeners.forEach(fn => { try { fn(state); } catch (e) {} });
@@ -52,7 +55,7 @@ export async function initCloud() {
         }
     } catch (e) {
         console.warn('[cloud] getSession failed:', e);
-        setSyncState('offline');
+        setSyncState('offline', e);
     }
 
     /* React to sign-in / sign-out from anywhere. */
@@ -128,7 +131,7 @@ export async function pushFile(file) {
         return { ok: true };
     } catch (e) {
         console.warn('[cloud] pushFile failed:', e);
-        setSyncState('error');
+        setSyncState('error', e);
         return { error: e };
     }
 }
@@ -156,7 +159,7 @@ export async function pushAllFiles() {
         return { ok: true, count: rows.length };
     } catch (e) {
         console.warn('[cloud] pushAllFiles failed:', e);
-        setSyncState('error');
+        setSyncState('error', e);
         return { error: e };
     }
 }
@@ -207,7 +210,7 @@ export async function pullFromCloud() {
         return { ok: true, count: (data || []).length };
     } catch (e) {
         console.warn('[cloud] pullFromCloud failed:', e);
-        setSyncState('error');
+        setSyncState('error', e);
         return { error: e };
     }
 }

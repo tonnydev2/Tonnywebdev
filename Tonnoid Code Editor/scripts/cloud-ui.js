@@ -2,8 +2,8 @@
    Cloud UI: sync button in header + auth dialog
    ============================================================ */
 import {
-    initCloud, signIn, signUp, signOut,
-    getSyncState, getCurrentUser, onSyncChange
+    initCloud, signIn, signUp, signOut, pushAllFiles,
+    getSyncState, getCurrentUser, getLastSyncError, onSyncChange
 } from './cloud.js';
 
 const syncBtn     = document.getElementById('syncBtn');
@@ -29,12 +29,20 @@ function paintSync() {
 
     if (!user) {
         syncLabel.textContent = 'Sign in';
+        syncBtn.title = '';
         return;
     }
 
-    if (state === 'syncing') syncLabel.textContent = 'Syncing…';
-    else if (state === 'error') syncLabel.textContent = 'Retry sync';
-    else syncLabel.textContent = user.email.split('@')[0];
+    if (state === 'syncing') {
+        syncLabel.textContent = 'Syncing…';
+        syncBtn.title = '';
+    } else if (state === 'error') {
+        syncLabel.textContent = 'Retry sync';
+        syncBtn.title = getLastSyncError() || 'Sync failed — tap to retry';
+    } else {
+        syncLabel.textContent = user.email.split('@')[0];
+        syncBtn.title = '';
+    }
 }
 
 onSyncChange(paintSync);
@@ -107,13 +115,25 @@ export async function initCloudUI() {
     paintSync();
 
     syncBtn.addEventListener('click', async () => {
-        if (getCurrentUser()) {
-            const ok = confirm('Sign out of Lantern Cloud?');
-            if (ok) await signOut();
-            paintSync();
-        } else {
-            openDialog();
+        const user = getCurrentUser();
+        if (!user) { openDialog(); return; }
+
+        if (getSyncState() === 'error') {
+            const detail = getLastSyncError();
+            const retry = confirm(
+                'Last sync attempt failed' + (detail ? ':\n\n' + detail : '.') +
+                '\n\nTap OK to retry now, or Cancel to sign out instead.'
+            );
+            if (retry) {
+                await pushAllFiles();
+                paintSync();
+                return;
+            }
         }
+
+        const ok = confirm('Sign out of Lantern Cloud?');
+        if (ok) await signOut();
+        paintSync();
     });
 
     cancelBtn.addEventListener('click', closeDialog);

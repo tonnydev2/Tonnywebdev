@@ -174,6 +174,7 @@ export function highlightHTML(code) {
     while (i < n) {
         const c = code[i];
 
+        /* HTML comment */
         if (c === '<' && code[i + 1] === '!' && code[i + 2] === '-' && code[i + 3] === '-') {
             let j = i + 4;
             while (j < n && !(code[j] === '-' && code[j + 1] === '-' && code[j + 2] === '>')) j++;
@@ -182,9 +183,11 @@ export function highlightHTML(code) {
             i = j;
             continue;
         }
+
         if (c === '<') {
             let j = i + 1;
 
+            /* Closing tag */
             if (code[j] === '/') {
                 j++;
                 const tagStart = j;
@@ -210,14 +213,15 @@ export function highlightHTML(code) {
                 continue;
             }
 
+            /* Opening tag */
             const tagStart = j;
             while (j < n && /[A-Za-z0-9-]/.test(code[j])) j++;
 
             if (j > tagStart) {
                 const tagName = code.slice(tagStart, j).toLowerCase();
                 out.push(`<span class="punc">&lt;</span><span class="tag">${escapeHtml(code.slice(tagStart, j))}</span>`);
-                let pendingAttr = null;
 
+                let pendingAttr = null;
                 while (j < n && code[j] !== '>') {
                     if (code[j] === '"' || code[j] === "'") {
                         const q = code[j];
@@ -256,26 +260,83 @@ export function highlightHTML(code) {
                 }
                 i = j;
 
+                /* <style> / <script> bodies — with string/comment-aware close search */
                 if (tagName === 'style' || tagName === 'script') {
-                    const closeTag = `</${tagName}`;
-                    const lowerCode = code.toLowerCase();
-                    let closeIdx = lowerCode.indexOf(closeTag, i);
-                    if (closeIdx === -1) closeIdx = n;
-                    const body = code.slice(i, closeIdx);
+                    const bodyStart = i;
+                    const bodyEnd = findInlineBlockClose(code, bodyStart, tagName);
+                    const body = code.slice(bodyStart, bodyEnd);
                     if (body.length) {
                         out.push(tagName === 'style' ? highlightCSS(body) : highlightJS(body));
                     }
-                    i = closeIdx;
+                    i = bodyEnd;
                 }
                 continue;
             }
         }
+
         out.push(escapeHtml(c));
         i++;
     }
     return out.join('');
 }
 
+/* Find the index of the `</tag>` closing a <style> or <script> block,
+   skipping over string literals (for script) and CSS comments (for style).
+   Returns text.length if no closer is found. */
+function findInlineBlockClose(code, from, tagName) {
+    const closer = `</${tagName}`;
+    const lower  = code.toLowerCase();
+
+    if (tagName === 'style') {
+        /* In CSS, `</style>` inside a comment doesn't count. Walk
+           through, tracking /* *\/ state. */
+        let i = from;
+        const n = code.length;
+        while (i < n) {
+            if (code[i] === '/' && code[i + 1] === '*') {
+                /* Skip to end of comment */
+                const end = code.indexOf('*/', i + 2);
+                i = end === -1 ? n : end + 2;
+                continue;
+            }
+            if (lower.startsWith(closer, i)) return i;
+            i++;
+        }
+        return n;
+    }
+
+    /* For script: skip over strings (' ", `). Does not handle regex
+       literals — a `</script>` inside a regex will still fool this.
+       In practice, that pattern is rare enough to accept. */
+    let i = from;
+    const n = code.length;
+    while (i < n) {
+        const c = code[i];
+        if (c === '"' || c === "'" || c === '`') {
+            const q = c;
+            i++;
+            while (i < n && code[i] !== q) {
+                if (code[i] === '\\') i++;
+                i++;
+            }
+            i++;    /* step past the closing quote */
+            continue;
+        }
+        if (c === '/' && code[i + 1] === '/') {
+            /* line comment */
+            while (i < n && code[i] !== '\n') i++;
+            continue;
+        }
+        if (c === '/' && code[i + 1] === '*') {
+            const end = code.indexOf('*/', i + 2);
+            i = end === -1 ? n : end + 2;
+            continue;
+        }
+        if (lower.startsWith(closer, i)) return i;
+        i++;
+    }
+    return n;
+}
 /* ---------- Dispatcher ---------- */
 export function highlight(code, lang) {
     if (lang === 'html') return highlightHTML(code);

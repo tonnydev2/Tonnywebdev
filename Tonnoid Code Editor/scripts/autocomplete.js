@@ -2,6 +2,8 @@ import { input, acBox } from './dom.js';
 import { currentFileLang } from './tabs.js';
 import { render } from './render.js';
 import { setCaret, VOID_TAGS } from './pairing.js';
+import { detectInlineLang } from './inline-lang.js';
+
 
 function escapeHtml(s) {
     return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -98,17 +100,29 @@ export function getWordAtCaret() {
     return { start, prefix: value.slice(start, caret), caret };
 }
 
+
 function getDictionary() {
-    const lang = currentFileLang();
+    const fileLang = currentFileLang();
+    const value = input.value;
+    const caret = input.selectionStart;
+
+    /* If we're in HTML, ask the inline detector which sub-language
+       actually owns the caret. */
+    let lang = fileLang;
+    if (fileLang === 'html') {
+        const ctx = detectInlineLang(value, caret);
+        lang = ctx.lang;   /* 'html' | 'css' | 'js' */
+    }
+
     if (lang === 'html') {
-        const before = input.value.slice(0, input.selectionStart);
+        const before = value.slice(0, caret);
         const lastLt = before.lastIndexOf('<');
         const lastGt = before.lastIndexOf('>');
         if (lastLt > lastGt) return AC_HTML_ATTRS.concat(AC_HTML_TAGS);
         return AC_HTML_TAGS;
     }
     if (lang === 'css') {
-        const before = input.value.slice(0, input.selectionStart);
+        const before = value.slice(0, caret);
         const lastOpen  = before.lastIndexOf('{');
         const lastClose = before.lastIndexOf('}');
         if (lastOpen > lastClose) return AC_CSS_PROPS;
@@ -116,7 +130,6 @@ function getDictionary() {
     }
     return AC_JS;
 }
-
 function getMatches(prefix) {
     const dict = getDictionary();
     const p = prefix.toLowerCase();
@@ -250,15 +263,22 @@ function caretCoords(textarea, position) {
 
 export function acceptAutocomplete() {
     if (!acState.open || acState.items.length === 0) return;
+
     const item   = acState.items[acState.activeIdx];
     const value  = input.value;
     const before = value.slice(0, acState.startPos);
     const after  = value.slice(acState.endPos);
 
-    let inserted = item.label;
+    let inserted   = item.label;
     let caretShift = item.label.length;
 
-    if (currentFileLang() === 'html' && item.kind === 'attr') {
+    /* Are we actually in HTML right now? (Not inside <style> / <script>) */
+    const fileLang = currentFileLang();
+    const effectiveLang = fileLang === 'html'
+        ? detectInlineLang(value, acState.startPos).lang
+        : fileLang;
+
+    if (effectiveLang === 'html' && item.kind === 'attr') {
         const afterTrim = after.replace(/^\s*/, '');
         if (!/^=/.test(afterTrim)) {
             inserted = item.label + '=""';
@@ -266,7 +286,7 @@ export function acceptAutocomplete() {
         }
     }
 
-    if (currentFileLang() === 'html' && item.kind === 'tag') {
+    if (effectiveLang === 'html' && item.kind === 'tag') {
         const b = value.slice(0, acState.startPos);
         const lastLt = b.lastIndexOf('<');
         const lastGt = b.lastIndexOf('>');
