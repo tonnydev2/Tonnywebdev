@@ -19,9 +19,8 @@
             <div class="header-actions">
               <button id="moreMenuBtn" title="More actions" aria-haspopup="true" aria-expanded="false">☰</button>
               <button id="saveFileBtn">💾 Save</button>
-              <button id="openFileBtn">📂 Open</button>
-              <button id="findBtn" title="Find & Replace">🔍 Find</button>
-
+              <button id="runBtn" title="Preview HTML">🌐 Run</button>
+              <button id="projectsBtn" title="Projects">📁 <span id="projectNameDisplay">Project</span></button>
               <div class="more-menu-wrap">
                 <div class="more-menu" id="moreMenu" hidden role="menu">
                   <select id="fileTypeSelect" title="File type for new file">
@@ -30,11 +29,12 @@
                       <option value="css">CSS (.css)</option>
                   </select>
                   <button id="newFileBtn">➕ New</button>
-                  <button id="runBtn" title="Preview HTML">🌐 Run</button>
+                  <button id="openFileBtn">📂 Open</button>  
                   <button id="openBrowserBtn" title="Open current HTML in a new browser tab">↗ Open in Browser</button>
                   <button id="downloadBtn">⬇ Download</button>
                   <button id="importBtn" class="primary">📤 Import</button>
                   <button id="installAppBtn" hidden title="Install as app">📲 Install app</button>
+                  <button id="findBtn" title="Find & Replace">🔍 Find</button>  
                   <button id="syncBtn" title="Cloud sync">
                       <span id="syncDot" class="sync-dot"></span>
                       <span id="syncLabel">Sign in</span>
@@ -86,8 +86,7 @@
             </div>
             <div class="preview-body">
                 <div class="preview-frame-wrap">
-                    <iframe id="previewFrame" class="preview-frame" sandbox="allow-scripts allow-modals allow-forms allow-popups allow-same-origin allow-pointer-lock" title="Preview"></iframe>
-                </div>
+                    <iframe id="previewFrame" class="preview-frame" title="Preview"></iframe>                </div>
                 <div class="console-panel" id="consolePanel" hidden>
                     <div class="console-head">
                         <span>Console</span>
@@ -144,7 +143,17 @@
                 <button type="button" class="findbar-btn" id="findCloseBtn" title="Close (Esc)">✕</button>
             </div>
         </div>
-
+        <!-- Projects panel -->
+        <div class="projects-panel" id="projectsPanel" hidden>
+            <div class="projects-head">
+                <span>Projects</span>
+                <div class="projects-head-actions">
+                    <button type="button" class="preview-btn" id="projectsNewBtn">+ New</button>
+                    <button type="button" class="preview-btn" id="projectsCloseBtn">✕</button>
+                </div>
+            </div>
+            <div class="projects-list" id="projectsList"></div>
+        </div>
         <!-- Mobile shortcut toolbar -->
         <div class="shortcutbar" id="shortcutBar">
             <div class="shortcutbar-row" id="shortcutBarRow"></div>
