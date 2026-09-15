@@ -2,40 +2,50 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lantern · multi‑file editor</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#14171c">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Lantern · code editor</title>
+    <link rel="manifest" href="manifest.webmanifest">
     <link rel="stylesheet" href="styles/style.css">
 </head>
 <body>
     <div class="wrap">
         <header>
             <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
-            <span class="fname" id="fileNameDisplay">untitled.<b>htm</b></span>
+            <span class="fname" id="fileNameDisplay">untitled.<b>html</b></span>
 
             <div class="header-actions">
-              <select id="fileTypeSelect" title="File type for new file">
-                  <option value="html">HTML (.html)</option>
-                  <option value="js">JavaScript (.js)</option>
-                  <option value="css">CSS (.css)</option>
-              </select>
-              <button id="newFileBtn">➕ New</button>
+              <button id="moreMenuBtn" title="More actions" aria-haspopup="true" aria-expanded="false">☰</button>
               <button id="saveFileBtn">💾 Save</button>
-              <button id="downloadBtn">⬇ Download</button>
               <button id="openFileBtn">📂 Open</button>
-              <button id="importBtn" class="primary">📤 Import</button>
               <button id="findBtn" title="Find & Replace">🔍 Find</button>
-                <div class="header-actions">
-    <!-- ...existing buttons... -->
-              <button id="syncBtn" title="Cloud sync">
-                  <span id="syncDot" class="sync-dot"></span>
-                  <span id="syncLabel">Sign in</span>
-              </button>
-          </div>
+
+              <div class="more-menu-wrap">
+                <div class="more-menu" id="moreMenu" hidden role="menu">
+                  <select id="fileTypeSelect" title="File type for new file">
+                      <option value="html">HTML (.html)</option>
+                      <option value="js">JavaScript (.js)</option>
+                      <option value="css">CSS (.css)</option>
+                  </select>
+                  <button id="newFileBtn">➕ New</button>
+                  <button id="runBtn" title="Preview HTML">🌐 Run</button>
+                  <button id="openBrowserBtn" title="Open current HTML in a new browser tab">↗ Open in Browser</button>
+                  <button id="downloadBtn">⬇ Download</button>
+                  <button id="importBtn" class="primary">📤 Import</button>
+                  <button id="installAppBtn" hidden title="Install as app">📲 Install app</button>
+                  <button id="syncBtn" title="Cloud sync">
+                      <span id="syncDot" class="sync-dot"></span>
+                      <span id="syncLabel">Sign in</span>
+                  </button>
+                </div>
+              </div>
+            </div>
             <div class="status">
                 <span>lines <b id="lineCount">1</b></span>
                 <span>chars <b id="charCount">0</b></span>
             </div>
-        </header>
         </header>
 
         <div class="tabs" id="tabsBar" role="tablist" aria-label="Open files"></div>
@@ -48,75 +58,109 @@
                   <div class="autocomplete" id="autocompleteBox" hidden></div>
               </div>
             </div>
-            <!-- Cloud sync dialog -->
-          <div class="dialog-backdrop" id="syncDialogBackdrop" hidden>
-              <div class="dialog">
-                  <div class="dialog-title" id="syncDialogTitle">Sign in to Lantern Cloud</div>
-          
-                  <label class="dialog-label" for="syncEmail">Email</label>
-                  <input type="email" class="dialog-input" id="syncEmail" autocomplete="email" spellcheck="false">
-          
-                  <label class="dialog-label" for="syncPassword" style="margin-top:10px">Password</label>
-                  <input type="password" class="dialog-input" id="syncPassword" autocomplete="current-password">
-          
-                  <div class="dialog-hint" id="syncHint">Sign in or create an account. Files stay on your device too.</div>
-          
-                  <div class="dialog-actions">
-                      <button type="button" class="dialog-btn" id="syncCancel">Cancel</button>
-                      <button type="button" class="dialog-btn" id="syncSignUp">Create account</button>
-                      <button type="button" class="dialog-btn primary" id="syncSignIn">Sign in</button>
-                  </div>
-              </div>
-          </div>
-            <!-- Name dialog -->
-          <div class="dialog-backdrop" id="nameDialogBackdrop" hidden>
-              <div class="dialog">
-                  <div class="dialog-title" id="nameDialogTitle">New file</div>
-                  <label class="dialog-label" for="nameDialogInput">File name</label>
-                  <input type="text" class="dialog-input" id="nameDialogInput" autocomplete="off" spellcheck="false">
-                  <div class="dialog-hint" id="nameDialogHint">Extension is added automatically.</div>
-                  <div class="dialog-actions">
-                      <button type="button" class="dialog-btn" id="nameDialogCancel">Cancel</button>
-                      <button type="button" class="dialog-btn primary" id="nameDialogConfirm">Create</button>
-                  </div>
-              </div>
-          </div>
-    </div>
-    
-             <!-- Find & Replace panel -->
+        </div>
+
+        <!-- Preview overlay -->
+        <div class="preview" id="previewPane" hidden>
+            <div class="preview-bar">
+                <span class="preview-title" id="previewTitle">preview</span>
+                <div class="preview-actions">
+                    <div class="device-wrap">
+                        <button type="button" class="preview-btn" id="previewDeviceBtn" title="Device size">🖥 Full</button>
+                        <div class="device-menu" id="previewDeviceMenu" hidden>
+                            <button type="button" data-device="full">🖥 Full width</button>
+                            <button type="button" data-device="iphone">📱 iPhone 14</button>
+                            <button type="button" data-device="pixel">📱 Pixel 7</button>
+                            <button type="button" data-device="ipad">💻 iPad</button>
+                        </div>
+                    </div>
+                    <button type="button" class="preview-btn" id="previewConsoleBtn" title="Toggle console">
+                        Console
+                        <span class="console-badge" id="consoleCount"></span>
+                    </button>
+                    <button type="button" class="preview-btn" id="previewReloadBtn" title="Reload">↻</button>
+                    <button type="button" class="preview-btn" id="attachBtn" title="Attach images / audio">📎</button>
+                    <button type="button" class="preview-btn" id="previewExternalBtn" title="Open in new tab">↗</button>
+                    <button type="button" class="preview-btn" id="previewCloseBtn" title="Close">✕</button>
+                </div>
+            </div>
+            <div class="preview-body">
+                <div class="preview-frame-wrap">
+                    <iframe id="previewFrame" class="preview-frame" sandbox="allow-scripts allow-modals allow-forms allow-popups allow-same-origin allow-pointer-lock" title="Preview"></iframe>
+                </div>
+                <div class="console-panel" id="consolePanel" hidden>
+                    <div class="console-head">
+                        <span>Console</span>
+                        <button type="button" class="preview-btn" id="consoleClearBtn" title="Clear">Clear</button>
+                        <button type="button" class="preview-btn" id="consoleToggleBtn" title="Hide">✕</button>
+                    </div>
+                    <div class="console-log" id="consoleLog"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cloud sync dialog -->
+        <div class="dialog-backdrop" id="syncDialogBackdrop" hidden>
+            <div class="dialog">
+                <div class="dialog-title" id="syncDialogTitle">Sign in to Lantern Cloud</div>
+                <label class="dialog-label" for="syncEmail">Email</label>
+                <input type="email" class="dialog-input" id="syncEmail" autocomplete="email" spellcheck="false">
+                <label class="dialog-label" for="syncPassword" style="margin-top:10px">Password</label>
+                <input type="password" class="dialog-input" id="syncPassword" autocomplete="current-password">
+                <div class="dialog-hint" id="syncHint">Sign in or create an account. Files stay on your device too.</div>
+                <div class="dialog-actions">
+                    <button type="button" class="dialog-btn" id="syncCancel">Cancel</button>
+                    <button type="button" class="dialog-btn" id="syncSignUp">Create account</button>
+                    <button type="button" class="dialog-btn primary" id="syncSignIn">Sign in</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Name dialog -->
+        <div class="dialog-backdrop" id="nameDialogBackdrop" hidden>
+            <div class="dialog">
+                <div class="dialog-title" id="nameDialogTitle">New file</div>
+                <label class="dialog-label" for="nameDialogInput">File name</label>
+                <input type="text" class="dialog-input" id="nameDialogInput" autocomplete="off" spellcheck="false">
+                <div class="dialog-hint" id="nameDialogHint">Extension is added automatically.</div>
+                <div class="dialog-actions">
+                    <button type="button" class="dialog-btn" id="nameDialogCancel">Cancel</button>
+                    <button type="button" class="dialog-btn primary" id="nameDialogConfirm">Create</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Find & Replace panel -->
         <div class="findbar" id="findBar" hidden>
             <div class="findbar-row">
                 <input type="text" id="findInput" placeholder="Find" autocomplete="off" spellcheck="false">
                 <span class="findbar-count" id="findCount">0/0</span>
                 <button type="button" class="findbar-btn" id="findPrevBtn" title="Previous (Shift+Enter)">↑</button>
                 <button type="button" class="findbar-btn" id="findNextBtn" title="Next (Enter)">↓</button>
-        
                 <input type="text" id="replaceInput" placeholder="Replace" autocomplete="off" spellcheck="false">
                 <button type="button" class="findbar-btn" id="replaceOneBtn" title="Replace">Replace</button>
                 <button type="button" class="findbar-btn" id="replaceAllBtn" title="Replace All">All</button>
-        
                 <button type="button" class="findbar-btn toggle" id="caseToggleBtn" title="Match case">Aa</button>
                 <button type="button" class="findbar-btn" id="findCloseBtn" title="Close (Esc)">✕</button>
             </div>
         </div>
-      
-    <!-- Mobile shortcut toolbar -->
-      <div class="shortcutbar" id="shortcutBar">
-          <div class="shortcutbar-row" id="shortcutBarRow">
-              <!-- filled by JS -->
-          </div>
-      </div>
+
+        <!-- Mobile shortcut toolbar -->
+        <div class="shortcutbar" id="shortcutBar">
+            <div class="shortcutbar-row" id="shortcutBarRow"></div>
+        </div>
 
         <footer id="statusFooter">
             <span>JavaScript · HTML · CSS — highlighting is local, nothing leaves this page</span>
             <span class="file-list-badge" id="storageInfo">📁 0 saved</span>
         </footer>
     </div>
-     <script type="module">
+
+    <script type="module">
       import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
       window.__createSupabaseClient = createClient;
       window.dispatchEvent(new Event('supabase-sdk-ready'));
-     </script>
+    </script>
     <script type="module" src="scripts/main.js"></script>
 </body>
 </html>
