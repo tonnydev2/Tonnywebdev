@@ -3,6 +3,7 @@ import { currentFileLang } from './tabs.js';
 import { render } from './render.js';
 import { setCaret, VOID_TAGS } from './pairing.js';
 import { detectInlineLang } from './inline-lang.js';
+import { projectFiles, getActiveProjectId } from './state.js';
 
 
 function escapeHtml(s) {
@@ -101,24 +102,44 @@ export function getWordAtCaret() {
 }
 
 
+function getProjectFileNames() {
+    const pid = getActiveProjectId();
+    const files = projectFiles[pid] || {};
+    return Object.keys(files);
+}
+
 function getDictionary() {
     const fileLang = currentFileLang();
     const value = input.value;
     const caret = input.selectionStart;
 
-    /* If we're in HTML, ask the inline detector which sub-language
-       actually owns the caret. */
     let lang = fileLang;
     if (fileLang === 'html') {
         const ctx = detectInlineLang(value, caret);
-        lang = ctx.lang;   /* 'html' | 'css' | 'js' */
+        lang = ctx.lang;
     }
 
     if (lang === 'html') {
         const before = value.slice(0, caret);
+
+        /* Inside a src="" or href="" attribute? Offer project files. */
+        const attrValueMatch = before.match(/\b(src|href)\s*=\s*["']([^"']*)$/i);
+        if (attrValueMatch) {
+            const names = getProjectFileNames();
+            if (names.length) {
+                return names.map(n => ({ label: n, kind: 'file' }));
+            }
+        }
+
         const lastLt = before.lastIndexOf('<');
         const lastGt = before.lastIndexOf('>');
-        if (lastLt > lastGt) return AC_HTML_ATTRS.concat(AC_HTML_TAGS);
+        if (lastLt > lastGt) {
+            const tagText = before.slice(lastLt);
+            if (/^<[a-zA-Z][a-zA-Z0-9-]*\s/.test(tagText)) {
+                return AC_HTML_ATTRS.concat(AC_HTML_TAGS);
+            }
+            return AC_HTML_TAGS;
+        }
         return AC_HTML_TAGS;
     }
     if (lang === 'css') {

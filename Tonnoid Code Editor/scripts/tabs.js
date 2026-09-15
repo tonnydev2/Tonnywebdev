@@ -1,20 +1,40 @@
 import {
-    tabs, savedFiles,
-    DEFAULT_LANG,
-    nextTabId, getActiveTabId, setActiveTabId,
+    projectFiles, tabsByProject, activeTabIdByProject,
+    getActiveProjectId, nextTabId, DEFAULT_LANG,
 } from './state.js';
 import { input, fileTypeSelect, tabsBar } from './dom.js';
 import { render } from './render.js';
 import { closeAutocomplete } from './autocomplete.js';
 import { askFileName } from './filename-dialog.js';
- 
+import { persistAll } from './storage.js';
+import { scheduleSnapshot } from './sw-fs.js';
+
 function escapeHtml(s) {
     return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
+/* -------- Helpers scoped to the active project -------- */
+
+function currentTabs() {
+    const pid = getActiveProjectId();
+    if (!pid) return [];
+    if (!tabsByProject[pid]) tabsByProject[pid] = [];
+    return tabsByProject[pid];
+}
+
+function currentActiveTabId() {
+    const pid = getActiveProjectId();
+    return pid ? activeTabIdByProject[pid] : null;
+}
+
+function setCurrentActiveTabId(id) {
+    const pid = getActiveProjectId();
+    if (pid) activeTabIdByProject[pid] = id;
+}
+
 export function getActiveTab() {
-    const id = getActiveTabId();
-    return tabs.find(t => t.id === id) || null;
+    const id = currentActiveTabId();
+    return currentTabs().find(t => t.id === id) || null;
 }
 
 export function currentFileLang() {
@@ -23,14 +43,21 @@ export function currentFileLang() {
 }
 
 export function isDirty(tab) {
-    return tab && tab.content !== tab.savedContent;
+    if (!tab) return false;
+    const pid = getActiveProjectId();
+    const stored = projectFiles[pid]?.[tab.name];
+    if (!stored) return tab.content !== '';
+    return tab.content !== stored.savedContent;
+}
+
+/* Filenames in use in this project (for uniqueness). */
+function usedNames(pid) {
+    return new Set(Object.keys(projectFiles[pid] || {}));
 }
 
 export function uniqueNewName(lang) {
-    const used = new Set([
-        ...tabs.map(t => t.name),
-        ...Object.keys(savedFiles),
-    ]);
+    const pid = getActiveProjectId();
+    const used = usedNames(pid);
     let n = 1;
     let name = `untitled.${lang}`;
     while (used.has(name)) {
@@ -40,30 +67,66 @@ export function uniqueNewName(lang) {
     return name;
 }
 
+/* ---------- Create / switch / close ---------- */
+
 export function createTab({ name, lang, content, savedContent }) {
+    const pid = getActiveProjectId();
+    if (!pid) return null;
+
     const finalLang = lang || DEFAULT_LANG;
     const finalName = name || uniqueNewName(finalLang);
 
-    const existing = tabs.find(t => t.name === finalName);
-    if (existing) { switchToTab(existing.id); return existing; }
+    /* If the project already has this file, open it as a tab. */
+    const projectFile = projectFiles[pid][finalName];
+    if (projectFile) {
+        const tabs = currentTabs();
+        const existing = tabs.find(t => t.name === finalName);
+        if (existing) { switchToTab(existing.id); return existing; }
+        const tab = {
+            id: nextTabId(),
+            name: finalName,
+            lang: projectFile.lang,
+            content: projectFile.content,
+            savedContent: projectFile.savedContent,
+        };
+        tabs.push(tab);
+        switchToTab(tab.id);
+        return tab;
+    }
 
+    /* Otherwise create it. */
+    const initialContent = content !== undefined ? content : '';
+    projectFiles[pid][finalName] = {
+        lang: finalLang,
+        content: initialContent,
+        savedContent: savedContent !== undefined ? savedContent : initialContent,
+    };
     const tab = {
         id: nextTabId(),
         name: finalName,
         lang: finalLang,
-        content:      content      !== undefined ? content      : '',
-        savedContent: savedContent !== undefined ? savedContent : (content !== undefined ? content : ''),
+        content: projectFiles[pid][finalName].content,
+        savedContent: projectFiles[pid][finalName].savedContent,
     };
-    tabs.push(tab);
+    currentTabs().push(tab);
     switchToTab(tab.id);
+    persistAll();
+    scheduleSnapshot();
     return tab;
 }
 
 export function switchToTab(id) {
     const outgoing = getActiveTab();
-    if (outgoing && outgoing.id !== id) outgoing.content = input.value;
+    if (outgoing && outgoing.id !== id) {
+        outgoing.content = input.value;
+        /* Save into projectFiles so tab switches persist. */
+        const pid = getActiveProjectId();
+        if (pid && projectFiles[pid][outgoing.name]) {
+            projectFiles[pid][outgoing.name].content = input.value;
+        }
+    }
 
-    setActiveTabId(id);
+    setCurrentActiveTabId(id);
     const tab = getActiveTab();
     if (!tab) return;
 
@@ -73,61 +136,35 @@ export function switchToTab(id) {
     renderTabs();
     render();
     scrollTabsToActive();
+    persistAll();
+    scheduleSnapshot();
 }
 
-
-/* Open the name dialog in rename mode for a given tab. */
-function promptRenameTab(tab) {
-    askFileName({
-        title: 'Rename file',
-        lang: tab.lang,
-        initial: tab.name,
-        mode: 'rename',
-        onConfirm: (newName) => {
-            /* Guard: don't allow renaming to a name that's already taken. */
-            const clash = tabs.find(t => t.name === newName && t.id !== tab.id);
-            if (clash) {
-                alert(`"${newName}" is already open.`);
-                return;
-            }
-
-            const oldName = tab.name;
-            tab.name = newName;
-
-            /* Migrate the savedFiles entry: rename the key and update
-               the `name` field inside. */
-            if (savedFiles[oldName]) {
-                const entry = savedFiles[oldName];
-                delete savedFiles[oldName];
-                entry.name = newName;
-                savedFiles[newName] = entry;
-
-                /* Re-persist so the new key survives a reload. */
-                import('./storage.js').then(m => m.persistSavedFiles());
-
-                /* Best-effort cloud rename: delete the old row, insert the
-                   new one. If the user is offline, this is a no-op. */
-                import('./cloud.js').then(async (m) => {
-                    try {
-                        await m.deleteCloudFile(oldName);
-                        await m.pushFile({
-                            name: newName,
-                            lang: tab.lang,
-                            content: tab.content,
-                        });
-                    } catch (e) {
-                        /* Silent: cloud sync will catch up on next save. */
-                    }
-                });
-            }
-
-            renderTabs();
-            render();
-        },
-    });
+/* Called when the project changes. Re-renders everything. */
+export function reloadForProject() {
+    const tabs = currentTabs();
+    if (tabs.length === 0) {
+        /* Create a starter tab if the project is empty. */
+        const pid = getActiveProjectId();
+        const firstName = Object.keys(projectFiles[pid] || {})[0];
+        if (firstName) {
+            createTab({ name: firstName });
+            return;
+        }
+        createTab({ name: 'index.html', lang: 'html', content: '' });
+        return;
+    }
+    let activeId = currentActiveTabId();
+    if (!activeId || !tabs.find(t => t.id === activeId)) {
+        activeId = tabs[0].id;
+        setCurrentActiveTabId(activeId);
+    }
+    switchToTab(activeId);
+    renderTabs();
 }
 
 export function closeTab(id) {
+    const tabs = currentTabs();
     const idx = tabs.findIndex(t => t.id === id);
     if (idx === -1) return;
     const tab = tabs[idx];
@@ -144,7 +181,7 @@ export function closeTab(id) {
         return;
     }
 
-    if (getActiveTabId() === id) {
+    if (currentActiveTabId() === id) {
         const nextIdx = Math.max(0, idx - 1);
         switchToTab(tabs[nextIdx].id);
     } else {
@@ -152,8 +189,45 @@ export function closeTab(id) {
     }
 }
 
+/* ---------- Rename ---------- */
+
+function promptRenameTab(tab) {
+    askFileName({
+        title: 'Rename file',
+        lang: tab.lang,
+        initial: tab.name,
+        mode: 'rename',
+        onConfirm: (newName) => {
+            const pid = getActiveProjectId();
+            const tabs = currentTabs();
+            const clash = tabs.find(t => t.name === newName && t.id !== tab.id);
+            if (clash) { alert(`"${newName}" is already open.`); return; }
+
+            const oldName = tab.name;
+            tab.name = newName;
+
+            /* Move the project file entry. */
+            const pf = projectFiles[pid];
+            if (pf[oldName]) {
+                pf[newName] = pf[oldName];
+                delete pf[oldName];
+            }
+            persistAll();
+            scheduleSnapshot();
+            renderTabs();
+            render();
+
+            /* Best-effort cloud rename. */
+            import('./cloud.js').then(m => m.renameFile(oldName, newName)).catch(() => {});
+        },
+    });
+}
+
+/* ---------- Render the strip ---------- */
+
 export function renderTabs() {
-    const activeId = getActiveTabId();
+    const activeId = currentActiveTabId();
+    const tabs = currentTabs();
     const parts = tabs.map(tab => {
         const activeClass = tab.id === activeId ? 'active' : '';
         const dirtyClass  = isDirty(tab) ? 'dirty' : '';
@@ -171,19 +245,16 @@ export function renderTabs() {
     tabsBar.innerHTML = parts.join('');
 
     tabsBar.querySelectorAll('.tab').forEach(el => {
-    el.addEventListener('click', (e) => {
-        if (e.target.closest('.tab-close')) return;
-        switchToTab(el.dataset.tabId);
+        el.addEventListener('click', (e) => {
+            if (e.target.closest('.tab-close')) return;
+            switchToTab(el.dataset.tabId);
+        });
+        el.addEventListener('dblclick', (e) => {
+            if (e.target.closest('.tab-close')) return;
+            const tab = currentTabs().find(t => t.id === el.dataset.tabId);
+            if (tab) promptRenameTab(tab);
+        });
     });
-
-    /* Double-click the tab body (but not the × button) to rename. */
-    el.addEventListener('dblclick', (e) => {
-        if (e.target.closest('.tab-close')) return;
-        const tab = tabs.find(t => t.id === el.dataset.tabId);
-        if (!tab) return;
-        promptRenameTab(tab);
-    });
-});
     tabsBar.querySelectorAll('.tab-close').forEach(el => {
         el.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -202,8 +273,6 @@ export function renderTabs() {
                     lang === 'js'   ? '// New JavaScript file\n' :
                     lang === 'html' ? '' :
                                       '/* CSS file */\n';
-                const existing = tabs.find(t => t.name === name);
-                if (existing) { switchToTab(existing.id); return; }
                 createTab({ name, lang, content: emptyContent });
             },
         });
@@ -214,4 +283,3 @@ export function scrollTabsToActive() {
     const el = tabsBar.querySelector('.tab.active');
     if (el && el.scrollIntoView) el.scrollIntoView({ block: 'nearest', inline: 'nearest' });
 }
-

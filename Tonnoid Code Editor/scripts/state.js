@@ -1,6 +1,8 @@
-/* Shared mutable state. Import and mutate — don't rebind. */
+/* ============================================================
+   Shared mutable state.
+   ============================================================ */
+
 export const DEFAULT_LANG = 'html';
-/* name → { type, dataUrl } */
 
 export const DEFAULT_HTML = `<!DOCTYPE html>
 <html lang="en">
@@ -15,21 +17,44 @@ export const DEFAULT_HTML = `<!DOCTYPE html>
 </html>
 `;
 
-/* Tab list. Each entry: { id, name, lang, content, savedContent } */
-export const tabs = [];
-let activeTabId = null;
-let tabCounter = 0;
+/* ---------- Projects ---------- */
 
+/* Each project: { id, name, createdAt } */
+export const projects = [];
+
+let activeProjectId = null;
+export function getActiveProjectId() { return activeProjectId; }
+export function setActiveProjectId(id) { activeProjectId = id; }
+
+export function getActiveProject() {
+    return projects.find(p => p.id === activeProjectId) || null;
+}
+
+/* projectId -> { [filename]: { lang, content, savedContent } } */
+export const projectFiles = {};
+
+/* projectId -> tabs array (for the tab strip) */
+export const tabsByProject = {};
+
+/* projectId -> activeTabId */
+export const activeTabIdByProject = {};
+
+/* ---------- Legacy flat storage (migrated on load) ---------- */
+export const savedFiles = {};
+
+/* name -> { type, dataUrl } — attached preview assets (global) */
+export const assets = {};
+
+/* ---------- Tab ID generation ---------- */
+let tabCounter = 0;
 export function nextTabId() {
     tabCounter += 1;
     return 't' + tabCounter;
 }
 
-export function getActiveTabId() { return activeTabId; }
-export function setActiveTabId(id) { activeTabId = id; }
-
-/* localStorage-backed saved files: name -> { name, lang, content } */
-export const savedFiles = {};
-
-export const assets = {};
-
+/* ---------- Simple ID for projects ---------- */
+let projectCounter = 0;
+export function nextProjectId() {
+    projectCounter += 1;
+    return 'p' + Date.now().toString(36) + '_' + projectCounter;
+}

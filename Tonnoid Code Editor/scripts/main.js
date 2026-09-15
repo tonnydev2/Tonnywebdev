@@ -1,12 +1,11 @@
 /* ============================================================
    Lantern — entry point.
    ============================================================ */
-
 import { input, fileTypeSelect } from './dom.js';
-import { DEFAULT_LANG, DEFAULT_HTML, tabs } from './state.js';
-import { loadSavedFiles } from './storage.js';
+import { DEFAULT_LANG, DEFAULT_HTML, getActiveProjectId, setActiveProjectId, projects } from './state.js';
+import { loadSavedFiles, persistAll } from './storage.js';
 import { render, syncSize } from './render.js';
-import { createTab, uniqueNewName, getActiveTab, renderTabs, switchToTab } from './tabs.js';
+import { createTab, uniqueNewName, getActiveTab, renderTabs, switchToTab, reloadForProject } from './tabs.js';
 import { closeAutocomplete, openAutocomplete, getWordAtCaret } from './autocomplete.js';
 import { onKeyDown, onBeforeInput } from './pairing.js';
 import { initFileButtons } from './files.js';
@@ -18,6 +17,8 @@ import { initConsole } from './console-pannel.js';
 import { loadAssets } from './assets.js';
 import { initOverflowMenu } from './overflow.js';
 import { initPWA } from './pwa.js';
+import { initProjects, createProject, setProjectSwitchHandler } from './projects.js';
+import { attachSW, pushSnapshot } from './sw-fs.js';
 
 input.addEventListener('input', () => {
     const tab = getActiveTab();
@@ -38,10 +39,8 @@ input.addEventListener('scroll', () => {
     import('./autocomplete.js').then(m => m.repositionAutocomplete?.());
 });
 
-/* Re-render on selection change so bracket-match updates. */
 input.addEventListener('click', render);
 input.addEventListener('keyup', (e) => {
-    /* Only re-render for pure navigation keys that move the caret. */
     const navKeys = ['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End','PageUp','PageDown'];
     if (navKeys.includes(e.key)) render();
 });
@@ -66,14 +65,38 @@ window.addEventListener('resize', () => {
     import('./autocomplete.js').then(m => m.repositionAutocomplete?.());
 });
 
-export function init() {
+export async function init() {
     loadSavedFiles();
 
-    createTab({
-        name: uniqueNewName('html'),
-        lang: 'html',
-        content: DEFAULT_HTML,
+    /* Ensure there's at least one project. */
+    if (projects.length === 0) {
+        /* Migrate or create a fresh one. */
+        const p = createProject('My project');
+        setActiveProjectId(p.id);
+    } else if (!getActiveProjectId()) {
+        setActiveProjectId(projects[0].id);
+    }
+
+    /* Register the SW as our virtual filesystem. */
+    if ('serviceWorker' in navigator) {
+        try {
+            const reg = await navigator.serviceWorker.register('./sw.js', { scope: './' });
+            await navigator.serviceWorker.ready;
+            attachSW(reg);
+            pushSnapshot();
+        } catch (e) {
+            console.warn('[main] SW registration failed:', e);
+        }
+    }
+
+    /* When the project changes, refresh the UI. */
+    setProjectSwitchHandler((projectId) => {
+        reloadForProject();
+        pushSnapshot();
     });
+
+    /* Initial tab. */
+    reloadForProject();
 
     initFileButtons();
     initShortcutBar();
@@ -82,9 +105,11 @@ export function init() {
     initConsole();
     initOverflowMenu();
     initPWA();
+    initProjects();
     loadAssets();
 
     render();
+    persistAll();
 }
 
 init();

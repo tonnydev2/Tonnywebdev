@@ -1,13 +1,15 @@
 /* ============================================================
-   HTML Preview — renders the current HTML tab in a live iframe,
-   inlining CSS and JS from other open tabs, plus any attached
-   assets (images / audio / video / fonts).
-   Also injects a console-capture prelude.
+   HTML Preview — serves the current HTML tab from the Service
+   Worker virtual filesystem so <script src>, <link href>, and
+   ES module imports all resolve inside the current project.
    ============================================================ */
 import { input } from './dom.js';
-import { tabs, savedFiles, assets } from './state.js';
+import {
+    tabsByProject, projectFiles, getActiveProjectId, getActiveProject,
+} from './state.js';
 import { getActiveTab } from './tabs.js';
 import { consolePrelude, closeConsole } from './console-pannel.js';
+import { pushSnapshot } from './sw-fs.js';
 
 const pane            = document.getElementById('previewPane');
 const frame           = document.getElementById('previewFrame');
@@ -24,126 +26,38 @@ let liveReloadTimer = null;
 let isOpen = false;
 let currentDevice = 'full';
 
-/* ------------------------------------------------------------
-   Public helpers
-   ------------------------------------------------------------ */
 export function isPreviewOpen() { return isOpen; }
 
-/* ------------------------------------------------------------
-   Lookup
-   ------------------------------------------------------------ */
-function findFileByName(name) {
-    if (!name) return null;
-    const clean = name.replace(/^\.\//, '').split('?')[0].split('#')[0];
-    const tab = tabs.find(t => t.name === clean || t.name.endsWith('/' + clean));
-    if (tab) return { name: tab.name, lang: tab.lang, content: tab.content };
-    const key = Object.keys(savedFiles).find(k => k === clean || k.endsWith('/' + clean));
-    if (key) return savedFiles[key];
-    return null;
+/* ---------- Ensure the SW has an up-to-date snapshot ---------- */
+function syncSnapshot() {
+    pushSnapshot();
 }
 
-/* ------------------------------------------------------------
-   Inline <link> and <script src>
-   ------------------------------------------------------------ */
-function inlineLinkedAssets(html) {
-    html = html.replace(
-        /<link\b[^>]*?rel\s*=\s*["']stylesheet["'][^>]*?>/gi,
-        (tag) => {
-            const hrefMatch = tag.match(/\bhref\s*=\s*["']([^"']+)["']/i);
-            if (!hrefMatch) return tag;
-            const href = hrefMatch[1];
-            if (/^(https?:)?\/\//i.test(href) || /^data:/i.test(href)) return tag;
-            const file = findFileByName(href);
-            if (!file) return tag;
-            const code = file.content.replace(/<\/style/gi, '<\\/style');
-            return `<style data-source="${href}">\n${code}\n</style>`;
-        }
-    );
-    html = html.replace(
-        /<script\b([^>]*?)\bsrc\s*=\s*["']([^"']+)["']([^>]*)>\s*<\/script>/gi,
-        (tag, attrs1, src, attrs2) => {
-            if (/^(https?:)?\/\//i.test(src) || /^data:/i.test(src)) return tag;
-            const file = findFileByName(src);
-            if (!file) return tag;
-            const code = file.content.replace(/<\/script/gi, '<\\/script');
-            const keepAttrs = (attrs1 + ' ' + attrs2)
-                .replace(/\bsrc\s*=\s*["'][^"']*["']/i, '')
-                .replace(/\s+/g, ' ').trim();
-            const attrStr = keepAttrs ? ' ' + keepAttrs : '';
-            return `<script${attrStr} data-source="${src}">\n${code}\n</script>`;
-        }
-    );
-    return html;
+/* ---------- Build the preview URL ---------- */
+/* Format: /__lantern__/<projectId>/<path> */
+function projectFileUrl(projectId, path) {
+    return `/__lantern__/${encodeURIComponent(projectId)}/${encodeURI(path)}`;
 }
 
-function replaceAssetUrls(html) {
-    return html.replace(
-        /\b(src|href|poster|data-src|data-href)\s*=\s*["']([^"']+)["']/gi,
-        (m, attr, url) => {
-            if (/^(https?:)?\/\//i.test(url) || /^data:/i.test(url) || /^blob:/i.test(url)) return m;
-            const clean = url.replace(/^\.\//, '').split('?')[0].split('#')[0];
-            const basename = clean.split('/').pop();
-            const hit = assets[clean] || assets[basename];
-            if (!hit || !hit.dataUrl) return m;
-            return `${attr}="${hit.dataUrl}"`;
-        }
-    );
-}
-
-/* ------------------------------------------------------------
-   Build the document
-   ------------------------------------------------------------ */
-function escapeHtml(s) {
-    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-}
-
-function buildPreviewDocument(tab = getActiveTab()) {
+function previewUrl() {
+    const tab = getActiveTab();
     if (!tab || tab.lang !== 'html') return null;
-
-    let html = tab.content;
-    html = inlineLinkedAssets(html);
-    html = replaceAssetUrls(html);
-
-    const prelude = consolePrelude();
-
-    if (!/<html[\s>]/i.test(html) && !/<!doctype/i.test(html)) {
-        html = `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${escapeHtml(tab.name)}</title>
-  ${prelude}
-</head>
-<body>
-${html}
-</body>
-</html>`;
-    } else if (/<head[\s>]/i.test(html)) {
-        /* Inject right after <head> so console hooks are in place
-           before any user script runs. */
-        html = html.replace(/<head([^>]*)>/i, `<head$1>\n${prelude}\n`);
-    } else if (/<html[\s>]/i.test(html)) {
-        html = html.replace(/<html([^>]*)>/i, `<html$1>\n<head>${prelude}</head>\n`);
-    } else {
-        html = prelude + html;
-    }
-
-    return html;
+    const projectId = getActiveProjectId();
+    if (!projectId) return null;
+    /* If we're on a tab that isn't the project's index.html, we still
+       serve it by name. */
+    return projectFileUrl(projectId, tab.name);
 }
 
-/* ------------------------------------------------------------
-   Render
-   ------------------------------------------------------------ */
+/* ---------- Render ---------- */
 export function renderPreview() {
     if (!isOpen) return;
 
-    /* Reset the console for each fresh render — otherwise logs pile
-       up endlessly while the user iterates. */
-    import('./console-panel.js').then(m => m.clearConsole());
+    /* Push latest content to the SW before reloading. */
+    syncSnapshot();
 
-    const doc = buildPreviewDocument();
-    if (doc === null) {
+    const url = previewUrl();
+    if (!url) {
         frame.srcdoc = `<!DOCTYPE html>
 <html><head><meta charset="utf-8">
 <style>
@@ -160,51 +74,16 @@ export function renderPreview() {
         return;
     }
 
-    frame.srcdoc = doc;
+    /* Force a fresh fetch by adding a cache-buster. */
+    const bust = url + (url.includes('?') ? '&' : '?') + '_t=' + Date.now();
+    frame.src = bust;
 }
 
-/* ------------------------------------------------------------
-   Device toggling
-   ------------------------------------------------------------ */
-const DEVICES = {
-    full:   { label: 'Full width', width: null,  height: null },
-    iphone: { label: 'iPhone',     width: 390,   height: 844 },
-    ipad:   { label: 'iPad',       width: 820,   height: 1180 },
-    pixel:  { label: 'Pixel',      width: 412,   height: 915 },
-};
-
-function applyDevice(key) {
-    currentDevice = key;
-    const d = DEVICES[key];
-    const wrapper = frame.parentElement;
-
-    if (!d.width) {
-        wrapper.classList.remove('device-frame');
-        wrapper.style.removeProperty('--device-w');
-        wrapper.style.removeProperty('--device-h');
-        deviceBtn.textContent = '🖥 Full';
-    } else {
-        wrapper.classList.add('device-frame');
-        wrapper.style.setProperty('--device-w', d.width + 'px');
-        wrapper.style.setProperty('--device-h', d.height + 'px');
-        deviceBtn.textContent = '📱 ' + d.label;
-    }
-
-    /* Mark active item in menu */
-    if (deviceMenu) {
-        deviceMenu.querySelectorAll('[data-device]').forEach(el => {
-            el.classList.toggle('active', el.dataset.device === key);
-        });
-    }
-}
-
-/* ------------------------------------------------------------
-   Open / close
-   ------------------------------------------------------------ */
+/* ---------- Open / close ---------- */
 export function openPreview() {
     const active = getActiveTab();
     if (!active || active.lang !== 'html') {
-        const htmlTab = tabs.find(t => t.lang === 'html');
+        const htmlTab = tabsByProject.find(t => t.lang === 'html');
         if (htmlTab) {
             import('./tabs.js').then(m => {
                 m.switchToTab(htmlTab.id);
@@ -231,30 +110,83 @@ export function closePreview() {
     isOpen = false;
     pane.hidden = true;
     document.body.classList.remove('preview-open');
-    frame.srcdoc = '';
+    frame.src = 'about:blank';
     detachLiveReload();
     closeConsole();
 }
 
-/* ------------------------------------------------------------
-   Open in browser
-   ------------------------------------------------------------ */
+/* ---------- Open in browser ---------- */
 export function openInBrowser() {
-    const active = getActiveTab();
-    const tab = (active && active.lang === 'html') ? active : tabs.find(t => t.lang === 'html');
-    if (!tab) { alert('No HTML file to open — create or switch to one first.'); return; }
+    /* We can't easily export the project as a set of URLs, so fall
+       back to building a single self-contained document via srcdoc
+       — no imports, no src references. */
+    const tab = getActiveTab();
+    if (!tab || tab.lang !== 'html') {
+        alert('Open an HTML file first.');
+        return;
+    }
+    const projectId = getActiveProjectId();
+    const files = projectFiles[projectId] || {};
 
-    const doc = buildPreviewDocument(tab);
-    const blob = new Blob([doc], { type: 'text/html' });
+    /* Inline every <script src> and <link href> from the same project. */
+    let html = tab.content;
+    html = html.replace(/<link\b[^>]*?rel=["']stylesheet["'][^>]*?>/gi, (tag) => {
+        const m = tag.match(/\bhref\s*=\s*["']([^"']+)["']/i);
+        if (!m) return tag;
+        const f = files[m[1].replace(/^\.\//, '')];
+        if (!f || f.lang !== 'css') return tag;
+        return `<style>\n${f.content.replace(/<\/style/gi, '<\\/style')}\n</style>`;
+    });
+    html = html.replace(
+        /<script\b([^>]*?)\bsrc\s*=\s*["']([^"']+)["']([^>]*)>\s*<\/script>/gi,
+        (tag, a1, src, a2) => {
+            const f = files[src.replace(/^\.\//, '')];
+            if (!f || f.lang !== 'js') return tag;
+            const code = f.content.replace(/<\/script/gi, '<\\/script');
+            const attrs = (a1 + ' ' + a2).replace(/\bsrc\s*=\s*["'][^"']*["']/i, '').trim();
+            return `<script ${attrs}>${code}</script>`;
+        }
+    );
+
+    const blob = new Blob([html], { type: 'text/html' });
     const url = URL.createObjectURL(blob);
-    const win = window.open(url, '_blank', 'noopener');
-    if (!win) alert('Your browser blocked the new tab. Allow pop-ups for this site and try again.');
+    window.open(url, '_blank', 'noopener');
     setTimeout(() => URL.revokeObjectURL(url), 60_000);
 }
 
-/* ------------------------------------------------------------
-   Live reload
-   ------------------------------------------------------------ */
+/* ---------- Device toggling ---------- */
+const DEVICES = {
+    full:   { label: 'Full width', width: null,  height: null },
+    iphone: { label: 'iPhone',     width: 390,   height: 844 },
+    ipad:   { label: 'iPad',       width: 820,   height: 1180 },
+    pixel:  { label: 'Pixel',      width: 412,   height: 915 },
+};
+
+function applyDevice(key) {
+    currentDevice = key;
+    const d = DEVICES[key];
+    const wrapper = frame.parentElement;
+
+    if (!d.width) {
+        wrapper.classList.remove('device-frame');
+        wrapper.style.removeProperty('--device-w');
+        wrapper.style.removeProperty('--device-h');
+        deviceBtn.textContent = '🖥 Full';
+    } else {
+        wrapper.classList.add('device-frame');
+        wrapper.style.setProperty('--device-w', d.width + 'px');
+        wrapper.style.setProperty('--device-h', d.height + 'px');
+        deviceBtn.textContent = '📱 ' + d.label;
+    }
+
+    if (deviceMenu) {
+        deviceMenu.querySelectorAll('[data-device]').forEach(el => {
+            el.classList.toggle('active', el.dataset.device === key);
+        });
+    }
+}
+
+/* ---------- Live reload ---------- */
 function scheduleLiveReload() {
     if (!isOpen) return;
     clearTimeout(liveReloadTimer);
@@ -272,9 +204,7 @@ function detachLiveReload() {
     reloadBtn.classList.remove('reloading');
 }
 
-/* ------------------------------------------------------------
-   Wire up
-   ------------------------------------------------------------ */
+/* ---------- Wire up ---------- */
 export function initPreview() {
     if (runBtn) {
         runBtn.addEventListener('click', () => {
@@ -282,29 +212,18 @@ export function initPreview() {
             else openPreview();
         });
     }
-
     reloadBtn.addEventListener('click', () => {
         clearTimeout(liveReloadTimer);
         reloadBtn.classList.remove('reloading');
         renderPreview();
     });
-
     closeBtn.addEventListener('click', closePreview);
 
     if (externalBtn) {
-        externalBtn.addEventListener('click', () => {
-            const doc = buildPreviewDocument();
-            if (!doc) return;
-            const blob = new Blob([doc], { type: 'text/html' });
-            const url = URL.createObjectURL(blob);
-            window.open(url, '_blank', 'noopener');
-            setTimeout(() => URL.revokeObjectURL(url), 60_000);
-        });
+        externalBtn.addEventListener('click', openInBrowser);
     }
-
     if (openBrowserBtn) openBrowserBtn.addEventListener('click', openInBrowser);
 
-    /* Device toggle */
     if (deviceBtn && deviceMenu) {
         deviceBtn.addEventListener('click', (e) => {
             e.stopPropagation();

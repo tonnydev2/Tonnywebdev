@@ -2,7 +2,7 @@
    Cloud sync via Supabase
    ============================================================ */
 import { SUPABASE_URL, SUPABASE_ANON_KEY, CLOUD_SYNC_ENABLED } from './config.js';
-import { savedFiles, tabs } from './state.js';
+import { savedFiles, tabsByProject } from './state.js';
 import { persistSavedFiles } from './storage.js';
 import { renderTabs } from './tabs.js';
 
@@ -181,7 +181,7 @@ export async function pullFromCloud() {
             /* We don't have per-file updated_at locally, so we treat the
                cloud as authoritative on sign-in (unless the local file is
                open in a tab with unsaved edits — we skip those). */
-            const openTab = tabs.find(t => t.name === row.name);
+            const openTab = tabsByProject.find(t => t.name === row.name);
             const hasLocalEdits = openTab && openTab.content !== openTab.savedContent;
 
             if (!local) {

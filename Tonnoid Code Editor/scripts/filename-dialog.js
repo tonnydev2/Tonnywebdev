@@ -1,5 +1,5 @@
 import { DEFAULT_LANG } from './state.js';
-import { tabs } from './state.js';
+import { tabsByProject } from './state.js';
 
 const nameBackdrop = document.getElementById('nameDialogBackdrop');
 const nameTitleEl  = document.getElementById('nameDialogTitle');
@@ -71,7 +71,7 @@ function submitNameDialog() {
     if (dialogMode === 'rename') {
         const ext = (dialogOriginal && dialogOriginal.match(/\.[^.]+$/)) || [`.${dialogLang}`];
         const newName = clean + ext;
-        const clash = tabs.find(t => t.name === newName && t.name !== dialogOriginal);
+        const clash = tabsByProject.find(t => t.name === newName && t.name !== dialogOriginal);
         if (clash) {
             nameHint.textContent = `"${newName}" is already open.`;
             nameHint.classList.add('error');
