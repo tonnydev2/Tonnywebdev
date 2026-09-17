@@ -1,5 +1,5 @@
 import { DEFAULT_LANG } from './state.js';
-import { tabsByProject } from './state.js';
+import { tabsByProject, getActiveProjectId } from './state.js';
 
 const nameBackdrop = document.getElementById('nameDialogBackdrop');
 const nameTitleEl  = document.getElementById('nameDialogTitle');
@@ -59,6 +59,11 @@ function sanitizeBaseName(s) {
 }
 
 function submitNameDialog() {
+    // inside submitNameDialog:
+						const pid = getActiveProjectId();
+						const projectTabs = (tabsByProject[pid] || []);
+						const clash = projectTabs.find(t => t.name === newName && t.name !== dialogOriginal);
+
     const raw = nameInput.value;
     const clean = sanitizeBaseName(raw);
     if (!clean) {

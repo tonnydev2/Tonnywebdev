@@ -36,7 +36,9 @@ function syncSnapshot() {
 /* ---------- Build the preview URL ---------- */
 /* Format: /__lantern__/<projectId>/<path> */
 function projectFileUrl(projectId, path) {
-    return `/__lantern__/${encodeURIComponent(projectId)}/${encodeURI(path)}`;
+    /* Resolve the app's base path, e.g. /Tonnoi-Code-Editor/ */
+    const base = new URL('./', location.href).pathname;   /* "/Tonnoi-Code-Editor/" */
+    return `${base}__lantern__/${encodeURIComponent(projectId)}/${encodeURI(path)}`;
 }
 
 function previewUrl() {
@@ -80,10 +82,13 @@ export function renderPreview() {
 }
 
 /* ---------- Open / close ---------- */
+
 export function openPreview() {
     const active = getActiveTab();
     if (!active || active.lang !== 'html') {
-        const htmlTab = tabsByProject.find(t => t.lang === 'html');
+        const pid = getActiveProjectId();
+        const tabs = (tabsByProject[pid] || []);
+        const htmlTab = tabs.find(t => t.lang === 'html');
         if (htmlTab) {
             import('./tabs.js').then(m => {
                 m.switchToTab(htmlTab.id);
@@ -91,7 +96,7 @@ export function openPreview() {
             });
         }
     }
-
+    /* ... rest unchanged ... */
     isOpen = true;
     pane.hidden = false;
     document.body.classList.add('preview-open');
