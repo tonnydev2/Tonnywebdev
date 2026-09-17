@@ -149,7 +149,8 @@ function injectConsolePrelude(html) {
 
     /* Insert right after <head> (case-insensitive) so it runs first. */
     const headOpen = /<head\b[^>]*>/i;
-    const m = html.match(headOpen);
+    /* Match /__lantern__/ anywhere in the path. */
+									const m = url.pathname.match(/\/__lantern__\/([^/]+)\/(.*)$/);
     if (m) {
         const idx = m.index + m[0].length;
         return html.slice(0, idx) + prelude + html.slice(idx);
