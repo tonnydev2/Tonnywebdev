@@ -11,7 +11,7 @@ import { onKeyDown, onBeforeInput } from './pairing.js';
 import { initFileButtons } from './files.js';
 import './find.js';
 import { initShortcutBar } from './shortcutBar.js';
-import { initCloud } from './cloud-ui.js';
+import { initCloud, initCloudUI } from './cloud.js';
 import { initPreview } from './preview.js';
 import { initConsole } from './console-pannel.js';
 import { loadAssets } from './assets.js';
@@ -76,6 +76,8 @@ export async function init() {
     } else if (!getActiveProjectId()) {
         setActiveProjectId(projects[0].id);
     }
+    
+    /* Purge any stale service workers (from previous folder layouts). */
 
     /* Register the SW as our virtual filesystem. */
     if ('serviceWorker' in navigator) {
@@ -101,6 +103,7 @@ export async function init() {
     initFileButtons();
     initShortcutBar();
     initCloud();
+    initCloudUI();
     initPreview();
     initConsole();
     initOverflowMenu();
