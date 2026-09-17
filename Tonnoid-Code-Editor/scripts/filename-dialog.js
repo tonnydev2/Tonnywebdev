@@ -59,11 +59,6 @@ function sanitizeBaseName(s) {
 }
 
 function submitNameDialog() {
-    // inside submitNameDialog:
-						const pid = getActiveProjectId();
-						const projectTabs = (tabsByProject[pid] || []);
-						const clash = projectTabs.find(t => t.name === newName && t.name !== dialogOriginal);
-
     const raw = nameInput.value;
     const clean = sanitizeBaseName(raw);
     if (!clean) {
@@ -76,7 +71,12 @@ function submitNameDialog() {
     if (dialogMode === 'rename') {
         const ext = (dialogOriginal && dialogOriginal.match(/\.[^.]+$/)) || [`.${dialogLang}`];
         const newName = clean + ext;
-        const clash = tabsByProject.find(t => t.name === newName && t.name !== dialogOriginal);
+
+        /* Check against the CURRENT PROJECT's tabs, not the global map. */
+        const pid = getActiveProjectId();
+        const projectTabs = tabsByProject[pid] || [];
+        const clash = projectTabs.find(t => t.name === newName && t.name !== dialogOriginal);
+
         if (clash) {
             nameHint.textContent = `"${newName}" is already open.`;
             nameHint.classList.add('error');
@@ -84,6 +84,7 @@ function submitNameDialog() {
         }
         if (dialogCallback) dialogCallback(newName);
     } else {
+        /* Create mode: pass the bare name (no extension appended here). */
         if (dialogCallback) dialogCallback(clean);
     }
     closeNameDialog();
