@@ -166,7 +166,6 @@ function injectConsolePrelude(html) {
     /* No <html> either? Prepend. */
     return prelude + html;
 }
-
 /* ---------- Fetch interception ---------- */
 self.addEventListener('install', (event) => {
     event.waitUntil(
@@ -215,7 +214,7 @@ self.addEventListener('fetch', (event) => {
             return;
         }
 
-        /* If this is an HTML file, inject the console-capture prelude
+         /* If this is an HTML file, inject the console-capture prelude
            so the parent page can receive console output and runtime
            errors from the iframe. */
         let body = file.content;
@@ -231,7 +230,7 @@ self.addEventListener('fetch', (event) => {
             },
         }));
         return;
-    }
+    }   /* ← THIS BRACE WAS MISSING */
 
     /* ---- Supabase: never cache ---- */
     if (url.hostname.endsWith('.supabase.co')) {
