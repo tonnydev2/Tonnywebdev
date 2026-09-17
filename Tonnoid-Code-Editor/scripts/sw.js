@@ -5,7 +5,7 @@
         under /__lantern__/<projectId>/<path>.
    ============================================================ */
 
-const CACHE = 'lantern-v5';   /* bumped */
+const CACHE = 'lantern-v7';   /* bumped again — force refresh */
 
 const CORE = [
     './',
@@ -32,7 +32,6 @@ const CORE = [
     './scripts/bracket-match.js',
     './scripts/inline-lang.js',
     './scripts/cloud.js',
-    './scripts/cloud-ui.js',
     './scripts/overflow.js',
     './scripts/shortcutBar.js',
     './scripts/pwa.js',
@@ -41,10 +40,6 @@ const CORE = [
 ];
 
 /* ---------- Snapshot storage ---------- */
-/* The page posts { __lantern: 'snapshot', snap: {...} } with the
-   full map of projects and their files. We keep it here so we can
-   serve requests instantly. */
-
 let snapshot = { projects: {}, activeProjectId: null };
 
 self.addEventListener('message', (event) => {
@@ -83,7 +78,6 @@ function mimeFor(path) {
 
 /* ---------- Project file lookup ---------- */
 function lookupProjectFile(projectId, path) {
-    /* path may or may not start with '/' */
     const clean = path.replace(/^\/+/, '').split('?')[0].split('#')[0];
     const proj = snapshot.projects[projectId];
     if (!proj) return null;
@@ -92,15 +86,8 @@ function lookupProjectFile(projectId, path) {
     return file;
 }
 
-/* Inject a small prelude into any served HTML document. It:
-     - wraps console.log / warn / error / info / debug
-     - catches window.onerror and unhandledrejection
-     - forwards everything to the parent page via postMessage
-   The prelude must run BEFORE any user script, so we insert it
-   as the very first thing inside <head>, or at the top of the
-   document if there's no <head>. */
+/* ---------- Console prelude injection ---------- */
 function injectConsolePrelude(html) {
-    /* Skip if already injected (double-render safety). */
     if (html.includes('__lantern_console_prelude__')) return html;
 
     const prelude = `<script data-lantern-console="__lantern_console_prelude__">
@@ -115,7 +102,6 @@ function injectConsolePrelude(html) {
                         return { __err: true, name: a.name, message: a.message, stack: a.stack };
                     }
                     try {
-                        /* Round-trip to check structured-clone-ability. */
                         JSON.stringify(a);
                         return a;
                     } catch (e) {
@@ -147,7 +133,6 @@ function injectConsolePrelude(html) {
     })();
     <\/script>`;
 
-    /* Insert right after <head> (case-insensitive) so it runs first. */
     const headOpen = /<head\b[^>]*>/i;
     const m = html.match(headOpen);
     if (m) {
@@ -155,7 +140,6 @@ function injectConsolePrelude(html) {
         return html.slice(0, idx) + prelude + html.slice(idx);
     }
 
-    /* No <head>? Insert right after <html ...>. */
     const htmlOpen = /<html\b[^>]*>/i;
     const m2 = html.match(htmlOpen);
     if (m2) {
@@ -163,10 +147,10 @@ function injectConsolePrelude(html) {
         return html.slice(0, idx) + prelude + html.slice(idx);
     }
 
-    /* No <html> either? Prepend. */
     return prelude + html;
 }
-/* ---------- Fetch interception ---------- */
+
+/* ---------- Install / activate ---------- */
 self.addEventListener('install', (event) => {
     event.waitUntil(
         caches.open(CACHE).then(cache => cache.addAll(CORE).catch(() => {}))
@@ -183,21 +167,22 @@ self.addEventListener('activate', (event) => {
     self.clients.claim();
 });
 
+/* ---------- Fetch interception ---------- */
 self.addEventListener('fetch', (event) => {
-    const req  = event.request;
+    const req = event.request;
     if (req.method !== 'GET') return;
 
     const url = new URL(req.url);
 
-    /* ---- Virtual project files: /__lantern__/<projectId>/<path> ---- */
-    const m = url.pathname.match(/^\/__lantern__\/([^/]+)\/(.*)$/);
+    /* ---- Virtual project files: .../__lantern__/<projectId>/<path> ---- */
+    /* Note: no leading ^ so it matches /Tonnoi-Code-Editor/__lantern__/... */
+    const m = url.pathname.match(/\/__lantern__\/([^/]+)\/(.*)$/);
     if (m) {
         const projectId = decodeURIComponent(m[1]);
         const inner     = decodeURIComponent(m[2]);
         const file      = lookupProjectFile(projectId, inner);
 
         if (!file) {
-            /* Try index.html as a fallback for the root request. */
             if (inner === '' || inner === 'index.html') {
                 const index = lookupProjectFile(projectId, 'index.html');
                 if (index) {
@@ -214,22 +199,20 @@ self.addEventListener('fetch', (event) => {
             return;
         }
 
-        /* If this is an HTML file, inject the console-capture prelude
-   so the parent page can receive console output and runtime
-   errors from the iframe. */
-let body = file.content;
-const mime = mimeFor(inner);
-if (/^text\/html/i.test(mime)) {
-    body = injectConsolePrelude(body);
-}
+        let body = file.content;
+        const mime = mimeFor(inner);
+        if (/^text\/html/i.test(mime)) {
+            body = injectConsolePrelude(body);
+        }
 
-event.respondWith(new Response(body, {
-    headers: {
-        'Content-Type': mime,
-        'Cache-Control': 'no-store',
-    },
-}));
-return;
+        event.respondWith(new Response(body, {
+            headers: {
+                'Content-Type': mime,
+                'Cache-Control': 'no-store',
+            },
+        }));
+        return;
+    }
 
     /* ---- Supabase: never cache ---- */
     if (url.hostname.endsWith('.supabase.co')) {
